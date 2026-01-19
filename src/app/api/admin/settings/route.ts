@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 // Settings are stored in a simple key-value format
 // For a production app, you might want a dedicated Settings model in Prisma
 
