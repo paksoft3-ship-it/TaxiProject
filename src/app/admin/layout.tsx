@@ -1,0 +1,257 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import {
+  CarTaxiFront,
+  LayoutDashboard,
+  Calendar,
+  Car,
+  Users,
+  Settings,
+  LogOut,
+  FileText,
+  MessageSquare,
+  BarChart3,
+  Menu,
+  X,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const navigation = [
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Fleet', href: '/admin/fleet', icon: Car },
+  { name: 'Drivers', href: '/admin/drivers', icon: Users },
+  { name: 'Blog', href: '/admin/blog', icon: FileText },
+  { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
+];
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/admin/login' });
+  };
+
+  return (
+    <div className="flex min-h-screen w-full bg-background-light dark:bg-background-dark">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-sidebar-bg flex-col justify-between shrink-0 transition-all duration-300 sticky top-0 h-screen z-50">
+        <div className="flex flex-col gap-8 py-6 px-4">
+          {/* Brand */}
+          <Link href="/admin" className="flex items-center gap-3 px-2">
+            <div className="flex items-center justify-center size-10 rounded-xl bg-primary text-black shadow-lg shadow-primary/20 shrink-0">
+              <CarTaxiFront className="size-5" />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-white text-lg font-bold leading-none tracking-tight">
+                PrimeTaxi
+              </h1>
+              <p className="text-slate-400 text-xs font-medium tracking-wide">
+                Admin Portal
+              </p>
+            </div>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="flex flex-col gap-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-3 rounded-lg transition-colors',
+                    isActive
+                      ? 'bg-primary text-black'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  )}
+                >
+                  <item.icon className={cn('size-5', isActive && 'fill-current')} />
+                  <span
+                    className={cn(
+                      'text-sm',
+                      isActive ? 'font-semibold' : 'font-medium'
+                    )}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* User Profile Bottom */}
+        <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center gap-3 p-2 rounded-lg">
+            <div
+              className="size-9 rounded-full bg-cover bg-center shrink-0 border border-slate-700 bg-slate-600"
+            />
+            <div className="flex flex-col flex-1">
+              <p className="text-white text-sm font-medium leading-none">
+                {session?.user?.name || 'Admin User'}
+              </p>
+              <p className="text-slate-500 text-xs mt-1">
+                {session?.user?.role || 'Admin'}
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="text-slate-400 hover:text-white transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 w-72 bg-sidebar-bg flex flex-col justify-between z-50 transform transition-transform duration-300 ease-in-out lg:hidden',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="flex flex-col gap-6 py-6 px-4">
+          {/* Header with close button */}
+          <div className="flex items-center justify-between px-2">
+            <Link href="/admin" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
+              <div className="flex items-center justify-center size-10 rounded-xl bg-primary text-black shadow-lg shadow-primary/20 shrink-0">
+                <CarTaxiFront className="size-5" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-white text-lg font-bold leading-none tracking-tight">
+                  PrimeTaxi
+                </h1>
+                <p className="text-slate-400 text-xs font-medium tracking-wide">
+                  Admin Portal
+                </p>
+              </div>
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex flex-col gap-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-3 rounded-lg transition-colors',
+                    isActive
+                      ? 'bg-primary text-black'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  )}
+                >
+                  <item.icon className={cn('size-5', isActive && 'fill-current')} />
+                  <span
+                    className={cn(
+                      'text-sm',
+                      isActive ? 'font-semibold' : 'font-medium'
+                    )}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* User Profile Bottom */}
+        <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center gap-3 p-2 rounded-lg">
+            <div
+              className="size-9 rounded-full bg-cover bg-center shrink-0 border border-slate-700 bg-slate-600"
+            />
+            <div className="flex flex-col flex-1">
+              <p className="text-white text-sm font-medium leading-none">
+                {session?.user?.name || 'Admin User'}
+              </p>
+              <p className="text-slate-500 text-xs mt-1">
+                {session?.user?.role || 'Admin'}
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="text-slate-400 hover:text-white transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <Menu className="size-6" />
+          </button>
+          <span className="text-lg font-bold text-slate-900 dark:text-white">PrimeTaxi Admin</span>
+          <Link
+            href="/admin/settings"
+            className="p-2 -mr-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <Settings className="size-5" />
+          </Link>
+        </header>
+
+        <div className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">{children}</div>
+      </main>
+    </div>
+  );
+}
