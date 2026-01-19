@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import {
@@ -61,6 +62,11 @@ export default function AdminLayout({
     signOut({ callbackUrl: '/admin/login' });
   };
 
+  // Don't show admin layout on login page
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen w-full bg-background-light dark:bg-background-dark">
       {/* Desktop Sidebar */}
@@ -68,9 +74,11 @@ export default function AdminLayout({
         <div className="flex flex-col gap-8 py-6 px-4">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
-            <img
+            <Image
               src="/logo.png"
               alt="PrimeTaxi Admin"
+              width={80}
+              height={56}
               className="h-14 w-auto object-contain brightness-0 invert"
             />
           </Link>
@@ -149,9 +157,11 @@ export default function AdminLayout({
         <div className="flex flex-col gap-6 py-6 px-4">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
-            <img
+            <Image
               src="/logo.png"
               alt="PrimeTaxi Admin"
+              width={80}
+              height={56}
               className="h-14 w-auto object-contain brightness-0 invert"
             />
           </Link>
