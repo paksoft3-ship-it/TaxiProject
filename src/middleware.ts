@@ -13,15 +13,17 @@ export default withAuth(
         return NextResponse.redirect(new URL('/admin/login', req.url));
       }
 
-      // Must have ADMIN role
-      if (token.role !== 'ADMIN') {
+      // Must have ADMIN or SUPER_ADMIN role
+      const isAdmin = token.role === 'ADMIN' || token.role === 'SUPER_ADMIN';
+      if (!isAdmin) {
         return NextResponse.redirect(new URL('/admin/login?error=unauthorized', req.url));
       }
     }
 
     // Check if accessing admin API routes
     if (pathname.startsWith('/api/admin')) {
-      if (!token || token.role !== 'ADMIN') {
+      const isAdmin = token?.role === 'ADMIN' || token?.role === 'SUPER_ADMIN';
+      if (!token || !isAdmin) {
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 401 }

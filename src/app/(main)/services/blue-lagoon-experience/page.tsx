@@ -101,13 +101,13 @@ export default function BlueLagoonExperiencePage() {
               <span className="text-slate-500">/</span>
               <span className="text-primary">Blue Lagoon Experience</span>
             </div>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded-full text-sm font-bold mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-bold mb-6">
               <Snowflake className="size-4" />
               Iceland's #1 Attraction
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
               Experience the <br />
-              <span className="text-cyan-400">Blue Lagoon</span>
+              <span className="text-primary">Blue Lagoon</span>
             </h1>
             <p className="text-lg text-slate-300 mb-8 leading-relaxed">
               Immerse yourself in the world-famous geothermal spa surrounded by stunning lava fields.
@@ -116,7 +116,7 @@ export default function BlueLagoonExperiencePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/booking?type=BLUE_LAGOON"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 text-white font-bold rounded-xl hover:bg-cyan-400 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
               >
                 Book Transfer
                 <ArrowRight className="size-4" />
@@ -134,7 +134,7 @@ export default function BlueLagoonExperiencePage() {
       </section>
 
       {/* Quick Info Bar */}
-      <section className="bg-cyan-500 text-white py-4">
+      <section className="bg-primary text-black py-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
             <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function BlueLagoonExperiencePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {highlights.slice(0, 6).map((highlight) => (
                   <div key={highlight} className="flex items-start gap-2">
-                    <Check className="size-5 text-cyan-500 shrink-0 mt-0.5" />
+                    <Check className="size-5 text-primary shrink-0 mt-0.5" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">{highlight}</span>
                   </div>
                 ))}
@@ -208,8 +208,8 @@ export default function BlueLagoonExperiencePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature) => (
               <div key={feature.title} className="text-center">
-                <div className="size-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
-                  <feature.icon className="size-8 text-cyan-500" />
+                <div className="size-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <feature.icon className="size-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
                 <p className="text-slate-600 dark:text-slate-400 text-sm">{feature.description}</p>
@@ -233,11 +233,11 @@ export default function BlueLagoonExperiencePage() {
               <div
                 key={pkg.name}
                 className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${
-                  pkg.popular ? 'border-cyan-500' : 'border-slate-100 dark:border-slate-700'
+                  pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
                 }`}
               >
                 {pkg.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-cyan-500 text-white text-xs font-bold rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
                     Most Popular
                   </span>
                 )}
@@ -250,7 +250,7 @@ export default function BlueLagoonExperiencePage() {
                 <ul className="space-y-3 mb-8">
                   {pkg.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <Check className="size-4 text-cyan-500" />
+                      <Check className="size-4 text-primary" />
                       {feature}
                     </li>
                   ))}
@@ -259,7 +259,7 @@ export default function BlueLagoonExperiencePage() {
                   href="/booking?type=BLUE_LAGOON"
                   className={`block text-center py-3 rounded-xl font-bold transition-colors ${
                     pkg.popular
-                      ? 'bg-cyan-500 text-white hover:bg-cyan-400'
+                      ? 'bg-primary text-black hover:bg-primary'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
                   }`}
                 >
@@ -296,26 +296,26 @@ export default function BlueLagoonExperiencePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-cyan-500 to-blue-500">
+      <section className="py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
-          <Camera className="size-12 mx-auto mb-6 text-white/80" />
-          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+          <Camera className="size-12 mx-auto mb-6 text-black/60" />
+          <h2 className="text-3xl md:text-4xl font-black text-black mb-4">
             Ready for an Unforgettable Experience?
           </h2>
-          <p className="text-white/80 text-lg mb-8">
+          <p className="text-black/70 text-lg mb-8">
             Book your Blue Lagoon transfer today and let us handle the rest.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/booking?type=BLUE_LAGOON"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-cyan-600 font-bold rounded-xl hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-white font-bold rounded-xl hover:bg-slate-700 transition-colors"
             >
               Book Transfer
               <ArrowRight className="size-4" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-white font-bold rounded-xl hover:bg-white/30 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black/10 text-black font-bold rounded-xl hover:bg-black/20 transition-colors"
             >
               Ask a Question
             </Link>

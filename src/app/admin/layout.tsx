@@ -75,7 +75,7 @@ export default function AdminLayout({
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
             <Image
-              src="/logo.png"
+              src="/logo-v2.png"
               alt="PrimeTaxi Admin"
               width={80}
               height={56}

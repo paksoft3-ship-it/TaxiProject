@@ -139,13 +139,13 @@ export default function PrivateTransfersPage() {
               <span className="text-slate-500">/</span>
               <span className="text-primary">Private Transfers</span>
             </div>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-yellow-400 rounded-full text-sm font-bold mb-6">
               <Car className="size-4" />
               Premium Service
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
               Private <br />
-              <span className="text-amber-400">Transfers</span>
+              <span className="text-yellow-400">Transfers</span>
             </h1>
             <p className="text-lg text-slate-300 mb-8 leading-relaxed">
               Experience luxury door-to-door transportation anywhere in Iceland.
@@ -154,7 +154,7 @@ export default function PrivateTransfersPage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/booking?type=PRIVATE_TRANSFER"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
               >
                 Book Transfer
                 <ArrowRight className="size-4" />
@@ -172,7 +172,7 @@ export default function PrivateTransfersPage() {
       </section>
 
       {/* Vehicle Amenities Bar */}
-      <section className="bg-amber-500 text-black py-4">
+      <section className="bg-primary text-black py-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
             <div className="flex items-center gap-2">
@@ -209,11 +209,11 @@ export default function PrivateTransfersPage() {
               <div
                 key={vehicle.name}
                 className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${
-                  vehicle.popular ? 'border-amber-500' : 'border-slate-100 dark:border-slate-700'
+                  vehicle.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
                 }`}
               >
                 {vehicle.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-500 text-black text-xs font-bold rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
                     Most Popular
                   </span>
                 )}
@@ -231,7 +231,7 @@ export default function PrivateTransfersPage() {
                 <ul className="space-y-2 mb-6">
                   {vehicle.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <Check className="size-4 text-amber-500" />
+                      <Check className="size-4 text-primary" />
                       {feature}
                     </li>
                   ))}
@@ -241,7 +241,7 @@ export default function PrivateTransfersPage() {
                   href="/booking?type=PRIVATE_TRANSFER"
                   className={`block text-center py-3 rounded-xl font-bold transition-colors ${
                     vehicle.popular
-                      ? 'bg-amber-500 text-black hover:bg-amber-400'
+                      ? 'bg-primary text-black hover:bg-yellow-400'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
                   }`}
                 >
@@ -265,8 +265,8 @@ export default function PrivateTransfersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {transferTypes.map((type) => (
               <div key={type.title} className="text-center">
-                <div className="size-16 mx-auto mb-4 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                  <type.icon className="size-8 text-amber-500" />
+                <div className="size-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <type.icon className="size-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{type.title}</h3>
                 <p className="text-slate-600 dark:text-slate-400 text-sm">{type.description}</p>
@@ -292,7 +292,7 @@ export default function PrivateTransfersPage() {
                 className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"
               >
                 <span className="text-slate-700 dark:text-slate-300 font-medium">{item.route}</span>
-                <span className="text-amber-500 font-bold whitespace-nowrap ml-4">{item.price}</span>
+                <span className="text-primary font-bold whitespace-nowrap ml-4">{item.price}</span>
               </div>
             ))}
           </div>
@@ -330,7 +330,7 @@ export default function PrivateTransfersPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {highlights.map((highlight) => (
                   <div key={highlight} className="flex items-start gap-2">
-                    <Check className="size-5 text-amber-500 shrink-0 mt-0.5" />
+                    <Check className="size-5 text-primary shrink-0 mt-0.5" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">{highlight}</span>
                   </div>
                 ))}
@@ -341,7 +341,7 @@ export default function PrivateTransfersPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-amber-500 to-yellow-500">
+      <section className="py-20 px-4 bg-gradient-to-r from-primary to-yellow-500">
         <div className="max-w-4xl mx-auto text-center">
           <Car className="size-12 mx-auto mb-6 text-black/60" />
           <h2 className="text-3xl md:text-4xl font-black text-black mb-4">

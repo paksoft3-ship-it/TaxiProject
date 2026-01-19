@@ -139,6 +139,30 @@ export default function AdminLoginPage() {
             support@primetaxi.is
           </a>
         </p>
+
+        {/* PakSoft Branding */}
+        <div className="mt-12 pt-8 border-t border-slate-700">
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-slate-500 text-xs uppercase tracking-wider">Developed by</p>
+            <a
+              href="https://paksoft.com.tr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 group"
+            >
+              <div className="flex items-center text-primary group-hover:text-yellow-400 transition-colors">
+                {/* Crescent Moon Icon */}
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 -rotate-12">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.08-1.38-.7.13-1.42.21-2.16.21-5.52 0-10-4.48-10-10S9.42 2.83 14.92 2.83c.74 0 1.46.08 2.16.21C15.58 2.5 13.85 2 12 2z" />
+                </svg>
+                <span className="font-bold text-2xl ml-2">PakSoft</span>
+              </div>
+            </a>
+            <p className="text-slate-600 text-xs">
+              Premium Software Solutions
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

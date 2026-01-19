@@ -137,13 +137,13 @@ export default function SightseeingToursPage() {
               <span className="text-slate-500">/</span>
               <span className="text-primary">Sightseeing Tours</span>
             </div>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm font-bold mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-bold mb-6">
               <Mountain className="size-4" />
               Guided Adventures
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
               Sightseeing <br />
-              <span className="text-purple-400">Tours</span>
+              <span className="text-primary">Tours</span>
             </h1>
             <p className="text-lg text-slate-300 mb-8 leading-relaxed">
               Discover Iceland's most spectacular landscapes with our expert-guided tours.
@@ -152,7 +152,7 @@ export default function SightseeingToursPage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/tours"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary transition-colors"
               >
                 View All Tours
                 <ArrowRight className="size-4" />
@@ -170,7 +170,7 @@ export default function SightseeingToursPage() {
       </section>
 
       {/* Quick Stats */}
-      <section className="bg-purple-500 text-white py-4">
+      <section className="bg-primary text-black py-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
             <div className="flex items-center gap-2">
@@ -219,7 +219,7 @@ export default function SightseeingToursPage() {
                         {tour.duration}
                       </span>
                       {tour.seasonal && (
-                        <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full">
+                        <span className="px-2 py-0.5 bg-primary text-black text-xs rounded-full">
                           {tour.seasonal}
                         </span>
                       )}
@@ -232,7 +232,7 @@ export default function SightseeingToursPage() {
                     {tour.highlights.map((highlight) => (
                       <span
                         key={highlight}
-                        className="px-3 py-1 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-primary/10 dark:bg-primary/10 text-slate-900 dark:text-primary text-xs font-medium rounded-full"
                       >
                         {highlight}
                       </span>
@@ -245,7 +245,7 @@ export default function SightseeingToursPage() {
                     </div>
                     <Link
                       href="/tours"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-400 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-primary transition-colors"
                     >
                       Book Now
                     </Link>
@@ -277,7 +277,7 @@ export default function SightseeingToursPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {highlights.map((highlight) => (
                   <div key={highlight} className="flex items-start gap-2">
-                    <Check className="size-5 text-purple-500 shrink-0 mt-0.5" />
+                    <Check className="size-5 text-primary shrink-0 mt-0.5" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">{highlight}</span>
                   </div>
                 ))}
@@ -286,8 +286,8 @@ export default function SightseeingToursPage() {
             <div className="grid grid-cols-2 gap-4">
               {features.map((feature) => (
                 <div key={feature.title} className="bg-slate-50 dark:bg-slate-700 rounded-xl p-6">
-                  <div className="size-12 mb-4 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <feature.icon className="size-6 text-purple-500" />
+                  <div className="size-12 mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="size-6 text-primary" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-sm">{feature.description}</p>
@@ -299,26 +299,26 @@ export default function SightseeingToursPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-purple-500 to-pink-500">
+      <section className="py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
-          <Sparkles className="size-12 mx-auto mb-6 text-white/80" />
-          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+          <Sparkles className="size-12 mx-auto mb-6 text-black/60" />
+          <h2 className="text-3xl md:text-4xl font-black text-black mb-4">
             Ready to Explore Iceland?
           </h2>
-          <p className="text-white/80 text-lg mb-8">
+          <p className="text-black/70 text-lg mb-8">
             Book your sightseeing tour today and create memories that last a lifetime.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/tours"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-white font-bold rounded-xl hover:bg-slate-700 transition-colors"
             >
               Browse All Tours
               <ArrowRight className="size-4" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-white font-bold rounded-xl hover:bg-white/30 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black/10 text-black font-bold rounded-xl hover:bg-black/20 transition-colors"
             >
               Custom Tour Request
             </Link>

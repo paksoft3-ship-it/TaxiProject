@@ -28,7 +28,7 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-2 mb-6">
               <Image
-                src="/logo.png"
+                src="/logo-v2.png"
                 alt="PrimeTaxi & Tours"
                 width={90}
                 height={64}

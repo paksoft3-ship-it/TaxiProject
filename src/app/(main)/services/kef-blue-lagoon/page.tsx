@@ -157,7 +157,7 @@ export default function KefBlueLagoonPage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/booking?type=KEF_BLUE_LAGOON"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-yellow-400 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
               >
                 Book Transfer
                 <ArrowRight className="size-4" />
@@ -175,7 +175,7 @@ export default function KefBlueLagoonPage() {
       </section>
 
       {/* Route Info Bar */}
-      <section className="bg-primary text-white py-4">
+      <section className="bg-primary text-black py-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
             <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function KefBlueLagoonPage() {
                 }`}
               >
                 {route.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-white text-xs font-bold rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
                     Most Popular
                   </span>
                 )}
@@ -237,7 +237,7 @@ export default function KefBlueLagoonPage() {
                     href="/booking?type=KEF_BLUE_LAGOON"
                     className={`inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${
                       route.popular
-                        ? 'bg-primary text-white hover:bg-yellow-400'
+                        ? 'bg-primary text-black hover:bg-yellow-400'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
                     }`}
                   >
