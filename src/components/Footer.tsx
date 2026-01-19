@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { CarTaxiFront, MapPin, Phone, Mail, Facebook, Instagram, Linkedin } from 'lucide-react';
 
 const companyLinks = [
@@ -26,9 +27,11 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-6">
-              <img
+              <Image
                 src="/logo.png"
                 alt="PrimeTaxi & Tours"
+                width={90}
+                height={64}
                 className="h-16 w-auto object-contain"
               />
             </Link>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -34,10 +35,13 @@ export function Header() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <img
+            <Image
               src="/logo.png"
               alt="PrimeTaxi & Tours"
+              width={90}
+              height={64}
               className="h-16 w-auto object-contain"
+              priority
             />
           </Link>
 
