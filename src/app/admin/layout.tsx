@@ -71,7 +71,7 @@ export default function AdminLayout({
             <img
               src="/logo.png"
               alt="PrimeTaxi Admin"
-              className="h-10 w-auto object-contain brightness-0 invert"
+              className="h-14 w-auto object-contain brightness-0 invert"
             />
           </Link>
 
@@ -152,7 +152,7 @@ export default function AdminLayout({
             <img
               src="/logo.png"
               alt="PrimeTaxi Admin"
-              className="h-8 w-auto object-contain brightness-0 invert"
+              className="h-14 w-auto object-contain brightness-0 invert"
             />
           </Link>
           <button
