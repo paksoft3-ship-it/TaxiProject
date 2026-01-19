@@ -26,10 +26,11 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-6">
-              <CarTaxiFront className="size-8 text-primary" />
-              <span className="text-white text-xl font-bold">
-                PrimeTaxi <span className="text-primary">&</span> Tours
-              </span>
+              <img
+                src="/logo.png"
+                alt="PrimeTaxi & Tours"
+                className="h-20 w-auto object-contain brightness-0 invert"
+              />
             </Link>
             <p className="text-sm leading-relaxed mb-6 text-slate-400">
               Professional and reliable transportation services in Iceland. From
@@ -133,7 +134,7 @@ export function Footer() {
 
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
           <p>&copy; {new Date().getFullYear()} PrimeTaxi & Tours. All rights reserved.</p>
-          
+
           <div className="flex justify-center items-center gap-2">
             <a
               href="https://paksoft.com.tr"
