@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+
 
 interface BookingDetails {
   id: string;
@@ -58,7 +59,7 @@ function formatDate(dateString: string): string {
   }).format(new Date(dateString));
 }
 
-export default function BookingConfirmationPage() {
+function BookingConfirmationContent() {
   const searchParams = useSearchParams();
   const bookingId = searchParams.get('booking');
   const paymentIntent = searchParams.get('payment_intent');
@@ -342,5 +343,19 @@ export default function BookingConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }
+    >
+      <BookingConfirmationContent />
+    </Suspense>
   );
 }

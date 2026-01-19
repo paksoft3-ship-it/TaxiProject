@@ -45,7 +45,18 @@ const features = [
   },
 ];
 
-const tours = [
+interface Tour {
+  name: string;
+  duration: string;
+  price: string;
+  image: string;
+  description: string;
+  highlights: string[];
+  distance?: string;
+  seasonal?: string;
+}
+
+const tours: Tour[] = [
   {
     name: 'Reykjavik City Tour',
     duration: '1-3 hours',

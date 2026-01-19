@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   description: 'PrimeTaxi & Tours Admin Dashboard',
 };
 
+export const dynamic = 'force-dynamic';
+
 async function getDashboardData() {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -416,8 +418,8 @@ export default async function AdminDashboard() {
                           )}
                         >
                           {driver.status === 'AVAILABLE' ? 'Available' :
-                           driver.status === 'ON_TOUR' ? 'On Tour' :
-                           driver.status === 'BREAK' ? 'On Break' : 'Offline'}
+                            driver.status === 'ON_TOUR' ? 'On Tour' :
+                              driver.status === 'BREAK' ? 'On Break' : 'Offline'}
                         </span>
                       </p>
                     </div>
