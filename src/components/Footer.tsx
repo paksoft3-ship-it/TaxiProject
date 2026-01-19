@@ -29,7 +29,7 @@ export function Footer() {
               <img
                 src="/logo.png"
                 alt="PrimeTaxi & Tours"
-                className="h-20 w-auto object-contain brightness-0 invert"
+                className="h-16 w-auto object-contain"
               />
             </Link>
             <p className="text-sm leading-relaxed mb-6 text-slate-400">
