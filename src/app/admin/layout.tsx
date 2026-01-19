@@ -68,17 +68,11 @@ export default function AdminLayout({
         <div className="flex flex-col gap-8 py-6 px-4">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
-            <div className="flex items-center justify-center size-10 rounded-xl bg-primary text-black shadow-lg shadow-primary/20 shrink-0">
-              <CarTaxiFront className="size-5" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-white text-lg font-bold leading-none tracking-tight">
-                PrimeTaxi
-              </h1>
-              <p className="text-slate-400 text-xs font-medium tracking-wide">
-                Admin Portal
-              </p>
-            </div>
+            <img
+              src="/logo.png"
+              alt="PrimeTaxi Admin"
+              className="h-10 w-auto object-contain brightness-0 invert"
+            />
           </Link>
 
           {/* Navigation */}
@@ -145,6 +139,7 @@ export default function AdminLayout({
       )}
 
       {/* Mobile Sidebar */}
+      {/* Mobile Sidebar */}
       <aside
         className={cn(
           'fixed inset-y-0 left-0 w-72 bg-sidebar-bg flex flex-col justify-between z-50 transform transition-transform duration-300 ease-in-out lg:hidden',
@@ -152,59 +147,51 @@ export default function AdminLayout({
         )}
       >
         <div className="flex flex-col gap-6 py-6 px-4">
-          {/* Header with close button */}
-          <div className="flex items-center justify-between px-2">
-            <Link href="/admin" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex items-center justify-center size-10 rounded-xl bg-primary text-black shadow-lg shadow-primary/20 shrink-0">
-                <CarTaxiFront className="size-5" />
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-white text-lg font-bold leading-none tracking-tight">
-                  PrimeTaxi
-                </h1>
-                <p className="text-slate-400 text-xs font-medium tracking-wide">
-                  Admin Portal
-                </p>
-              </div>
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <X className="size-5" />
-            </button>
-          </div>
+          {/* Brand */}
+          <Link href="/admin" className="flex items-center gap-3 px-2">
+            <img
+              src="/logo.png"
+              alt="PrimeTaxi Admin"
+              className="h-8 w-auto object-contain brightness-0 invert"
+            />
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-col gap-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
+        {/* Navigation */}
+        <nav className="flex flex-col gap-1 px-4">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-3 rounded-lg transition-colors',
+                  isActive
+                    ? 'bg-primary text-black'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                )}
+              >
+                <item.icon className={cn('size-5', isActive && 'fill-current')} />
+                <span
                   className={cn(
-                    'flex items-center gap-3 px-3 py-3 rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-primary text-black'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    'text-sm',
+                    isActive ? 'font-semibold' : 'font-medium'
                   )}
                 >
-                  <item.icon className={cn('size-5', isActive && 'fill-current')} />
-                  <span
-                    className={cn(
-                      'text-sm',
-                      isActive ? 'font-semibold' : 'font-medium'
-                    )}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* User Profile Bottom */}
         <div className="p-4 border-t border-slate-800">
@@ -250,7 +237,30 @@ export default function AdminLayout({
           </Link>
         </header>
 
-        <div className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">{children}</div>
+        <div className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">
+          {children}
+
+          {/* Admin Footer */}
+          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-center">
+            <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <span>Developed by</span>
+              <a
+                href="https://paksoft.com.tr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 group"
+              >
+                <div className="flex items-center text-primary group-hover:text-yellow-500 transition-colors">
+                  {/* Custom Crescent Icon */}
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 -rotate-12">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.08-1.38-.7.13-1.42.21-2.16.21-5.52 0-10-4.48-10-10S9.42 2.83 14.92 2.83c.74 0 1.46.08 2.16.21C15.58 2.5 13.85 2 12 2z" />
+                  </svg>
+                  <span className="font-bold ml-1">PakSoft</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

@@ -34,17 +34,11 @@ export function Header() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="size-10 bg-primary rounded-lg flex items-center justify-center text-slate-900">
-              <CarTaxiFront className="size-6" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold leading-tight tracking-tight">
-                PrimeTaxi <span className="text-primary">&</span> Tours
-              </h1>
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                Iceland's Premium Ride
-              </span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="PrimeTaxi & Tours"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Menu */}
