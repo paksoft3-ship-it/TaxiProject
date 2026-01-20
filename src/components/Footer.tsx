@@ -40,6 +40,22 @@ export function Footer() {
               airport transfers to custom private tours, we ensure your journey
               is safe and comfortable.
             </p>
+            <div className="flex items-center gap-4 mb-6">
+               <Image
+                src="/footerimg1.webp"
+                alt="Authorized Day Tour Provider"
+                width={80}
+                height={80}
+                className="h-20 w-auto object-contain rounded-lg"
+              />
+               <Image
+                src="/footerimg2.webp"
+                alt="Service Partner"
+                width={80}
+                height={80}
+                className="h-20 w-auto object-contain rounded-lg"
+              />
+            </div>
             <div className="flex gap-4">
               <a
                 href="https://facebook.com"
