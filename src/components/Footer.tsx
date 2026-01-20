@@ -41,14 +41,14 @@ export function Footer() {
               is safe and comfortable.
             </p>
             <div className="flex items-center gap-4 mb-6">
-               <Image
+              <Image
                 src="/footerimg1.webp"
                 alt="Authorized Day Tour Provider"
                 width={80}
                 height={80}
                 className="h-20 w-auto object-contain rounded-lg"
               />
-               <Image
+              <Image
                 src="/footerimg2.webp"
                 alt="Service Partner"
                 width={80}
@@ -58,7 +58,7 @@ export function Footer() {
             </div>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/share/1HZ4VEteno/?mibextid=wwXIfr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="size-10 rounded-full bg-white/5 hover:bg-primary hover:text-slate-900 flex items-center justify-center transition-colors"
@@ -67,22 +67,13 @@ export function Footer() {
                 <Facebook className="size-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/prime_.taxi?igsh=MXJxYjN5OTlkM3V2YQ%3D%3D&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="size-10 rounded-full bg-white/5 hover:bg-primary hover:text-slate-900 flex items-center justify-center transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="size-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="size-10 rounded-full bg-white/5 hover:bg-primary hover:text-slate-900 flex items-center justify-center transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="size-5" />
               </a>
             </div>
           </div>
@@ -131,11 +122,11 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="tel:+3545551234"
+                  href="tel:+3548575955"
                   className="flex items-center gap-3 hover:text-primary transition-colors"
                 >
                   <Phone className="size-5 text-primary shrink-0" />
-                  <span>+354 555 1234</span>
+                  <span>+354 857 5955</span>
                 </a>
               </li>
               <li>
