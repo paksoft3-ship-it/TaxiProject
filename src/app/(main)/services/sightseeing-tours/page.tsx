@@ -60,7 +60,7 @@ const tours: Tour[] = [
   {
     name: 'Reykjavik City Tour',
     duration: '1-3 hours',
-    price: '25,000 ISK',
+    price: '10,500 ISK',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
     description: 'Discover the charm of Iceland\'s capital with a personalized city tour covering all major landmarks.',
     highlights: ['Hallgrímskirkja Church', 'Harpa Concert Hall', 'Sun Voyager', 'Old Harbour'],
@@ -68,16 +68,16 @@ const tours: Tour[] = [
   {
     name: 'Golden Circle',
     duration: '6 hours',
-    price: '92,000 ISK',
+    price: '92,500 ISK',
     distance: '320 km',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
-    description: 'Visit Þingvellir National Park, Geysir geothermal area, and Gullfoss waterfall.',
+    description: 'Visit Þingvellir National Park, Geysir geothermal area, and Gullfoss Waterfall.',
     highlights: ['Þingvellir National Park', 'Strokkur Geyser', 'Gullfoss Waterfall', 'Kerið Crater (optional)'],
   },
   {
     name: 'South Coast Spectacular',
     duration: '10 hours',
-    price: '138,000 ISK',
+    price: '138,500 ISK',
     distance: '420 km',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
     description: 'Explore waterfalls, black sand beaches, and glacier views along the scenic south coast.',
@@ -86,7 +86,7 @@ const tours: Tour[] = [
   {
     name: 'Snæfellsnes Peninsula',
     duration: '12 hours',
-    price: '154,000 ISK',
+    price: '154,500 ISK',
     distance: '350 km',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
     description: 'Discover "Iceland in Miniature" with diverse landscapes, volcanoes, and charming villages.',
@@ -95,7 +95,7 @@ const tours: Tour[] = [
   {
     name: 'Glacier Lagoon & Diamond Beach',
     duration: '15 hours',
-    price: '204,000 ISK',
+    price: '204,500 ISK',
     distance: '800 km',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
     description: 'Journey to the stunning Jökulsárlón glacier lagoon and the famous Diamond Beach where icebergs wash ashore.',

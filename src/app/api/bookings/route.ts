@@ -59,10 +59,10 @@ export async function POST(request: NextRequest) {
     // Calculate price based on service type
     const basePrices: Record<string, number> = {
       TAXI: 3500,
-      AIRPORT_TRANSFER: 19500,
+      AIRPORT_TRANSFER: 20000,
       PRIVATE_TOUR: 45000,
       CUSTOM_TOUR: 60000,
-      BLUE_LAGOON: 19500, // Default base
+      BLUE_LAGOON: 20000, // Default base
     };
 
     let basePrice = basePrices[validated.type] || 0;

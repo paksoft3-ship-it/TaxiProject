@@ -38,10 +38,10 @@ const serviceLabels: Record<string, string> = {
 // Base prices per service type
 const basePrices: Record<string, number> = {
   TAXI: 850, // Base fare for city taxi
-  AIRPORT_TRANSFER: 19500, // KEF Airport standard rate
+  AIRPORT_TRANSFER: 20000, // KEF Airport standard rate
   PRIVATE_TOUR: 45000, // 4-hour tour base
   CUSTOM_TOUR: 60000, // Custom tour base
-  BLUE_LAGOON: 19500, // Default base
+  BLUE_LAGOON: 20000, // Default base
 };
 
 // Price per km for taxi services

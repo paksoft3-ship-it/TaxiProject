@@ -21,6 +21,7 @@ interface TourCardProps {
   };
   highlights: string[];
   variant?: 'default' | 'featured';
+  distance?: string;
 }
 
 export function TourCard({
@@ -34,6 +35,7 @@ export function TourCard({
   image,
   badge,
   highlights,
+  distance,
   variant = 'default',
 }: TourCardProps) {
   if (variant === 'featured') {
@@ -107,6 +109,12 @@ export function TourCard({
             <Clock className="size-3.5" />
             {duration}
           </div>
+          {distance && (
+            <div className="flex items-center text-slate-500 text-xs gap-1">
+              <span className="text-primary font-bold">km</span>
+              {distance}
+            </div>
+          )}
         </div>
         <h3 className="text-secondary dark:text-white text-xl font-bold mb-3 group-hover:text-primary transition-colors">
           {name}

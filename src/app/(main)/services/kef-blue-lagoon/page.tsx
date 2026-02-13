@@ -51,7 +51,7 @@ const routes = [
     description: 'Perfect for arrivals - relax after your flight',
     duration: '25 min',
     distance: '23 km',
-    price: '10,000 ISK',
+    price: '10,500 ISK',
     note: '1-4 passengers',
   },
   {
@@ -59,7 +59,7 @@ const routes = [
     description: 'Ideal for departures - refresh before your flight',
     duration: '25 min',
     distance: '23 km',
-    price: '10,000 ISK',
+    price: '10,500 ISK',
     note: '1-4 passengers',
   },
   {
@@ -211,9 +211,8 @@ export default function KefBlueLagoonPage() {
             {routes.map((route) => (
               <div
                 key={route.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${
-                  route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
-                }`}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
+                  }`}
               >
                 {route.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -235,11 +234,10 @@ export default function KefBlueLagoonPage() {
                   </div>
                   <Link
                     href="/booking?type=KEF_BLUE_LAGOON"
-                    className={`inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${
-                      route.popular
+                    className={`inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${route.popular
                         ? 'bg-primary text-black hover:bg-yellow-400'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
-                    }`}
+                      }`}
                   >
                     Book Now
                   </Link>

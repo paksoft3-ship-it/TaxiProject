@@ -50,14 +50,14 @@ const vehicleOptions = [
     name: 'Standard Sedan',
     capacity: '1-3 passengers',
     luggage: '3 bags',
-    price: 'From 10,000 ISK',
+    price: 'From 10,500 ISK',
     features: ['Air conditioning', 'Free WiFi', 'Phone chargers', 'Bottled water'],
   },
   {
     name: 'Premium SUV',
     capacity: '1-4 passengers',
     luggage: '4 bags',
-    price: 'From 19,500 ISK',
+    price: 'From 20,000 ISK',
     features: ['Leather seats', 'Extra legroom', 'Free WiFi', 'Climate control'],
     popular: true,
   },
@@ -71,8 +71,8 @@ const vehicleOptions = [
 ];
 
 const popularRoutes = [
-  { route: 'Reykjavik to Blue Lagoon', price: '19,500 ISK' },
-  { route: 'Blue Lagoon to Reykjavik', price: '19,500 ISK' },
+  { route: 'Reykjavik to Blue Lagoon', price: '20,000 ISK' },
+  { route: 'Blue Lagoon to Reykjavik', price: '20,000 ISK' },
   { route: 'Transfer to/from Hveragerði', price: '22,000 ISK' },
   { route: 'Transfer to/from Selfoss', price: '27,500 ISK' },
   { route: 'Transfer to/from The Lava Tunnel', price: '21,000 ISK' },
@@ -208,9 +208,8 @@ export default function PrivateTransfersPage() {
             {vehicleOptions.map((vehicle) => (
               <div
                 key={vehicle.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${
-                  vehicle.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
-                }`}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${vehicle.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
+                  }`}
               >
                 {vehicle.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -239,11 +238,10 @@ export default function PrivateTransfersPage() {
                 <p className="text-2xl font-black text-slate-900 dark:text-white mb-6">{vehicle.price}</p>
                 <Link
                   href="/booking?type=PRIVATE_TRANSFER"
-                  className={`block text-center py-3 rounded-xl font-bold transition-colors ${
-                    vehicle.popular
+                  className={`block text-center py-3 rounded-xl font-bold transition-colors ${vehicle.popular
                       ? 'bg-primary text-black hover:bg-yellow-400'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
+                    }`}
                 >
                   Book Now
                 </Link>
