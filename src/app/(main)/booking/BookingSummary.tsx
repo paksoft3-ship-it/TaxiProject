@@ -17,7 +17,14 @@ interface BookingSummaryProps {
     email: string;
     phone: string;
   };
+  options?: {
+    premiumCar: boolean;
+    childSeats: number;
+    extraStop: boolean;
+    extraTime: boolean;
+  };
   step: number;
+  packageType?: string;
 }
 
 const serviceLabels: Record<string, string> = {
@@ -25,14 +32,16 @@ const serviceLabels: Record<string, string> = {
   AIRPORT_TRANSFER: 'Airport Transfer',
   PRIVATE_TOUR: 'Private Tour',
   CUSTOM_TOUR: 'Custom Tour',
+  BLUE_LAGOON: 'Blue Lagoon Transfer',
 };
 
 // Base prices per service type
 const basePrices: Record<string, number> = {
-  TAXI: 3500, // Base fare for city taxi
-  AIRPORT_TRANSFER: 18900, // KEF Airport standard rate
+  TAXI: 850, // Base fare for city taxi
+  AIRPORT_TRANSFER: 19500, // KEF Airport standard rate
   PRIVATE_TOUR: 45000, // 4-hour tour base
   CUSTOM_TOUR: 60000, // Custom tour base
+  BLUE_LAGOON: 19500, // Default base
 };
 
 // Price per km for taxi services
@@ -72,7 +81,7 @@ const passengerFees = {
   largeGroup: 5000, // Group of 6+
 };
 
-export function BookingSummary({ serviceType, formData, step }: BookingSummaryProps) {
+export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType }: BookingSummaryProps) {
   // Calculate estimated distance based on locations
   const estimatedDistance = useMemo(() => {
     const pickup = formData.pickupLocation.toLowerCase();
@@ -117,6 +126,34 @@ export function BookingSummary({ serviceType, formData, step }: BookingSummaryPr
   const priceBreakdown = useMemo(() => {
     const breakdown: { label: string; amount: number; type: 'add' | 'multiply' }[] = [];
 
+    // Blue Lagoon Packages
+    if (serviceType === 'BLUE_LAGOON') {
+      let amount = 19500;
+      let label = 'One-Way Transfer';
+
+      if (packageType === 'roundtrip') {
+        amount = 39000;
+        label = 'Round Trip Transfer';
+      } else if (packageType === 'combo') {
+        if (formData.passengers > 4) {
+          amount = 14000;
+          label = 'Airport Combo Transfer (5-8 Pax)';
+        } else {
+          amount = 40000;
+          label = 'Airport Combo Transfer';
+        }
+      }
+
+      breakdown.push({ label, amount, type: 'add' });
+      return breakdown;
+    }
+
+    // Special fixed price for Airport Transfer > 4 pax
+    if (serviceType === 'AIRPORT_TRANSFER' && formData.passengers > 4) {
+      breakdown.push({ label: 'Fixed fare (5-8 passengers)', amount: 25000, type: 'add' });
+      return breakdown;
+    }
+
     // Base price
     const base = basePrices[serviceType] || 0;
     breakdown.push({ label: 'Base fare', amount: base, type: 'add' });
@@ -131,18 +168,41 @@ export function BookingSummary({ serviceType, formData, step }: BookingSummaryPr
 
     // Extra passenger fees
     if (formData.passengers > 4) {
-      const extraPassengers = formData.passengers - 4;
-      const fee = extraPassengers * passengerFees.extraPassenger;
-      breakdown.push({ label: `Extra passengers (${extraPassengers})`, amount: fee, type: 'add' });
+      if (serviceType === 'AIRPORT_TRANSFER') {
+        // Special fixed price logic handled above
+      } else if (serviceType === 'BLUE_LAGOON') {
+        // Fixed price for Blue Lagoon packages regardless of pax count (packages handle specific tiers)
+      } else {
+        const extraPassengers = formData.passengers - 4;
+        const fee = extraPassengers * passengerFees.extraPassenger;
+        breakdown.push({ label: `Extra passengers (${extraPassengers})`, amount: fee, type: 'add' });
+      }
     }
 
     // Large group fee
-    if (formData.passengers >= 6) {
+    if (formData.passengers >= 6 && serviceType !== 'AIRPORT_TRANSFER' && serviceType !== 'BLUE_LAGOON') {
       breakdown.push({ label: 'Large group surcharge', amount: passengerFees.largeGroup, type: 'add' });
     }
 
+    // Options & Extras
+    if (options.premiumCar) {
+      breakdown.push({ label: 'Premium Luxury Vehicle', amount: 5000, type: 'add' });
+    }
+
+    if (options.childSeats > 0) {
+      breakdown.push({ label: `Child / Booster Seat (${options.childSeats})`, amount: options.childSeats * 2000, type: 'add' });
+    }
+
+    if (options.extraStop) {
+      breakdown.push({ label: 'Extra Stop', amount: 7000, type: 'add' });
+    }
+
+    if (options.extraTime) {
+      breakdown.push({ label: 'Extra Time', amount: 14000, type: 'add' });
+    }
+
     return breakdown;
-  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance]);
+  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType]);
 
   // Calculate subtotal
   const subtotal = priceBreakdown.reduce((sum, item) => sum + item.amount, 0);
@@ -158,7 +218,7 @@ export function BookingSummary({ serviceType, formData, step }: BookingSummaryPr
     if (serviceType === 'TAXI') {
       return `${Math.ceil(estimatedDistance / 40 * 60)} min`; // ~40 km/h avg
     }
-    if (serviceType === 'AIRPORT_TRANSFER') {
+    if (serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') {
       return '45-55 min';
     }
     if (serviceType === 'PRIVATE_TOUR') {
@@ -250,14 +310,25 @@ export function BookingSummary({ serviceType, formData, step }: BookingSummaryPr
                 </div>
                 {formData.pickupLocation && formData.dropoffLocation && (
                   <div className="flex gap-2 mt-3">
-                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300">
-                      <Ruler className="size-3.5" />
-                      ~{estimatedDistance} km
-                    </div>
-                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300">
-                      <Clock className="size-3.5" />
-                      {estimatedDuration}
-                    </div>
+                    {/* Hide distance/duration for fixed services */}
+                    {serviceType !== 'BLUE_LAGOON' && serviceType !== 'PRIVATE_TOUR' && (
+                      <>
+                        <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                          <Ruler className="size-3.5" />
+                          ~{estimatedDistance} km
+                        </div>
+                        <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                          <Clock className="size-3.5" />
+                          {estimatedDuration}
+                        </div>
+                      </>
+                    )}
+                    {(serviceType === 'BLUE_LAGOON' || serviceType === 'PRIVATE_TOUR') && (
+                      <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                        <Clock className="size-3.5" />
+                        {estimatedDuration}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

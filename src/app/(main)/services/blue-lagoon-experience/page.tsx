@@ -73,7 +73,7 @@ const packages = [
   {
     name: 'Airport Combo',
     price: '40,000 ISK',
-    description: 'KEF Airport → Blue Lagoon → Reykjavik',
+    description: 'KEF Airport → Blue Lagoon → Reykjavik (14,000 ISK for 5-8 pax)',
     features: ['Airport pickup', 'Blue Lagoon stop', 'Hotel drop-off', 'Luggage handling', 'Flight tracking'],
   },
 ];
@@ -232,9 +232,8 @@ export default function BlueLagoonExperiencePage() {
             {packages.map((pkg) => (
               <div
                 key={pkg.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${
-                  pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
-                }`}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
+                  }`}
               >
                 {pkg.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -256,12 +255,13 @@ export default function BlueLagoonExperiencePage() {
                   ))}
                 </ul>
                 <Link
-                  href="/booking?type=BLUE_LAGOON"
-                  className={`block text-center py-3 rounded-xl font-bold transition-colors ${
-                    pkg.popular
-                      ? 'bg-primary text-black hover:bg-primary'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
+                  href={`/booking?type=BLUE_LAGOON&package=${pkg.name === 'One-Way Transfer' ? 'oneway' :
+                    pkg.name === 'Round Trip Transfer' ? 'roundtrip' : 'combo'
+                    }`}
+                  className={`block text-center py-3 rounded-xl font-bold transition-colors ${pkg.popular
+                    ? 'bg-primary text-black hover:bg-primary'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
                 >
                   Book Now
                 </Link>

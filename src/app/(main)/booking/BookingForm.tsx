@@ -20,10 +20,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { POPULAR_LOCATIONS } from '@/lib/locations';
 import { BookingSummary } from './BookingSummary';
 
-type BookingStep = 1 | 2 | 3 | 4;
-type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR';
+type BookingStep = 1 | 2 | 3 | 4 | 5;
+type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR' | 'BLUE_LAGOON';
 
 interface ValidationErrors {
   date?: string;
@@ -46,15 +47,31 @@ export function BookingForm() {
   const router = useRouter();
 
   const initialType = (searchParams.get('type') as ServiceType) || 'TAXI';
+  const initialPackage = searchParams.get('package');
   const initialPickup = searchParams.get('pickup') || '';
   const initialDropoff = searchParams.get('dropoff') || '';
   const initialDate = searchParams.get('date') || '';
 
-  const [step, setStep] = useState<BookingStep>(1);
+  // Determine initial step and form data based on package
+  let startStep: BookingStep = 1;
+  let defaultPickup = initialPickup;
+  let defaultDropoff = initialDropoff;
+
+  if (initialType === 'BLUE_LAGOON' && initialPackage) {
+    startStep = 2; // Skip service selection
+    if (initialPackage === 'combo') {
+      defaultPickup = 'Keflavik Airport';
+      defaultDropoff = 'Reykjavik City (via Blue Lagoon)';
+    } else if (initialPackage === 'oneway') {
+      // User needs to specify direction, so maybe don't prefill completely or use generic
+    }
+  }
+
+  const [step, setStep] = useState<BookingStep>(startStep);
   const [serviceType, setServiceType] = useState<ServiceType>(initialType);
   const [formData, setFormData] = useState({
-    pickupLocation: initialPickup,
-    dropoffLocation: initialDropoff,
+    pickupLocation: defaultPickup,
+    dropoffLocation: defaultDropoff,
     date: initialDate,
     time: '10:00',
     passengers: 2,
@@ -63,6 +80,19 @@ export function BookingForm() {
     phone: '',
     specialRequests: '',
   });
+  const [options, setOptions] = useState({
+    premiumCar: false,
+    childSeats: 0,
+    extraStop: false,
+    extraTime: false,
+  });
+  const [flightDetails, setFlightDetails] = useState({
+    flightNumber: '',
+    flightTime: '',
+    luggageCount: 0,
+  });
+  const [additionalInfo, setAdditionalInfo] = useState('');
+
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -113,6 +143,12 @@ export function BookingForm() {
   };
 
   const validateStep4 = (): boolean => {
+    // Optional step validation if needed (e.g., flight number required for airport pickup)
+    // For now, let's keep it optional or add logic later if user requests strict validation
+    return true;
+  };
+
+  const validateStep5 = (): boolean => {
     const newErrors: ValidationErrors = {};
 
     if (!formData.name.trim()) {
@@ -140,17 +176,19 @@ export function BookingForm() {
       isValid = validateStep2();
     } else if (step === 3) {
       isValid = validateStep3();
+    } else if (step === 4) {
+      isValid = validateStep4();
     }
 
     if (isValid) {
-      setStep((prev) => Math.min(prev + 1, 4) as BookingStep);
+      setStep((prev) => Math.min(prev + 1, 5) as BookingStep);
     }
   };
 
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1) as BookingStep);
 
   const handleSubmitBooking = async () => {
-    if (!validateStep4()) {
+    if (!validateStep5()) {
       return;
     }
 
@@ -170,7 +208,14 @@ export function BookingForm() {
           dropoffLocation: formData.dropoffLocation,
           pickupDate: formData.date,
           pickupTime: formData.time,
-          specialRequests: formData.specialRequests,
+          specialRequests: additionalInfo, // Using the new additional info field
+          flightNumber: flightDetails.flightNumber,
+          flightTime: flightDetails.flightTime,
+          luggageCount: flightDetails.luggageCount,
+          options: {
+            ...options,
+            packageType: initialPackage || undefined,
+          },
         }),
       });
 
@@ -196,7 +241,7 @@ export function BookingForm() {
     }
   };
 
-  const progress = (step / 4) * 100;
+  const progress = (step / 5) * 100;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -216,7 +261,7 @@ export function BookingForm() {
         <div className="flex flex-col gap-3">
           <div className="flex gap-6 justify-between items-center">
             <p className="text-secondary text-sm font-bold uppercase tracking-wider">
-              Step {step} of 4
+              Step {step} of 5
             </p>
             <span className="text-slate-400 text-sm">{progress}% Completed</span>
           </div>
@@ -337,14 +382,24 @@ export function BookingForm() {
               </span>
               Locations
             </h3>
+// ... inside BookingForm component
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-4">
+                {/* Datalist for location suggestions */}
+                <datalist id="locations-list">
+                  {POPULAR_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc} />
+                  ))}
+                </datalist>
+
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
                   <div className="relative">
                     <Plane className="absolute left-3 top-3.5 text-primary size-5" />
                     <input
                       type="text"
+                      list="locations-list"
                       value={formData.pickupLocation}
                       onChange={(e) => updateFormData('pickupLocation', e.target.value)}
                       placeholder="Enter airport, hotel, or address"
@@ -370,6 +425,7 @@ export function BookingForm() {
                     <Flag className="absolute left-3 top-3.5 text-red-500 size-5" />
                     <input
                       type="text"
+                      list="locations-list"
                       value={formData.dropoffLocation}
                       onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
                       placeholder="Enter destination"
@@ -391,13 +447,19 @@ export function BookingForm() {
                     Popular Destinations:
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {['Reykjavik City', 'Blue Lagoon', 'Sky Lagoon'].map((place) => (
+                    {POPULAR_LOCATIONS.slice(0, 6).map((place) => (
                       <button
                         key={place}
-                        onClick={() => updateFormData('dropoffLocation', place)}
+                        onClick={() => {
+                          if (!formData.pickupLocation) {
+                            updateFormData('pickupLocation', place);
+                          } else {
+                            updateFormData('dropoffLocation', place);
+                          }
+                        }}
                         className={cn(
                           'px-3 py-1 text-xs rounded-full transition-colors border',
-                          formData.dropoffLocation === place
+                          (formData.pickupLocation === place || formData.dropoffLocation === place)
                             ? 'bg-primary/10 text-secondary border-primary/20 font-medium'
                             : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-100'
                         )}
@@ -417,14 +479,178 @@ export function BookingForm() {
           </section>
         )}
 
-        {/* Step 4: Passenger Details */}
+        {/* Step 4: Options & Details (NEW) */}
         {step === 4 && (
           <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 4
               </span>
-              Passenger Details
+              Options & Details
+            </h3>
+
+            {/* Travel Details */}
+            <div className="space-y-6 mb-8">
+              <h4 className="font-bold text-slate-900 border-b pb-2">Travel Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {serviceType === 'AIRPORT_TRANSFER' && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-slate-700 font-semibold text-sm">Flight Number</label>
+                      <input
+                        type="text"
+                        value={flightDetails.flightNumber}
+                        onChange={(e) => setFlightDetails(prev => ({ ...prev, flightNumber: e.target.value }))}
+                        placeholder="e.g. FI502"
+                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-slate-700 font-semibold text-sm">
+                        {formData.pickupLocation.toLowerCase().includes('airport') ? 'Expected Landing Time' : 'Flight Departure Time'}
+                      </label>
+                      <input
+                        type="time"
+                        value={flightDetails.flightTime}
+                        onChange={(e) => setFlightDetails(prev => ({ ...prev, flightTime: e.target.value }))}
+                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-slate-700 font-semibold text-sm">Number of Suitcases</label>
+                  <select
+                    value={flightDetails.luggageCount}
+                    onChange={(e) => setFlightDetails(prev => ({ ...prev, luggageCount: parseInt(e.target.value) }))}
+                    className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                      <option key={num} value={num}>{num}</option>
+                    ))}
+                    <option value={9}>9+</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Extras */}
+            <div className="space-y-6">
+              <h4 className="font-bold text-slate-900 border-b pb-2">Extras & Upgrades</h4>
+
+              <div className="space-y-4">
+                {/* Premium Car */}
+                <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={options.premiumCar}
+                      onChange={(e) => setOptions(prev => ({ ...prev, premiumCar: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900">Premium Luxury Car</p>
+                      <p className="text-sm text-slate-500">Upgrade to a luxury oversized vehicle</p>
+                    </div>
+                  </div>
+                  <span className="font-bold text-slate-900">ISK 5,000</span>
+                </label>
+
+                {/* Child Seats */}
+                <div className="p-4 rounded-lg border border-slate-200 bg-slate-50/50 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={options.childSeats > 0}
+                        onChange={(e) => setOptions(prev => ({ ...prev, childSeats: e.target.checked ? 1 : 0 }))}
+                        className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                      />
+                      <div>
+                        <p className="font-bold text-slate-900">Child Seat / Booster Seat</p>
+                        <p className="text-sm text-slate-500">Safety seats for children</p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-slate-900">ISK 2,000 <span className="text-xs font-normal text-slate-500">/ each</span></span>
+                  </div>
+
+                  {options.childSeats > 0 && (
+                    <div className="ml-8 mt-3 flex items-center gap-3">
+                      <label className="text-sm font-medium text-slate-700">How many seats?</label>
+                      <select
+                        value={options.childSeats}
+                        onChange={(e) => setOptions(prev => ({ ...prev, childSeats: parseInt(e.target.value) }))}
+                        className="rounded border-slate-300 text-sm py-1 pl-2 pr-8 focus:ring-primary focus:border-primary"
+                      >
+                        {[1, 2, 3, 4].map(num => (
+                          <option key={num} value={num}>{num}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Extra Stop */}
+                <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={options.extraStop}
+                      onChange={(e) => setOptions(prev => ({ ...prev, extraStop: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900">Extra Pick up / Drop off place</p>
+                      <p className="text-sm text-slate-500">Stop at an additional location</p>
+                    </div>
+                  </div>
+                  <span className="font-bold text-slate-900">ISK 7,000</span>
+                </label>
+
+                {/* Extra Time */}
+                <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={options.extraTime}
+                      onChange={(e) => setOptions(prev => ({ ...prev, extraTime: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900">Extra Time</p>
+                      <p className="text-sm text-slate-500">Extended waiting or service time</p>
+                    </div>
+                  </div>
+                  <span className="font-bold text-slate-900">ISK 14,000</span>
+                </label>
+              </div>
+
+              {/* Additional Information */}
+              <div className="flex flex-col gap-2 pt-4">
+                <label className="text-slate-700 font-semibold text-sm">
+                  Additional Details
+                </label>
+                <textarea
+                  value={additionalInfo}
+                  onChange={(e) => setAdditionalInfo(e.target.value)}
+                  placeholder="Any special requirements or information..."
+                  rows={3}
+                  className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary resize-none"
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Step 5: Passenger Details (Previously Step 4) */}
+        {step === 5 && (
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+            <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
+                5
+              </span>
+              Contact Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
@@ -504,18 +730,6 @@ export function BookingForm() {
                   ))}
                 </select>
               </div>
-              <div className="md:col-span-2 flex flex-col gap-2">
-                <label className="text-slate-700 font-semibold text-sm">
-                  Special Requests (Optional)
-                </label>
-                <textarea
-                  value={formData.specialRequests}
-                  onChange={(e) => updateFormData('specialRequests', e.target.value)}
-                  placeholder="Child seats, wheelchair accessibility, extra luggage..."
-                  rows={3}
-                  className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary resize-none"
-                />
-              </div>
             </div>
           </section>
         )}
@@ -530,7 +744,7 @@ export function BookingForm() {
             <ArrowLeft className="size-5" />
             Back
           </button>
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               onClick={nextStep}
               className="px-8 py-3 rounded-lg bg-primary text-secondary font-bold hover:bg-yellow-400 shadow-md shadow-yellow-400/20 transition-all transform hover:scale-[1.02] flex items-center gap-2"
@@ -565,7 +779,9 @@ export function BookingForm() {
         <BookingSummary
           serviceType={serviceType}
           formData={formData}
+          options={options}
           step={step}
+          packageType={initialPackage || undefined}
         />
       </div>
     </div>

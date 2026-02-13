@@ -46,14 +46,14 @@ export function Footer() {
                 alt="Authorized Day Tour Provider"
                 width={80}
                 height={80}
-                className="h-20 w-auto object-contain rounded-lg"
+                className="h-20 w-auto object-contain rounded-lg mix-blend-screen"
               />
               <Image
                 src="/footerimg2.webp"
                 alt="Service Partner"
                 width={80}
                 height={80}
-                className="h-20 w-auto object-contain rounded-lg"
+                className="h-20 w-auto object-contain rounded-lg mix-blend-screen"
               />
             </div>
             <div className="flex gap-4">

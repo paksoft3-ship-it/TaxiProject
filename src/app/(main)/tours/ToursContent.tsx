@@ -102,7 +102,7 @@ const tours = [
     category: 'TRANSFER' as const,
     duration: '45 min',
     shortDescription: 'Premium Airport Service',
-    price: 18900,
+    price: 19500,
     currency: 'ISK',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBVWeCbujmlEyrgmQ8GQQ4KrfCo9ELZ_L573wLwgKBck7PWSCwohWC6tPekru2ZS7aM6XrDpisc1IXVB4XWg6DQOWEtAak0-ybxa5aPf7A0VKzNCo0smbeNWrr1VFCCJYKL8RY0CrVdKYBER2B4EY0L8WpaahjiMg-SNTM4Q5sRgFPb7XQMkgW9YHw43sDx0I7p9rZfaTp3qMEB_a_X_RKtXOEqikacLPpoD9hYmNg_gpNRFg5vMXR49lbdM0yU7Nk_yoBF3Zg57OmZ',
     badge: { text: 'Transfer', type: 'transfer' as const },

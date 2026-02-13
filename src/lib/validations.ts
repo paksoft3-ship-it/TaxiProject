@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const bookingSchema = z.object({
-  type: z.enum(['TAXI', 'AIRPORT_TRANSFER', 'PRIVATE_TOUR', 'CUSTOM_TOUR']),
+  type: z.enum(['TAXI', 'AIRPORT_TRANSFER', 'PRIVATE_TOUR', 'CUSTOM_TOUR', 'BLUE_LAGOON']),
   customerName: z.string().min(2, 'Name must be at least 2 characters'),
   customerEmail: z.string().email('Invalid email address'),
   customerPhone: z.string().min(7, 'Invalid phone number'),
@@ -11,6 +11,16 @@ export const bookingSchema = z.object({
   pickupDate: z.string(),
   pickupTime: z.string(),
   tourId: z.string().optional(),
+  flightNumber: z.string().optional(),
+  flightTime: z.string().optional(),
+  luggageCount: z.number().optional(),
+  options: z.object({
+    premiumCar: z.boolean().optional(),
+    childSeats: z.number().optional(),
+    extraStop: z.boolean().optional(),
+    extraTime: z.boolean().optional(),
+    packageType: z.string().optional(),
+  }).optional(),
   specialRequests: z.string().optional(),
 });
 

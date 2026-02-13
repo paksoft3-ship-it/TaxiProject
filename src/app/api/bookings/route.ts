@@ -62,15 +62,99 @@ export async function POST(request: NextRequest) {
       AIRPORT_TRANSFER: 19500,
       PRIVATE_TOUR: 45000,
       CUSTOM_TOUR: 60000,
+      BLUE_LAGOON: 19500, // Default base
     };
 
-    const basePrice = basePrices[validated.type] || 0;
-    const extras = validated.passengers > 4 ? (validated.passengers - 4) * 2000 : 0;
-    const totalPrice = basePrice + extras;
+    let basePrice = basePrices[validated.type] || 0;
+
+    // Handle Blue Lagoon Packages specifically
+    if (validated.type === 'BLUE_LAGOON' && validated.options?.packageType) {
+      if (validated.options.packageType === 'roundtrip') {
+        basePrice = 39000;
+      } else if (validated.options.packageType === 'combo') {
+        if (validated.passengers > 4) {
+          basePrice = 14000;
+        } else {
+          basePrice = 40000;
+        }
+      }
+    }
+
+    // Calculate extras
+    let extras = 0;
+
+    // Extra passengers fee
+    if (validated.passengers > 4) {
+      if (validated.type === 'AIRPORT_TRANSFER') {
+        extras += 25000 - basePrice; // Fixed price of 25000 for > 4 pax
+      } else if (validated.type === 'BLUE_LAGOON') {
+        // Assume same fixed price logic or keep base? 
+        // For now, keep base price for Blue Lagoon as fixed vehicle price.
+      } else {
+        extras += (validated.passengers - 4) * 2000;
+      }
+    }
+
+    // New Options calculations
+    if (validated.options) {
+      if (validated.options.premiumCar) extras += 5000;
+      if (validated.options.childSeats) extras += validated.options.childSeats * 2000;
+      if (validated.options.extraStop) extras += 7000;
+      if (validated.options.extraTime) extras += 14000;
+    }
+
+    // Special logic for fixed price airport transfer > 4 pax
+    let totalPrice = basePrice + extras;
+
+    if (validated.type === 'AIRPORT_TRANSFER' && validated.passengers > 4) {
+      // Fixed base of 25000 logic...
+      // Already handled above by setting extras to (25000 - basePrice)
+      // So totalPrice = basePrice + (25000 - basePrice) = 25000.
+
+      // Add other extras on top
+      if (validated.options) {
+        if (validated.options.premiumCar) totalPrice += 5000;
+        if (validated.options.childSeats) totalPrice += validated.options.childSeats * 2000;
+        if (validated.options.extraStop) totalPrice += 7000;
+        if (validated.options.extraTime) totalPrice += 14000;
+      }
+
+      // Recalculate 'extras' field for DB
+      extras = totalPrice - basePrice;
+    }
+
+    // Compile special requests string
+    let specialRequests = validated.specialRequests || '';
+    const details = [];
+
+    // Map types for DB compatibility
+    let dbType: string = validated.type;
+    if (validated.type === 'BLUE_LAGOON') {
+      dbType = 'AIRPORT_TRANSFER'; // Map to supported DB enum
+      details.push('Service: Blue Lagoon Transfer');
+      if (validated.options?.packageType) {
+        details.push(`Package: ${validated.options.packageType}`);
+      }
+    }
+
+    if (validated.flightNumber) details.push(`Flight: ${validated.flightNumber}`);
+    if (validated.flightTime) details.push(`Time: ${validated.flightTime}`);
+    if (validated.luggageCount) details.push(`Luggage: ${validated.luggageCount}`);
+
+    if (validated.options) {
+      if (validated.options.premiumCar) details.push('Premium Car');
+      if (validated.options.childSeats) details.push(`${validated.options.childSeats} Child/Booster Seat(s)`);
+      if (validated.options.extraStop) details.push('Extra Stop');
+      if (validated.options.extraTime) details.push('Extra Time');
+    }
+
+    if (details.length > 0) {
+      specialRequests = `${details.join(', ')}. ${specialRequests}`;
+    }
 
     // Create payment intent
     const paymentIntent = await createPaymentIntent(totalPrice, 'isk', {
-      bookingType: validated.type,
+      bookingType: validated.type, // Stripe can receive custom strings, or stick to dbType? Let's use validated.type for metadata
       customerEmail: validated.customerEmail,
     });
 
@@ -78,7 +162,7 @@ export async function POST(request: NextRequest) {
     const booking = await prisma.booking.create({
       data: {
         bookingNumber: generateBookingNumber(),
-        type: validated.type,
+        type: dbType as any, // Cast to any to bypass strict literal check if needed, or mapped type
         customerName: validated.customerName,
         customerEmail: validated.customerEmail,
         customerPhone: validated.customerPhone,
@@ -93,7 +177,7 @@ export async function POST(request: NextRequest) {
         currency: 'ISK',
         paymentIntentId: paymentIntent.id,
         tourId: validated.tourId,
-        specialRequests: validated.specialRequests,
+        specialRequests: specialRequests, // Saved combined string
       },
     });
 

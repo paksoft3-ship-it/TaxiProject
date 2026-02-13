@@ -1,0 +1,15 @@
+export const POPULAR_LOCATIONS = [
+    'Keflavik Airport (KEF)',
+    'Reykjavik City Center',
+    'Blue Lagoon',
+    'Sky Lagoon',
+    'Retreat Hotel',
+    'Silica Hotel',
+    'The Reykjavik EDITION',
+    'Hilton Nordica',
+    'Skarfabakki Cruise Terminal',
+    'Harpa Concert Hall',
+    'Perlan',
+    'Hallgrímskirkja',
+    'BSI Bus Terminal',
+];
