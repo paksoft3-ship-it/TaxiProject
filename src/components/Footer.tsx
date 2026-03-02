@@ -2,6 +2,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { CarTaxiFront, MapPin, Phone, Mail, Facebook, Instagram, Linkedin } from 'lucide-react';
 
+
+
+
 const companyLinks = [
   { name: 'About Us', href: '/about' },
   { name: 'Our Fleet', href: '/fleet' },
