@@ -59,7 +59,7 @@ const highlights = [
 const packages = [
   {
     name: 'One-Way Transfer',
-    price: '19,500 ISK',
+    price: '20,000 ISK',
     description: 'Single transfer from/to Reykjavik',
     features: ['Hotel pickup or drop-off', 'Luggage assistance', 'Free WiFi', 'English-speaking driver'],
   },

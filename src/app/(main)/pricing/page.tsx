@@ -27,7 +27,7 @@ const pricingCards = [
     title: 'Private Transfers',
     icon: CarTaxiFront,
     priceLabel: 'Starting from',
-    price: '19,500 ISK',
+    price: '20,000 ISK',
     priceSubtext: '',
     priceNote: 'Reykjavik ↔ Blue Lagoon',
     features: [
@@ -44,7 +44,7 @@ const pricingCards = [
     title: 'Airport Transfer',
     icon: Plane,
     priceLabel: 'Fixed Rate',
-    price: '19,500 ISK',
+    price: '20,000 ISK',
     priceSubtext: '',
     priceNote: 'Keflavik (KEF) ↔ Reykjavik',
     features: [
@@ -62,14 +62,14 @@ const pricingCards = [
     title: 'Sightseeing Tours',
     icon: Mountain,
     priceLabel: 'Starting from',
-    price: '25,000 ISK',
+    price: '10,500 ISK',
     priceSubtext: '',
     priceNote: 'Reykjavik City Tour (1-3 hrs)',
     features: [
       'Expert Local Guides',
-      'Golden Circle from 92,000 ISK',
-      'South Coast from 138,000 ISK',
-      'Glacier Lagoon from 204,000 ISK',
+      'Golden Circle from 92,500 ISK',
+      'South Coast from 138,500 ISK',
+      'Glacier Lagoon from 204,500 ISK',
     ],
     buttonText: 'View Tours',
     href: '/services/sightseeing-tours',
@@ -252,31 +252,31 @@ export default function PricingPage() {
                     <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik City Tour</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">1-3 hours</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">-</td>
-                    <td className="p-4 text-right font-bold text-primary">25,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">10,500 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Golden Circle</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">6 hours</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">320 km</td>
-                    <td className="p-4 text-right font-bold text-primary">92,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">92,500 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">South Coast Spectacular</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">10 hours</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">420 km</td>
-                    <td className="p-4 text-right font-bold text-primary">138,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">138,500 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Snæfellsnes Peninsula</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">12 hours</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">350 km</td>
-                    <td className="p-4 text-right font-bold text-primary">154,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">154,500 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Glacier Lagoon & Diamond Beach</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">15 hours</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">800 km</td>
-                    <td className="p-4 text-right font-bold text-primary">204,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">204,500 ISK</td>
                   </tr>
                 </tbody>
               </table>
@@ -300,7 +300,7 @@ export default function PricingPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik ↔ Blue Lagoon</td>
-                    <td className="p-4 text-right font-bold text-primary">19,500 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">20,000 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from The Lava Tunnel</td>
@@ -354,7 +354,7 @@ export default function PricingPage() {
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (1-4 pax)</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
-                    <td className="p-4 text-right font-bold text-primary">10,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">10,500 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (5-8 pax)</td>
@@ -364,7 +364,7 @@ export default function PricingPage() {
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Reykjavik</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">45 min</td>
-                    <td className="p-4 text-right font-bold text-primary">19,500 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">20,000 ISK</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF → Blue Lagoon → Reykjavik</td>

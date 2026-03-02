@@ -28,9 +28,9 @@ const quickReplies = [
 
 const botResponses: Record<string, string> = {
   'book a taxi': 'I can help you book a taxi! You can book online at /booking or call us at +354 555 1234 for immediate pickup.',
-  'airport transfer': 'Our airport transfers from Keflavík (KEF) to Reykjavik start at 19,500 ISK. We offer meet & greet service and flight monitoring. Would you like to book?',
-  'tour information': 'We offer various private tours including Golden Circle (8h), Northern Lights hunting (4h), South Coast adventure (10h), and Blue Lagoon transfers. Check our /tours page for details!',
-  'pricing': 'Our pricing:\n• City Taxi: 950 ISK start + 350 ISK/km\n• Airport Transfer: from 19,500 ISK\n• Private Tours: from 45,000 ISK\nVisit /pricing for full details.',
+  'airport transfer': 'Our airport transfers from Keflavík (KEF) to Reykjavik start at 20,000 ISK. We offer meet & greet service and flight monitoring. Would you like to book?',
+  'tour information': 'We offer various private tours including Golden Circle (6h), Northern Lights hunting (4-5h), South Coast adventure (10h), and Blue Lagoon transfers. Check our /tours page for details!',
+  'pricing': 'Our pricing:\n• Airport Transfer: from 20,000 ISK\n• KEF ↔ Blue Lagoon: from 10,500 ISK\n• Private Tours: from 10,500 ISK\nVisit /pricing for full details.',
   'contact support': 'You can reach us:\n• Phone: +354 555 1234 (24/7)\n• Email: booking@primetaxi.is\n• WhatsApp: +354 555 1234\nOr fill out our contact form at /contact',
   'default': 'Thanks for your message! For immediate assistance, please call us at +354 555 1234 or use our booking page. Our team will respond to your inquiry shortly.',
 };

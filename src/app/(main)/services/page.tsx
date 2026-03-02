@@ -43,7 +43,7 @@ const services = [
       'Return transfer available',
     ],
     pricing: {
-      from: '19,500 ISK',
+      from: '20,000 ISK',
       note: 'One-way from Reykjavik',
     },
     href: '/booking?type=BLUE_LAGOON',
@@ -67,7 +67,7 @@ const services = [
       'Small group experiences',
     ],
     pricing: {
-      from: '25,000 ISK',
+      from: '10,500 ISK',
       note: 'Reykjavik City Tour (1-3 hours)',
     },
     href: '/tours',
@@ -91,7 +91,7 @@ const services = [
       'Flexible scheduling',
     ],
     pricing: {
-      from: '19,500 ISK',
+      from: '20,000 ISK',
       note: 'Reykjavik ↔ Blue Lagoon',
     },
     href: '/booking?type=PRIVATE_TRANSFER',
@@ -115,7 +115,7 @@ const services = [
       'Flexible timing options',
     ],
     pricing: {
-      from: '10,000 ISK',
+      from: '10,500 ISK',
       note: 'KEF ↔ Blue Lagoon (1-4 passengers)',
     },
     href: '/booking?type=KEF_BLUE_LAGOON',
