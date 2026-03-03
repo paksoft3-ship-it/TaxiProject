@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 interface Driver {
   id: string;
@@ -58,6 +59,7 @@ interface VehicleFormData {
   capacity: number;
   status: 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'RETIRED';
   features: string[];
+  image: string | null;
 }
 
 const initialFormData: VehicleFormData = {
@@ -69,6 +71,7 @@ const initialFormData: VehicleFormData = {
   capacity: 4,
   status: 'AVAILABLE',
   features: [],
+  image: null,
 };
 
 const statusConfig = {
@@ -248,6 +251,7 @@ export default function FleetPage() {
       capacity: vehicle.capacity,
       status: vehicle.status,
       features: vehicle.features,
+      image: vehicle.image,
     });
     setShowEditModal(true);
   };
@@ -737,6 +741,11 @@ export default function FleetPage() {
                     </div>
                   )}
                 </div>
+                <ImageUpload
+                  label="Vehicle Photo (Optional)"
+                  value={formData.image || ''}
+                  onChange={(url) => setFormData({ ...formData, image: url || null })}
+                />
 
                 <div className="flex gap-3 pt-4">
                   <button
@@ -890,6 +899,11 @@ export default function FleetPage() {
                     </div>
                   )}
                 </div>
+                <ImageUpload
+                  label="Vehicle Photo (Optional)"
+                  value={formData.image || ''}
+                  onChange={(url) => setFormData({ ...formData, image: url || null })}
+                />
 
                 <div className="flex gap-3 pt-4">
                   <button

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 interface Vehicle {
   id: string;
@@ -56,6 +57,7 @@ interface DriverFormData {
   licenseNumber: string;
   status: 'AVAILABLE' | 'ON_TOUR' | 'OFFLINE' | 'BREAK';
   vehicleId: string | null;
+  image: string | null;
 }
 
 const initialFormData: DriverFormData = {
@@ -65,6 +67,7 @@ const initialFormData: DriverFormData = {
   licenseNumber: '',
   status: 'OFFLINE',
   vehicleId: null,
+  image: null,
 };
 
 const statusConfig = {
@@ -258,6 +261,7 @@ export default function DriversPage() {
       licenseNumber: driver.licenseNumber,
       status: driver.status,
       vehicleId: driver.vehicleId,
+      image: driver.image,
     });
     setShowEditModal(true);
   };
@@ -652,6 +656,12 @@ export default function DriversPage() {
                     ))}
                   </select>
                 </div>
+                <ImageUpload
+                  label="Profile Photo (Optional)"
+                  value={formData.image || ''}
+                  onChange={(url) => setFormData({ ...formData, image: url || null })}
+                  aspect="square"
+                />
 
                 <div className="flex gap-3 pt-4">
                   <button
@@ -767,6 +777,12 @@ export default function DriversPage() {
                     )}
                   </select>
                 </div>
+                <ImageUpload
+                  label="Profile Photo (Optional)"
+                  value={formData.image || ''}
+                  onChange={(url) => setFormData({ ...formData, image: url || null })}
+                  aspect="square"
+                />
 
                 <div className="flex gap-3 pt-4">
                   <button
