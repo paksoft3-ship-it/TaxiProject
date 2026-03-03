@@ -15,6 +15,9 @@ import {
   Snowflake,
   Calendar,
 } from 'lucide-react';
+import prisma from '@/lib/db';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Keflavik Airport to Blue Lagoon Transfer | Direct Service',
@@ -42,50 +45,6 @@ const features = [
     icon: Shield,
     title: 'Reliable Service',
     description: 'Never miss your flight or lagoon slot with our punctual service.',
-  },
-];
-
-const routes = [
-  {
-    name: 'KEF → Blue Lagoon',
-    description: 'Perfect for arrivals - relax after your flight',
-    duration: '25 min',
-    distance: '23 km',
-    price: '10,500 ISK',
-    note: '1-4 passengers',
-  },
-  {
-    name: 'Blue Lagoon → KEF',
-    description: 'Ideal for departures - refresh before your flight',
-    duration: '25 min',
-    distance: '23 km',
-    price: '10,500 ISK',
-    note: '1-4 passengers',
-  },
-  {
-    name: 'KEF → Blue Lagoon → Reykjavik',
-    description: 'Complete arrival package with city drop-off',
-    duration: '~3 hours total',
-    distance: '75 km',
-    price: '40,000 ISK',
-    note: '1-4 passengers, includes lagoon time',
-    popular: true,
-  },
-  {
-    name: 'Reykjavik → Blue Lagoon → KEF',
-    description: 'Complete departure package from your hotel',
-    duration: '~3 hours total',
-    distance: '75 km',
-    price: '40,000 ISK',
-    note: '1-4 passengers, includes lagoon time',
-  },
-  {
-    name: 'KEF ↔ Blue Lagoon (5-8 passengers)',
-    description: 'Larger group transfer between airport and spa',
-    duration: '25 min',
-    distance: '23 km',
-    price: '14,000 ISK',
-    note: '5-8 passengers, one-way',
   },
 ];
 
@@ -119,7 +78,11 @@ const faqs = [
   },
 ];
 
-export default function KefBlueLagoonPage() {
+export default async function KefBlueLagoonPage() {
+  const routes = await prisma.transferRoute.findMany({
+    where: { category: 'AIRPORT_BLUE_LAGOON', active: true },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+  });
   return (
     <>
       {/* Hero Section */}
@@ -210,9 +173,8 @@ export default function KefBlueLagoonPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {routes.map((route) => (
               <div
-                key={route.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
-                  }`}
+                key={route.id}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
               >
                 {route.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -220,17 +182,19 @@ export default function KefBlueLagoonPage() {
                   </span>
                 )}
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{route.name}</h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">{route.description}</p>
-                <div className="flex items-center gap-4 mb-6 text-sm text-slate-500 dark:text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-4" />
-                    {route.duration}
-                  </span>
-                </div>
+                {route.description && <p className="text-slate-600 dark:text-slate-400 mb-4">{route.description}</p>}
+                {route.duration && (
+                  <div className="flex items-center gap-4 mb-6 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Clock className="size-4" />
+                      {route.duration}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
                   <div>
-                    <p className="text-2xl font-black text-slate-900 dark:text-white">{route.price}</p>
-                    <p className="text-xs text-slate-500">{route.note}</p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">{route.price.toLocaleString()} ISK</p>
+                    {route.passengers && <p className="text-xs text-slate-500">{route.passengers}</p>}
                   </div>
                   <Link
                     href="/booking?type=KEF_BLUE_LAGOON"

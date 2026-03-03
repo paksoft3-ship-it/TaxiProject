@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import prisma from '@/lib/db';
+
+export const revalidate = 3600;
 import {
   Car,
   Check,
@@ -70,17 +73,6 @@ const vehicleOptions = [
   },
 ];
 
-const popularRoutes = [
-  { route: 'Reykjavik to Blue Lagoon', price: '20,000 ISK' },
-  { route: 'Blue Lagoon to Reykjavik', price: '20,000 ISK' },
-  { route: 'Transfer to/from Hveragerði', price: '22,000 ISK' },
-  { route: 'Transfer to/from Selfoss', price: '27,500 ISK' },
-  { route: 'Transfer to/from The Lava Tunnel', price: '21,000 ISK' },
-  { route: 'Transfer to/from Hotel ION Adventure', price: '26,500 ISK' },
-  { route: 'Transfer to/from Hotel Grímsborgir', price: '35,500 ISK' },
-  { route: 'Transfer to/from Hotel Ranga', price: '53,500 ISK' },
-  { route: 'Transfer to/from Hotel Búðir', price: '88,000 ISK' },
-];
 
 const transferTypes = [
   {
@@ -116,7 +108,11 @@ const highlights = [
   'Multiple payment options',
 ];
 
-export default function PrivateTransfersPage() {
+export default async function PrivateTransfersPage() {
+  const popularRoutes = await prisma.transferRoute.findMany({
+    where: { category: 'PRIVATE_TRANSFER', active: true },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+  });
   return (
     <>
       {/* Hero Section */}
@@ -286,11 +282,11 @@ export default function PrivateTransfersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularRoutes.map((item) => (
               <div
-                key={item.route}
+                key={item.id}
                 className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"
               >
-                <span className="text-slate-700 dark:text-slate-300 font-medium">{item.route}</span>
-                <span className="text-primary font-bold whitespace-nowrap ml-4">{item.price}</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{item.name}</span>
+                <span className="text-primary font-bold whitespace-nowrap ml-4">{item.price.toLocaleString()} ISK</span>
               </div>
             ))}
           </div>

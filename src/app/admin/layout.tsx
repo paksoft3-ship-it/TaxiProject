@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   Map,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Fleet', href: '/admin/fleet', icon: Car },
   { name: 'Drivers', href: '/admin/drivers', icon: Users },
   { name: 'Tours', href: '/admin/tours', icon: Map },
+  { name: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

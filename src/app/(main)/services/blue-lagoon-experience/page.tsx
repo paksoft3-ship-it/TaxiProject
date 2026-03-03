@@ -15,6 +15,9 @@ import {
   Droplets,
   Camera,
 } from 'lucide-react';
+import prisma from '@/lib/db';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Experience the Blue Lagoon | Premium Transfer Service',
@@ -56,29 +59,11 @@ const highlights = [
   'Free WiFi in all vehicles',
 ];
 
-const packages = [
-  {
-    name: 'One-Way Transfer',
-    price: '20,000 ISK',
-    description: 'Single transfer from/to Reykjavik',
-    features: ['Hotel pickup or drop-off', 'Luggage assistance', 'Free WiFi', 'English-speaking driver'],
-  },
-  {
-    name: 'Round Trip Transfer',
-    price: '39,000 ISK',
-    description: 'Return transfer from Reykjavik',
-    features: ['Hotel pickup & drop-off', 'Flexible return time', 'Luggage assistance', 'Free WiFi'],
-    popular: true,
-  },
-  {
-    name: 'Airport Combo',
-    price: '40,000 ISK',
-    description: 'KEF Airport → Blue Lagoon → Reykjavik (14,000 ISK for 5-8 pax)',
-    features: ['Airport pickup', 'Blue Lagoon stop', 'Hotel drop-off', 'Luggage handling', 'Flight tracking'],
-  },
-];
-
-export default function BlueLagoonExperiencePage() {
+export default async function BlueLagoonExperiencePage() {
+  const packages = await prisma.transferRoute.findMany({
+    where: { category: 'BLUE_LAGOON', active: true },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+  });
   return (
     <>
       {/* Hero Section */}
@@ -231,9 +216,8 @@ export default function BlueLagoonExperiencePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {packages.map((pkg) => (
               <div
-                key={pkg.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
-                  }`}
+                key={pkg.id}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
               >
                 {pkg.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -241,10 +225,10 @@ export default function BlueLagoonExperiencePage() {
                   </span>
                 )}
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{pkg.name}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">{pkg.description}</p>
+                {pkg.description && <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">{pkg.description}</p>}
                 <p className="text-3xl font-black text-slate-900 dark:text-white mb-6">
-                  {pkg.price}
-                  <span className="text-sm font-normal text-slate-500"> / person</span>
+                  {pkg.price.toLocaleString()} ISK
+                  <span className="text-sm font-normal text-slate-500"> / vehicle</span>
                 </p>
                 <ul className="space-y-3 mb-8">
                   {pkg.features.map((feature) => (
@@ -255,11 +239,9 @@ export default function BlueLagoonExperiencePage() {
                   ))}
                 </ul>
                 <Link
-                  href={`/booking?type=BLUE_LAGOON&package=${pkg.name === 'One-Way Transfer' ? 'oneway' :
-                    pkg.name === 'Round Trip Transfer' ? 'roundtrip' : 'combo'
-                    }`}
+                  href="/booking?type=BLUE_LAGOON"
                   className={`block text-center py-3 rounded-xl font-bold transition-colors ${pkg.popular
-                    ? 'bg-primary text-black hover:bg-primary'
+                    ? 'bg-primary text-black hover:bg-yellow-400'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
                     }`}
                 >
