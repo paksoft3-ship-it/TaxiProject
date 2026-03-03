@@ -1,14 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Settings,
   Building2,
   CreditCard,
   Bell,
   Mail,
   Globe,
-  Shield,
   Palette,
   Save,
   Check,
@@ -18,70 +16,90 @@ import {
   Clock,
   Banknote,
   Percent,
-  Users,
   Car,
-  HelpCircle,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 type SettingsTab = 'general' | 'pricing' | 'notifications' | 'appearance';
+
+interface Settings {
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  contactPhone: string;
+  address: string;
+  timezone: string;
+  currency: string;
+  bookingEmailNotifications: boolean;
+  autoConfirmBookings: boolean;
+  airportTransferPrice: number;
+  blueLagoonTransferPrice: number;
+  kefBlueLagoonPrice: number;
+  cruisePortPrice: number;
+  cityTourBasePrice: number;
+  [key: string]: any;
+}
+
+const defaultSettings: Settings = {
+  siteName: 'PrimeTaxi & Tours',
+  siteDescription: 'Premium taxi and tour services in Iceland',
+  contactEmail: 'info@primetaxi.is',
+  contactPhone: '+354 555 1234',
+  address: 'Reykjavik, Iceland',
+  timezone: 'Atlantic/Reykjavik',
+  currency: 'ISK',
+  bookingEmailNotifications: true,
+  autoConfirmBookings: false,
+  airportTransferPrice: 20000,
+  blueLagoonTransferPrice: 20000,
+  kefBlueLagoonPrice: 15000,
+  cruisePortPrice: 25000,
+  cityTourBasePrice: 10500,
+};
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
 
-  // Form state
-  const [generalSettings, setGeneralSettings] = useState({
-    companyName: 'PrimeTaxi & Tours',
-    email: 'info@primetaxi.is',
-    phone: '+354 555 0000',
-    address: 'Laugavegur 1, 101 Reykjavík, Iceland',
-    timezone: 'Atlantic/Reykjavik',
-    currency: 'ISK',
-    language: 'en',
-  });
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setSettings({ ...defaultSettings, ...data.settings });
+      } catch {
+        toast.error('Failed to load settings');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
-  const [pricingSettings, setPricingSettings] = useState({
-    baseTaxiFare: 2500,
-    perKmRate: 350,
-    waitingPerMinute: 100,
-    airportSurcharge: 1500,
-    nightSurcharge: 20,
-    weekendSurcharge: 15,
-    minBookingAmount: 3000,
-    cancellationFee: 5000,
-    tourDepositPercent: 30,
-  });
-
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNewBooking: true,
-    emailBookingConfirmed: true,
-    emailBookingCancelled: true,
-    emailPaymentReceived: true,
-    smsNewBooking: false,
-    smsDriverAssigned: true,
-    pushNewBooking: true,
-    pushDriverNearby: true,
-    dailySummary: true,
-    weeklySummary: true,
-  });
-
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    theme: 'system',
-    primaryColor: '#f2cc0d',
-    accentColor: '#1e293b',
-    compactMode: false,
-    showDriverPhotos: true,
-  });
-
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaveStatus('saving');
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      });
+      if (!res.ok) throw new Error('Save failed');
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
-    }, 1000);
+      toast.success('Settings saved successfully');
+    } catch {
+      setSaveStatus('idle');
+      toast.error('Failed to save settings');
+    }
   };
+
+  const set = (key: string, value: any) => setSettings((prev) => ({ ...prev, [key]: value }));
 
   const tabs = [
     { id: 'general' as const, label: 'General', icon: Building2 },
@@ -90,9 +108,16 @@ export default function SettingsPage() {
     { id: 'appearance' as const, label: 'Appearance', icon: Palette },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-8">
-      {/* Page Heading */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -131,9 +156,7 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      {/* Settings Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar Navigation */}
         <nav className="lg:w-64 flex lg:flex-col gap-2">
           {tabs.map((tab) => (
             <button
@@ -153,7 +176,6 @@ export default function SettingsPage() {
           ))}
         </nav>
 
-        {/* Settings Content */}
         <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           {/* General Settings */}
           {activeTab === 'general' && (
@@ -171,8 +193,8 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    value={generalSettings.companyName}
-                    onChange={(e) => setGeneralSettings({ ...generalSettings, companyName: e.target.value })}
+                    value={settings.siteName}
+                    onChange={(e) => set('siteName', e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 </div>
@@ -185,8 +207,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="email"
-                      value={generalSettings.email}
-                      onChange={(e) => setGeneralSettings({ ...generalSettings, email: e.target.value })}
+                      value={settings.contactEmail}
+                      onChange={(e) => set('contactEmail', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                     />
                   </div>
@@ -197,8 +219,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="tel"
-                      value={generalSettings.phone}
-                      onChange={(e) => setGeneralSettings({ ...generalSettings, phone: e.target.value })}
+                      value={settings.contactPhone}
+                      onChange={(e) => set('contactPhone', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                     />
                   </div>
@@ -211,21 +233,21 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    value={generalSettings.address}
-                    onChange={(e) => setGeneralSettings({ ...generalSettings, address: e.target.value })}
+                    value={settings.address}
+                    onChange={(e) => set('address', e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       <Clock className="size-4 text-slate-400" />
                       Timezone
                     </label>
                     <select
-                      value={generalSettings.timezone}
-                      onChange={(e) => setGeneralSettings({ ...generalSettings, timezone: e.target.value })}
+                      value={settings.timezone}
+                      onChange={(e) => set('timezone', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                     >
                       <option value="Atlantic/Reykjavik">Iceland (GMT+0)</option>
@@ -239,30 +261,14 @@ export default function SettingsPage() {
                       Currency
                     </label>
                     <select
-                      value={generalSettings.currency}
-                      onChange={(e) => setGeneralSettings({ ...generalSettings, currency: e.target.value })}
+                      value={settings.currency}
+                      onChange={(e) => set('currency', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                     >
                       <option value="ISK">ISK - Icelandic Króna</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="USD">USD - US Dollar</option>
                       <option value="GBP">GBP - British Pound</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      <Globe className="size-4 text-slate-400" />
-                      Language
-                    </label>
-                    <select
-                      value={generalSettings.language}
-                      onChange={(e) => setGeneralSettings({ ...generalSettings, language: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                    >
-                      <option value="en">English</option>
-                      <option value="is">Íslenska</option>
-                      <option value="de">Deutsch</option>
-                      <option value="fr">Français</option>
                     </select>
                   </div>
                 </div>
@@ -274,146 +280,68 @@ export default function SettingsPage() {
           {activeTab === 'pricing' && (
             <div className="p-6 space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Pricing Configuration</h3>
-                <p className="text-sm text-slate-500">Set your taxi and tour pricing rates</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Fixed Route Prices</h3>
+                <p className="text-sm text-slate-500">Set transfer and tour base prices (ISK). Changes are reflected on the public pricing page.</p>
               </div>
 
-              {/* Taxi Pricing */}
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Car className="size-5" />
-                  Taxi Pricing (ISK)
+                  Transfer Prices (ISK)
                 </h4>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Base Fare</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.baseTaxiFare}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, baseTaxiFare: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[
+                    { key: 'airportTransferPrice', label: 'Airport Transfer (KEF ↔ Reykjavik)' },
+                    { key: 'blueLagoonTransferPrice', label: 'Blue Lagoon Transfer (Reykjavik ↔ Blue Lagoon)' },
+                    { key: 'kefBlueLagoonPrice', label: 'KEF ↔ Blue Lagoon Direct' },
+                    { key: 'cruisePortPrice', label: 'Cruise Port Transfer' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        {label}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={settings[key]}
+                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
+                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Per Kilometer</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.perKmRate}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, perKmRate: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Waiting (per min)</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.waitingPerMinute}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, waitingPerMinute: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Surcharges */}
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Percent className="size-5" />
-                  Surcharges
+                  Tour Base Prices (ISK)
                 </h4>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Airport Surcharge</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.airportSurcharge}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, airportSurcharge: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[
+                    { key: 'cityTourBasePrice', label: 'City Tour Base Price' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        {label}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={settings[key]}
+                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
+                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Night Surcharge (22:00-06:00)</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.nightSurcharge}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, nightSurcharge: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-8 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Weekend Surcharge</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.weekendSurcharge}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, weekendSurcharge: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-8 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-
-              {/* Booking Settings */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CreditCard className="size-5" />
-                  Booking & Payment
-                </h4>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Minimum Booking</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.minBookingAmount}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, minBookingAmount: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Cancellation Fee</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.cancellationFee}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, cancellationFee: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-12 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tour Deposit</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={pricingSettings.tourDepositPercent}
-                        onChange={(e) => setPricingSettings({ ...pricingSettings, tourDepositPercent: parseInt(e.target.value) })}
-                        className="w-full px-4 py-2.5 pr-8 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
+                  Note: Individual tour prices can be managed in the <strong>Tours</strong> section.
+                </p>
               </div>
             </div>
           )}
@@ -426,18 +354,15 @@ export default function SettingsPage() {
                 <p className="text-sm text-slate-500">Configure how you receive alerts and updates</p>
               </div>
 
-              {/* Email Notifications */}
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Mail className="size-5" />
-                  Email Notifications
+                  Booking Notifications
                 </h4>
                 <div className="space-y-4">
                   {[
-                    { key: 'emailNewBooking', label: 'New booking received', description: 'Get notified when a new booking is made' },
-                    { key: 'emailBookingConfirmed', label: 'Booking confirmed', description: 'Notification when booking is confirmed' },
-                    { key: 'emailBookingCancelled', label: 'Booking cancelled', description: 'Alert when a booking is cancelled' },
-                    { key: 'emailPaymentReceived', label: 'Payment received', description: 'Confirmation when payment is successful' },
+                    { key: 'bookingEmailNotifications', label: 'Email notifications for new bookings', description: 'Receive email when a new booking is made' },
+                    { key: 'autoConfirmBookings', label: 'Auto-confirm bookings', description: 'Automatically confirm bookings without manual review' },
                   ].map((item) => (
                     <label key={item.key} className="flex items-center justify-between cursor-pointer">
                       <div>
@@ -447,70 +372,8 @@ export default function SettingsPage() {
                       <div className="relative">
                         <input
                           type="checkbox"
-                          checked={notificationSettings[item.key as keyof typeof notificationSettings] as boolean}
-                          onChange={(e) => setNotificationSettings({ ...notificationSettings, [item.key]: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/50 transition-colors" />
-                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform" />
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* SMS Notifications */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Phone className="size-5" />
-                  SMS Notifications
-                </h4>
-                <div className="space-y-4">
-                  {[
-                    { key: 'smsNewBooking', label: 'New booking SMS', description: 'Receive SMS for new bookings' },
-                    { key: 'smsDriverAssigned', label: 'Driver assigned', description: 'SMS when driver is assigned to booking' },
-                  ].map((item) => (
-                    <label key={item.key} className="flex items-center justify-between cursor-pointer">
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-white">{item.label}</p>
-                        <p className="text-sm text-slate-500">{item.description}</p>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings[item.key as keyof typeof notificationSettings] as boolean}
-                          onChange={(e) => setNotificationSettings({ ...notificationSettings, [item.key]: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/50 transition-colors" />
-                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform" />
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Summary Reports */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Clock className="size-5" />
-                  Summary Reports
-                </h4>
-                <div className="space-y-4">
-                  {[
-                    { key: 'dailySummary', label: 'Daily summary', description: 'Receive daily activity summary at end of day' },
-                    { key: 'weeklySummary', label: 'Weekly summary', description: 'Receive weekly performance report' },
-                  ].map((item) => (
-                    <label key={item.key} className="flex items-center justify-between cursor-pointer">
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-white">{item.label}</p>
-                        <p className="text-sm text-slate-500">{item.description}</p>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings[item.key as keyof typeof notificationSettings] as boolean}
-                          onChange={(e) => setNotificationSettings({ ...notificationSettings, [item.key]: e.target.checked })}
+                          checked={!!settings[item.key]}
+                          onChange={(e) => set(item.key, e.target.checked)}
                           className="sr-only peer"
                         />
                         <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/50 transition-colors" />
@@ -530,98 +393,10 @@ export default function SettingsPage() {
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Appearance</h3>
                 <p className="text-sm text-slate-500">Customize the look and feel of your dashboard</p>
               </div>
-
-              {/* Theme */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Theme</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: 'light', label: 'Light', icon: '☀️' },
-                    { value: 'dark', label: 'Dark', icon: '🌙' },
-                    { value: 'system', label: 'System', icon: '💻' },
-                  ].map((theme) => (
-                    <button
-                      key={theme.value}
-                      onClick={() => setAppearanceSettings({ ...appearanceSettings, theme: theme.value })}
-                      className={cn(
-                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-                        appearanceSettings.theme === theme.value
-                          ? 'border-primary bg-primary/10'
-                          : 'border-slate-200 dark:border-slate-600 hover:border-slate-300'
-                      )}
-                    >
-                      <span className="text-2xl">{theme.icon}</span>
-                      <span className="text-sm font-medium text-slate-900 dark:text-white">{theme.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Brand Colors */}
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Brand Colors</h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Primary Color</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        value={appearanceSettings.primaryColor}
-                        onChange={(e) => setAppearanceSettings({ ...appearanceSettings, primaryColor: e.target.value })}
-                        className="w-12 h-12 rounded-lg border border-slate-200 cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={appearanceSettings.primaryColor}
-                        onChange={(e) => setAppearanceSettings({ ...appearanceSettings, primaryColor: e.target.value })}
-                        className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-mono focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Accent Color</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        value={appearanceSettings.accentColor}
-                        onChange={(e) => setAppearanceSettings({ ...appearanceSettings, accentColor: e.target.value })}
-                        className="w-12 h-12 rounded-lg border border-slate-200 cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={appearanceSettings.accentColor}
-                        onChange={(e) => setAppearanceSettings({ ...appearanceSettings, accentColor: e.target.value })}
-                        className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-mono focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Other Options */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-4">
-                <h4 className="font-semibold text-slate-900 dark:text-white">Display Options</h4>
-                {[
-                  { key: 'compactMode', label: 'Compact mode', description: 'Use smaller spacing and fonts' },
-                  { key: 'showDriverPhotos', label: 'Show driver photos', description: 'Display driver profile pictures in lists' },
-                ].map((item) => (
-                  <label key={item.key} className="flex items-center justify-between cursor-pointer">
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-white">{item.label}</p>
-                      <p className="text-sm text-slate-500">{item.description}</p>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={appearanceSettings[item.key as keyof typeof appearanceSettings] as boolean}
-                        onChange={(e) => setAppearanceSettings({ ...appearanceSettings, [item.key]: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/50 transition-colors" />
-                      <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform" />
-                    </div>
-                  </label>
-                ))}
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Appearance settings such as theme and brand colors are configured in the codebase (tailwind.config.js).
+                </p>
               </div>
             </div>
           )}

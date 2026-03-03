@@ -293,6 +293,99 @@ export async function sendPaymentConfirmation(booking: BookingEmailData): Promis
   });
 }
 
+// Generic send email utility
+export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+  });
+}
+
+// Password reset email
+export async function sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Password Reset</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: #facc15; margin: 0; font-size: 24px;">PrimeTaxi & Tours</h1>
+        <p style="color: #e2e8f0; margin: 10px 0 0 0;">Password Reset Request</p>
+      </div>
+      <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0;">
+        <p>You requested a password reset for your admin account. Click the button below to reset your password.</p>
+        <p>This link expires in <strong>1 hour</strong>. If you did not request a password reset, ignore this email.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="display: inline-block; background: #facc15; color: #1e293b; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+            Reset Password
+          </a>
+        </div>
+        <p style="color: #64748b; font-size: 13px;">Or copy this link: <a href="${resetUrl}" style="color: #3b82f6;">${resetUrl}</a></p>
+      </div>
+      <div style="background: #1e293b; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
+        <p style="color: #94a3b8; margin: 0; font-size: 12px;">PrimeTaxi & Tours | Reykjavik, Iceland</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: email,
+    subject: 'Password Reset - PrimeTaxi Admin',
+    html,
+  });
+}
+
+// Reply to a customer message
+export async function sendMessageReply(
+  to: string,
+  subject: string,
+  replyBody: string,
+  originalMessage: string
+): Promise<void> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: #facc15; margin: 0; font-size: 24px;">PrimeTaxi & Tours</h1>
+        <p style="color: #e2e8f0; margin: 10px 0 0 0;">Reply to your inquiry</p>
+      </div>
+      <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0;">
+        <div style="white-space: pre-wrap; font-size: 15px; color: #1e293b; margin-bottom: 30px;">${replyBody}</div>
+        <div style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">--- Original message ---</p>
+          <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 13px; color: #475569; white-space: pre-wrap;">${originalMessage}</div>
+        </div>
+        <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
+          Need further assistance? Contact us at <a href="mailto:info@primetaxi.is" style="color: #3b82f6;">info@primetaxi.is</a> or call +354 555 1234.
+        </p>
+      </div>
+      <div style="background: #1e293b; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
+        <p style="color: #94a3b8; margin: 0; font-size: 12px;">PrimeTaxi & Tours | Reykjavik, Iceland</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+  });
+}
+
 // Export a test function
 export async function testEmailConnection(): Promise<boolean> {
   try {

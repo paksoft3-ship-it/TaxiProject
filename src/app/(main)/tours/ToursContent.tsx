@@ -1,11 +1,24 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, Sparkles, SlidersHorizontal } from 'lucide-react';
 import { TourCard } from '@/components/TourCard';
 import { cn } from '@/lib/utils';
 
-import { tours } from '@/data/tours';
+interface Tour {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  duration: string;
+  price: number;
+  currency: string;
+  category: string;
+  highlights: string[];
+  images: string[];
+  featured: boolean;
+  active: boolean;
+}
 
 const filters = [
   { id: 'all', label: 'All Tours' },
@@ -23,14 +36,23 @@ const sortOptions = [
 ];
 
 export function ToursContent() {
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recommended');
 
+  useEffect(() => {
+    fetch('/api/tours')
+      .then((r) => r.json())
+      .then((data) => setTours(data.tours || []))
+      .catch(() => setTours([]))
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const filteredTours = useMemo(() => {
     let result = [...tours];
 
-    // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -41,7 +63,6 @@ export function ToursContent() {
       );
     }
 
-    // Apply category filter
     if (activeFilter !== 'all') {
       switch (activeFilter) {
         case 'full-day':
@@ -51,15 +72,17 @@ export function ToursContent() {
           result = result.filter((tour) => tour.category === 'HALF_DAY');
           break;
         case 'northern-lights':
-          result = result.filter((tour) => (tour as any).isNorthernLights);
+          result = result.filter((tour) =>
+            tour.name.toLowerCase().includes('northern') ||
+            tour.highlights.some((h) => h.toLowerCase().includes('aurora') || h.toLowerCase().includes('northern'))
+          );
           break;
         case 'airport':
-          result = result.filter((tour) => tour.category === 'TRANSFER' || (tour as any).isAirport);
+          result = result.filter((tour) => tour.category === 'TRANSFER');
           break;
       }
     }
 
-    // Apply sorting
     switch (sortBy) {
       case 'price-low':
         result.sort((a, b) => a.price - b.price);
@@ -77,12 +100,13 @@ export function ToursContent() {
         });
         break;
       default:
-        // recommended - keep original order
+        // recommended: featured first
+        result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
         break;
     }
 
     return result;
-  }, [searchQuery, activeFilter, sortBy]);
+  }, [tours, searchQuery, activeFilter, sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,10 +198,14 @@ export function ToursContent() {
         <div className="flex justify-between items-end mb-8">
           <div>
             <h3 className="text-secondary dark:text-white text-2xl font-bold mb-1">
-              {searchQuery ? `Search Results` : activeFilter === 'all' ? 'Most Popular Tours' : filters.find(f => f.id === activeFilter)?.label}
+              {searchQuery
+                ? 'Search Results'
+                : activeFilter === 'all'
+                ? 'Most Popular Tours'
+                : filters.find((f) => f.id === activeFilter)?.label}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {filteredTours.length} {filteredTours.length === 1 ? 'tour' : 'tours'} found
+              {isLoading ? 'Loading...' : `${filteredTours.length} ${filteredTours.length === 1 ? 'tour' : 'tours'} found`}
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-secondary dark:text-slate-300">
@@ -196,10 +224,28 @@ export function ToursContent() {
           </div>
         </div>
 
-        {filteredTours.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="rounded-2xl bg-slate-200 dark:bg-slate-700 animate-pulse h-80" />
+            ))}
+          </div>
+        ) : filteredTours.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredTours.map((tour) => (
-              <TourCard key={tour.id} {...tour} />
+              <TourCard
+                key={tour.id}
+                id={tour.id}
+                name={tour.name}
+                slug={tour.slug}
+                category={tour.category as any}
+                duration={tour.duration}
+                shortDescription={tour.shortDescription}
+                price={tour.price}
+                currency={tour.currency}
+                image={tour.images?.[0] || ''}
+                highlights={tour.highlights}
+              />
             ))}
           </div>
         ) : (

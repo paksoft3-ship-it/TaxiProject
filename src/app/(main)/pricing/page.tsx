@@ -14,6 +14,9 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import prisma from '@/lib/db';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -21,60 +24,30 @@ export const metadata: Metadata = {
     'Transparent pricing for Iceland taxi services. City taxis, airport transfers, and private tours with no hidden fees.',
 };
 
-const pricingCards = [
-  {
-    id: 'transfer',
-    title: 'Private Transfers',
-    icon: CarTaxiFront,
-    priceLabel: 'Starting from',
-    price: '20,000 ISK',
-    priceSubtext: '',
-    priceNote: 'Reykjavik ↔ Blue Lagoon',
-    features: [
-      '24/7 Availability',
-      'Door-to-door Service',
-      'Modern Luxury Vehicles',
-      'English-speaking Drivers',
-    ],
-    buttonText: 'Book Transfer',
-    href: '/services/private-transfers',
-  },
-  {
-    id: 'airport',
-    title: 'Airport Transfer',
-    icon: Plane,
-    priceLabel: 'Fixed Rate',
-    price: '20,000 ISK',
-    priceSubtext: '',
-    priceNote: 'Keflavik (KEF) ↔ Reykjavik',
-    features: [
-      'Meet & Greet in Arrivals',
-      'Flight Monitoring (No delay fees)',
-      'Fixed Price Guarantee',
-      'All Luggage Included',
-    ],
-    buttonText: 'Book Transfer',
-    href: '/booking?type=AIRPORT_TRANSFER',
-    highlighted: true,
-  },
-  {
-    id: 'tour',
-    title: 'Sightseeing Tours',
-    icon: Mountain,
-    priceLabel: 'Starting from',
-    price: '10,500 ISK',
-    priceSubtext: '',
-    priceNote: 'Reykjavik City Tour (1-3 hrs)',
-    features: [
-      'Expert Local Guides',
-      'Golden Circle from 92,500 ISK',
-      'South Coast from 138,500 ISK',
-      'Glacier Lagoon from 204,500 ISK',
-    ],
-    buttonText: 'View Tours',
-    href: '/services/sightseeing-tours',
-  },
-];
+async function getPricing() {
+  const defaults = {
+    airportTransferPrice: 20000,
+    blueLagoonTransferPrice: 20000,
+    cityTourBasePrice: 10500,
+  };
+  try {
+    const keys = Object.keys(defaults);
+    const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
+    const result = { ...defaults };
+    for (const s of settings) {
+      if (s.key in result) {
+        (result as any)[s.key] = parseFloat(s.value) || (defaults as any)[s.key];
+      }
+    }
+    return result;
+  } catch {
+    return defaults;
+  }
+}
+
+function formatISK(n: number) {
+  return `${n.toLocaleString('en-US')} ISK`;
+}
 
 const faqs = [
   {
@@ -107,7 +80,64 @@ const faqs = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const pricing = await getPricing();
+
+  const pricingCards = [
+    {
+      id: 'transfer',
+      title: 'Private Transfers',
+      icon: CarTaxiFront,
+      priceLabel: 'Starting from',
+      price: formatISK(pricing.blueLagoonTransferPrice),
+      priceSubtext: '',
+      priceNote: 'Reykjavik ↔ Blue Lagoon',
+      features: [
+        '24/7 Availability',
+        'Door-to-door Service',
+        'Modern Luxury Vehicles',
+        'English-speaking Drivers',
+      ],
+      buttonText: 'Book Transfer',
+      href: '/services/private-transfers',
+    },
+    {
+      id: 'airport',
+      title: 'Airport Transfer',
+      icon: Plane,
+      priceLabel: 'Fixed Rate',
+      price: formatISK(pricing.airportTransferPrice),
+      priceSubtext: '',
+      priceNote: 'Keflavik (KEF) ↔ Reykjavik',
+      features: [
+        'Meet & Greet in Arrivals',
+        'Flight Monitoring (No delay fees)',
+        'Fixed Price Guarantee',
+        'All Luggage Included',
+      ],
+      buttonText: 'Book Transfer',
+      href: '/booking?type=AIRPORT_TRANSFER',
+      highlighted: true,
+    },
+    {
+      id: 'tour',
+      title: 'Sightseeing Tours',
+      icon: Mountain,
+      priceLabel: 'Starting from',
+      price: formatISK(pricing.cityTourBasePrice),
+      priceSubtext: '',
+      priceNote: 'Reykjavik City Tour (1-3 hrs)',
+      features: [
+        'Expert Local Guides',
+        'Golden Circle from 92,500 ISK',
+        'South Coast from 138,500 ISK',
+        'Glacier Lagoon from 204,500 ISK',
+      ],
+      buttonText: 'View Tours',
+      href: '/services/sightseeing-tours',
+    },
+  ];
+
   return (
     <>
       {/* Hero Section */}

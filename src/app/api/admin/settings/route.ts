@@ -6,13 +6,10 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-// Settings are stored in a simple key-value format
-// For a production app, you might want a dedicated Settings model in Prisma
-
 const settingsSchema = z.object({
   siteName: z.string().optional(),
   siteDescription: z.string().optional(),
-  contactEmail: z.string().email().optional(),
+  contactEmail: z.string().optional(),
   contactPhone: z.string().optional(),
   address: z.string().optional(),
   googleAnalyticsId: z.string().optional(),
@@ -20,23 +17,25 @@ const settingsSchema = z.object({
   facebookPixelId: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  ogImage: z.string().url().optional(),
+  ogImage: z.string().optional(),
   twitterHandle: z.string().optional(),
-  facebookUrl: z.string().url().optional(),
-  instagramUrl: z.string().url().optional(),
-  tripAdvisorUrl: z.string().url().optional(),
+  facebookUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  tripAdvisorUrl: z.string().optional(),
   stripePublishableKey: z.string().optional(),
   currency: z.enum(['ISK', 'EUR', 'USD']).optional(),
   timezone: z.string().optional(),
   bookingEmailNotifications: z.boolean().optional(),
   autoConfirmBookings: z.boolean().optional(),
+  // Pricing fields
+  airportTransferPrice: z.number().optional(),
+  blueLagoonTransferPrice: z.number().optional(),
+  kefBlueLagoonPrice: z.number().optional(),
+  cruisePortPrice: z.number().optional(),
+  cityTourBasePrice: z.number().optional(),
 });
 
-// In-memory settings cache (in production, use Redis or database)
-let settingsCache: Record<string, any> | null = null;
-
-// Default settings
-const defaultSettings = {
+const defaultSettings: Record<string, string> = {
   siteName: 'PrimeTaxi & Tours',
   siteDescription: 'Premium taxi and tour services in Iceland',
   contactEmail: 'info@primetaxi.is',
@@ -46,7 +45,8 @@ const defaultSettings = {
   googleTagManagerId: '',
   facebookPixelId: '',
   metaTitle: 'PrimeTaxi & Tours - Premium Private Tours & Transfers',
-  metaDescription: 'Experience Iceland with our premium private tours and airport transfers. Golden Circle, Northern Lights, South Coast and more.',
+  metaDescription:
+    'Experience Iceland with our premium private tours and airport transfers. Golden Circle, Northern Lights, South Coast and more.',
   ogImage: '/og-image.jpg',
   twitterHandle: '@primetaxi',
   facebookUrl: 'https://facebook.com/primetaxi',
@@ -55,29 +55,56 @@ const defaultSettings = {
   stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
   currency: 'ISK',
   timezone: 'Atlantic/Reykjavik',
-  bookingEmailNotifications: true,
-  autoConfirmBookings: false,
+  bookingEmailNotifications: 'true',
+  autoConfirmBookings: 'false',
+  airportTransferPrice: '20000',
+  blueLagoonTransferPrice: '20000',
+  kefBlueLagoonPrice: '15000',
+  cruisePortPrice: '25000',
+  cityTourBasePrice: '10500',
 };
+
+function parseValue(key: string, value: string): any {
+  if (key === 'bookingEmailNotifications' || key === 'autoConfirmBookings') {
+    return value === 'true';
+  }
+  if (
+    key === 'airportTransferPrice' ||
+    key === 'blueLagoonTransferPrice' ||
+    key === 'kefBlueLagoonPrice' ||
+    key === 'cruisePortPrice' ||
+    key === 'cityTourBasePrice'
+  ) {
+    return parseFloat(value) || 0;
+  }
+  return value;
+}
 
 // GET - Get all settings
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Return cached settings or defaults
-    const settings = settingsCache || defaultSettings;
+    const dbSettings = await prisma.setting.findMany();
+    const dbMap: Record<string, string> = {};
+    for (const s of dbSettings) {
+      dbMap[s.key] = s.value;
+    }
+
+    // Merge defaults with DB values
+    const settings: Record<string, any> = {};
+    for (const key of Object.keys(defaultSettings)) {
+      const raw = dbMap[key] ?? defaultSettings[key];
+      settings[key] = parseValue(key, raw);
+    }
 
     return NextResponse.json({ settings });
   } catch (error) {
     console.error('Settings GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }
 
@@ -85,7 +112,6 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -93,34 +119,38 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validatedData = settingsSchema.parse(body);
 
-    // Merge with existing settings
-    const currentSettings = settingsCache || defaultSettings;
-    const newSettings = {
-      ...currentSettings,
-      ...validatedData,
-    };
+    // Persist each key-value pair to DB
+    await Promise.all(
+      Object.entries(validatedData).map(([key, val]) => {
+        if (val === undefined) return Promise.resolve();
+        const value = String(val);
+        return prisma.setting.upsert({
+          where: { key },
+          create: { key, value },
+          update: { value },
+        });
+      })
+    );
 
-    // Update cache
-    settingsCache = newSettings;
+    // Return merged settings
+    const dbSettings = await prisma.setting.findMany();
+    const dbMap: Record<string, string> = {};
+    for (const s of dbSettings) {
+      dbMap[s.key] = s.value;
+    }
 
-    // In production, persist to database:
-    // await prisma.setting.upsert({ ... })
+    const settings: Record<string, any> = {};
+    for (const key of Object.keys(defaultSettings)) {
+      const raw = dbMap[key] ?? defaultSettings[key];
+      settings[key] = parseValue(key, raw);
+    }
 
-    return NextResponse.json({
-      message: 'Settings updated successfully',
-      settings: newSettings,
-    });
+    return NextResponse.json({ message: 'Settings updated successfully', settings });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 });
     }
     console.error('Settings PUT error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
   }
 }

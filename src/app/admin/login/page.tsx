@@ -114,7 +114,7 @@ export default function AdminLoginPage() {
                 <span className="text-sm text-slate-600">Remember me</span>
               </label>
               <a
-                href="#"
+                href="/admin/forgot-password"
                 className="text-sm text-primary hover:underline font-medium"
               >
                 Forgot password?

@@ -160,13 +160,35 @@ export default function AdminMessagesPage() {
     }
   };
 
-  // Send reply (opens email client)
-  const handleSendReply = () => {
-    if (!selectedMessage) return;
-    const mailtoUrl = `mailto:${selectedMessage.email}?subject=Re: ${encodeURIComponent(selectedMessage.subject)}&body=${encodeURIComponent(replyText)}`;
-    window.open(mailtoUrl, '_blank');
-    setReplyText('');
-    toast.success('Email client opened');
+  // Send reply via SMTP
+  const handleSendReply = async () => {
+    if (!selectedMessage || !replyText.trim()) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/messages/${selectedMessage.id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: `Re: ${selectedMessage.subject}`,
+          body: replyText,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send');
+      }
+
+      setReplyText('');
+      toast.success('Reply sent successfully');
+      // Mark as read in UI
+      setMessages(messages.map(m => m.id === selectedMessage.id ? { ...m, read: true } : m));
+      setSelectedMessage({ ...selectedMessage, read: true });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reply');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -395,11 +417,11 @@ export default function AdminMessagesPage() {
                   </a>
                   <button
                     onClick={handleSendReply}
-                    disabled={!replyText.trim()}
+                    disabled={!replyText.trim() || isSubmitting}
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Send className="size-4" />
-                    Send Reply
+                    {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                    {isSubmitting ? 'Sending...' : 'Send Reply'}
                   </button>
                 </div>
               </div>

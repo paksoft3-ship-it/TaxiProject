@@ -18,6 +18,7 @@ import {
   BarChart3,
   Menu,
   X,
+  Map,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Fleet', href: '/admin/fleet', icon: Car },
   { name: 'Drivers', href: '/admin/drivers', icon: Users },
+  { name: 'Tours', href: '/admin/tours', icon: Map },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
