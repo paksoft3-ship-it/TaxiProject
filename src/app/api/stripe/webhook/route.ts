@@ -78,14 +78,15 @@ export async function POST(request: NextRequest) {
           tourName: booking.tour?.name,
         };
 
-        // Send emails in parallel (don't await to not block webhook response)
+        // Send emails non-blocking — each fails independently so one bad address doesn't drop all emails
+        const sendSafely = (label: string, fn: Promise<void>) =>
+          fn.catch((err) => console.error(`Failed to send ${label} email:`, err));
+
         Promise.all([
-          sendBookingConfirmation(emailData),
-          sendPaymentConfirmation(emailData),
-          sendAdminBookingNotification(emailData),
-        ]).catch((error) => {
-          console.error('Failed to send booking emails:', error);
-        });
+          sendSafely('booking confirmation', sendBookingConfirmation(emailData)),
+          sendSafely('payment confirmation', sendPaymentConfirmation(emailData)),
+          sendSafely('admin notification', sendAdminBookingNotification(emailData)),
+        ]);
       }
 
       console.log(`Payment succeeded for PaymentIntent: ${paymentIntent.id}`);

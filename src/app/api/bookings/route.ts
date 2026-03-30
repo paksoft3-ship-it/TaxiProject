@@ -6,6 +6,8 @@ import { authOptions } from '@/lib/auth';
 import { bookingSchema } from '@/lib/validations';
 import { generateBookingNumber } from '@/lib/utils';
 import { createPaymentIntent } from '@/lib/stripe';
+import { sendBookingConfirmation, sendAdminBookingNotification } from '@/lib/email';
+import { rateLimit, getIp } from '@/lib/rateLimit';
 
 // GET /api/bookings - Get all bookings (admin only)
 export async function GET(request: NextRequest) {
@@ -61,6 +63,15 @@ export async function GET(request: NextRequest) {
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 bookings per IP per hour
+    const ip = getIp(request);
+    if (!rateLimit(`bookings:${ip}`, 10, 60 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validated = bookingSchema.parse(body);
 
@@ -224,6 +235,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // For TAXI bookings: send emails immediately (no Stripe webhook fires for metered rides)
+    if (validated.type === 'TAXI') {
+      const emailData = {
+        bookingNumber: booking.bookingNumber,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        type: booking.type,
+        pickupDate: booking.pickupDate,
+        pickupTime: booking.pickupTime,
+        pickupLocation: booking.pickupLocation,
+        dropoffLocation: booking.dropoffLocation || undefined,
+        passengers: booking.passengers,
+        totalPrice: booking.totalPrice,
+        currency: booking.currency,
+        specialRequests: booking.specialRequests || undefined,
+      };
+      Promise.all([
+        sendBookingConfirmation(emailData),
+        sendAdminBookingNotification(emailData),
+      ]).catch((err) => console.error('Failed to send TAXI booking emails:', err));
+    }
+
     return NextResponse.json({
       booking,
       clientSecret: paymentIntent?.client_secret,
@@ -231,7 +265,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed' },
         { status: 400 }
       );
     }

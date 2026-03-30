@@ -5,13 +5,22 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_
   typescript: true,
 });
 
+// Currencies that have no subunit — amounts are passed as-is to Stripe
+const ZERO_DECIMAL_CURRENCIES = new Set(['isk', 'jpy', 'krw', 'vnd', 'bif', 'clp', 'gnf', 'mga', 'pyg', 'rwf', 'ugx', 'xaf', 'xof']);
+
+function toStripeAmount(amount: number, currency: string): number {
+  return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase())
+    ? Math.round(amount)
+    : Math.round(amount * 100);
+}
+
 export async function createPaymentIntent(
   amount: number,
   currency: string = 'isk',
   metadata?: Record<string, string>
 ) {
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(amount * 100), // Convert to smallest currency unit
+    amount: toStripeAmount(amount, currency),
     currency: currency.toLowerCase(),
     automatic_payment_methods: {
       enabled: true,
@@ -34,11 +43,12 @@ export async function cancelPaymentIntent(paymentIntentId: string) {
 
 export async function createRefund(
   paymentIntentId: string,
-  amount?: number
+  amount?: number,
+  currency: string = 'isk'
 ) {
   const refund = await stripe.refunds.create({
     payment_intent: paymentIntentId,
-    amount: amount ? Math.round(amount * 100) : undefined,
+    amount: amount ? toStripeAmount(amount, currency) : undefined,
   });
 
   return refund;

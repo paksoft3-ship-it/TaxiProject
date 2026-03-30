@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { rateLimit, getIp } from '@/lib/rateLimit';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 requests per IP per 15 minutes
+  const ip = getIp(request);
+  if (!rateLimit(`forgot-password:${ip}`, 5, 15 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { email } = await request.json();
 
@@ -35,7 +45,12 @@ export async function POST(request: NextRequest) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       const resetUrl = `${appUrl}/admin/reset-password?token=${token}`;
 
-      await sendPasswordResetEmail(email.toLowerCase(), resetUrl);
+      try {
+        await sendPasswordResetEmail(email.toLowerCase(), resetUrl);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+        // Don't fail the request — token is saved, user can retry
+      }
     }
 
     return NextResponse.json({

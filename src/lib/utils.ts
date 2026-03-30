@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { randomBytes } from 'crypto';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -40,7 +41,7 @@ export function formatTime(time: string): string {
 export function generateBookingNumber(): string {
   const prefix = 'ICE';
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+  const random = randomBytes(4).toString('hex').toUpperCase(); // 8 hex chars = 4 billion combinations
   return `${prefix}-${timestamp}-${random}`;
 }
 

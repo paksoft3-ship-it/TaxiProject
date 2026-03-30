@@ -119,16 +119,14 @@ function PaymentContent() {
       return;
     }
 
-    // Fallback: create a new payment intent if no secret is available
-    if (bookingAmount) {
-      fetch('/api/stripe/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parseInt(bookingAmount), currency: 'isk' }),
-      })
+    // Fallback: recover existing client secret using the booking ID
+    // (handles tab close/refresh where sessionStorage is cleared)
+    if (booking) {
+      fetch(`/api/bookings/${booking}/client-secret`)
         .then((res) => res.json())
         .then((data) => {
           if (data.clientSecret) setClientSecret(data.clientSecret);
+          else console.error('Could not recover client secret:', data.error);
         })
         .catch(console.error);
     }
