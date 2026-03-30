@@ -22,9 +22,9 @@ import {
 import { cn } from '@/lib/utils';
 import { POPULAR_LOCATIONS } from '@/lib/locations';
 import { BookingSummary } from './BookingSummary';
-import { useJsApiLoader, Autocomplete, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
+import { useJsApiLoader, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
 
-const libraries: ("places")[] = ["places"];
+const libraries: any[] = [];
 
 type BookingStep = 1 | 2 | 3 | 4 | 5;
 type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR' | 'BLUE_LAGOON';
@@ -122,8 +122,7 @@ export function BookingForm() {
   const [distanceKm, setDistanceKm] = useState<number>(0);
   const [durationStr, setDurationStr] = useState<string>('');
 
-  const [pickupAutocomplete, setPickupAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
-  const [dropoffAutocomplete, setDropoffAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
 
   const calculateRoute = async () => {
     if (!formData.pickupLocation || !formData.dropoffLocation) return;
@@ -462,44 +461,17 @@ export function BookingForm() {
                   <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
                   <div className="relative">
                     <Plane className="absolute left-3 top-3.5 text-primary size-5 z-10" />
-                    {isLoaded ? (
-                      <Autocomplete
-                        onLoad={(auto) => setPickupAutocomplete(auto)}
-                        onPlaceChanged={() => {
-                          if (pickupAutocomplete !== null) {
-                            const place = pickupAutocomplete.getPlace();
-                            updateFormData('pickupLocation', place.formatted_address || place.name || '');
-                            if (formData.dropoffLocation) {
-                              setTimeout(calculateRoute, 100);
-                            }
-                          }
-                        }}
-                      >
-                        <input
-                          type="text"
-                          value={formData.pickupLocation}
-                          onChange={(e) => updateFormData('pickupLocation', e.target.value)}
-                          onBlur={calculateRoute}
-                          placeholder="Enter airport, hotel, or address"
-                          className={cn(
-                            "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                            errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
-                          )}
-                        />
-                      </Autocomplete>
-                    ) : (
-                      <input
-                        type="text"
-                        value={formData.pickupLocation}
-                        onChange={(e) => updateFormData('pickupLocation', e.target.value)}
-                        placeholder="Loading maps..."
-                        disabled
-                        className={cn(
-                          "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                          errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
-                        )}
-                      />
-                    )}
+                    <input
+                      type="text"
+                      value={formData.pickupLocation}
+                      onChange={(e) => updateFormData('pickupLocation', e.target.value)}
+                      onBlur={calculateRoute}
+                      placeholder="Enter airport, hotel, or address"
+                      className={cn(
+                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                        errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
+                      )}
+                    />
                   </div>
                   {errors.pickupLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">
@@ -515,44 +487,17 @@ export function BookingForm() {
                   <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
                   <div className="relative">
                     <Flag className="absolute left-3 top-3.5 text-red-500 size-5 z-10" />
-                    {isLoaded ? (
-                      <Autocomplete
-                        onLoad={(auto) => setDropoffAutocomplete(auto)}
-                        onPlaceChanged={() => {
-                          if (dropoffAutocomplete !== null) {
-                            const place = dropoffAutocomplete.getPlace();
-                            updateFormData('dropoffLocation', place.formatted_address || place.name || '');
-                            if (formData.pickupLocation) {
-                              setTimeout(calculateRoute, 100);
-                            }
-                          }
-                        }}
-                      >
-                        <input
-                          type="text"
-                          value={formData.dropoffLocation}
-                          onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
-                          onBlur={calculateRoute}
-                          placeholder="Enter destination"
-                          className={cn(
-                            "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                            errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
-                          )}
-                        />
-                      </Autocomplete>
-                    ) : (
-                      <input
-                        type="text"
-                        value={formData.dropoffLocation}
-                        onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
-                        placeholder="Loading maps..."
-                        disabled
-                        className={cn(
-                          "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                          errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
-                        )}
-                      />
-                    )}
+                    <input
+                      type="text"
+                      value={formData.dropoffLocation}
+                      onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
+                      onBlur={calculateRoute}
+                      placeholder="Enter destination"
+                      className={cn(
+                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                        errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
+                      )}
+                    />
                   </div>
                   {errors.dropoffLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">

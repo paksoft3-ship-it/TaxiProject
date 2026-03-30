@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Flag, Calendar, CarTaxiFront, Mountain, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackBookingStarted } from '@/lib/analytics';
-import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
-
-const libraries: ("places")[] = ["places"];
 
 type BookingType = 'taxi' | 'tour';
 
@@ -18,16 +15,6 @@ export function BookingWidget() {
   const [dropoff, setDropoff] = useState('');
   const [date, setDate] = useState('');
   const [minDate, setMinDate] = useState('');
-
-  // Google Maps State
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries,
-  });
-
-  const [pickupAutocomplete, setPickupAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
-  const [dropoffAutocomplete, setDropoffAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
     // Generate accurate local date strictly on the client to avoid SSR/Caching bugs
@@ -41,24 +28,6 @@ export function BookingWidget() {
       setDate(localISOTime);
     }
   }, []);
-
-  const onPickupPlaceChanged = () => {
-    if (pickupAutocomplete !== null) {
-      const place = pickupAutocomplete.getPlace();
-      if (place.formatted_address) {
-        setPickup(place.formatted_address);
-      }
-    }
-  };
-
-  const onDropoffPlaceChanged = () => {
-    if (dropoffAutocomplete !== null) {
-      const place = dropoffAutocomplete.getPlace();
-      if (place.formatted_address) {
-        setDropoff(place.formatted_address);
-      }
-    }
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,30 +86,14 @@ export function BookingWidget() {
               </label>
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5 z-10 pointer-events-none" />
-                {isLoaded ? (
-                  <Autocomplete
-                    onLoad={(autocomplete) => setPickupAutocomplete(autocomplete)}
-                    onPlaceChanged={onPickupPlaceChanged}
-                  >
-                    <input
-                      type="text"
-                      value={pickup}
-                      onChange={(e) => setPickup(e.target.value)}
-                      placeholder="KEF Airport, Hotel, etc."
-                      className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                      required
-                    />
-                  </Autocomplete>
-                ) : (
-                  <input
-                    type="text"
-                    value={pickup}
-                    onChange={(e) => setPickup(e.target.value)}
-                    placeholder="KEF Airport, Hotel, etc."
-                    className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                    required
-                  />
-                )}
+                <input
+                  type="text"
+                  value={pickup}
+                  onChange={(e) => setPickup(e.target.value)}
+                  placeholder="KEF Airport, Hotel, etc."
+                  className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
+                  required
+                />
               </div>
             </div>
 
@@ -151,30 +104,14 @@ export function BookingWidget() {
               </label>
               <div className="relative">
                 <Flag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5 z-10 pointer-events-none" />
-                {isLoaded ? (
-                  <Autocomplete
-                    onLoad={(autocomplete) => setDropoffAutocomplete(autocomplete)}
-                    onPlaceChanged={onDropoffPlaceChanged}
-                  >
-                    <input
-                      type="text"
-                      value={dropoff}
-                      onChange={(e) => setDropoff(e.target.value)}
-                      placeholder={activeTab === 'tour' ? 'Golden Circle, South Coast...' : 'Enter destination'}
-                      className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                      required
-                    />
-                  </Autocomplete>
-                ) : (
-                  <input
-                    type="text"
-                    value={dropoff}
-                    onChange={(e) => setDropoff(e.target.value)}
-                    placeholder={activeTab === 'tour' ? 'Golden Circle, South Coast...' : 'Enter destination'}
-                    className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                    required
-                  />
-                )}
+                <input
+                  type="text"
+                  value={dropoff}
+                  onChange={(e) => setDropoff(e.target.value)}
+                  placeholder={activeTab === 'tour' ? 'Golden Circle, South Coast...' : 'Enter destination'}
+                  className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
+                  required
+                />
               </div>
             </div>
 
