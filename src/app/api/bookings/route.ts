@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import prisma from '@/lib/db';
+import { authOptions } from '@/lib/auth';
 import { bookingSchema } from '@/lib/validations';
 import { generateBookingNumber } from '@/lib/utils';
 import { createPaymentIntent } from '@/lib/stripe';
 
 // GET /api/bookings - Get all bookings (admin only)
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -58,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate price based on service type
     const basePrices: Record<string, number> = {
-      TAXI: 3500,
+      TAXI: 0,
       AIRPORT_TRANSFER: 20000,
       PRIVATE_TOUR: 45000,
       CUSTOM_TOUR: 60000,
@@ -128,7 +136,8 @@ export async function POST(request: NextRequest) {
     const details = [];
 
     // Map types for DB compatibility
-    let dbType: string = validated.type;
+    type DbBookingType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR';
+    let dbType: DbBookingType = validated.type as DbBookingType;
     if (validated.type === 'BLUE_LAGOON') {
       dbType = 'AIRPORT_TRANSFER'; // Map to supported DB enum
       details.push('Service: Blue Lagoon Transfer');
@@ -152,17 +161,20 @@ export async function POST(request: NextRequest) {
       specialRequests = `${details.join(', ')}. ${specialRequests}`;
     }
 
-    // Create payment intent
-    const paymentIntent = await createPaymentIntent(totalPrice, 'isk', {
-      bookingType: validated.type, // Stripe can receive custom strings, or stick to dbType? Let's use validated.type for metadata
-      customerEmail: validated.customerEmail,
-    });
+    // Create payment intent only for non-taxi services
+    let paymentIntent = null;
+    if (validated.type !== 'TAXI') {
+      paymentIntent = await createPaymentIntent(totalPrice, 'isk', {
+        bookingType: validated.type,
+        customerEmail: validated.customerEmail,
+      });
+    }
 
     // Create booking
     const booking = await prisma.booking.create({
       data: {
         bookingNumber: generateBookingNumber(),
-        type: dbType as any, // Cast to any to bypass strict literal check if needed, or mapped type
+        type: dbType,
         customerName: validated.customerName,
         customerEmail: validated.customerEmail,
         customerPhone: validated.customerPhone,
@@ -175,7 +187,7 @@ export async function POST(request: NextRequest) {
         extras,
         totalPrice,
         currency: 'ISK',
-        paymentIntentId: paymentIntent.id,
+        paymentIntentId: paymentIntent?.id,
         tourId: validated.tourId,
         specialRequests: specialRequests, // Saved combined string
       },
@@ -183,9 +195,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       booking,
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: paymentIntent?.client_secret,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      );
+    }
     console.error('Error creating booking:', error);
     return NextResponse.json(
       { error: 'Failed to create booking' },

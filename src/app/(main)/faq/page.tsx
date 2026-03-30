@@ -146,7 +146,7 @@ const faqCategories = [
     questions: [
       {
         q: 'How can I contact you?',
-        a: 'You can reach us by phone (+354 555 1234), WhatsApp, email (info@primetaxi.is), or through the contact form on our website. We aim to respond to all inquiries within 2 hours during business hours.',
+        a: 'You can reach us by phone (+354 857 5955), WhatsApp, email (info@primetaxi.is), or through the contact form on our website. We aim to respond to all inquiries within 2 hours during business hours.',
       },
       {
         q: 'What are your operating hours?',
@@ -154,7 +154,7 @@ const faqCategories = [
       },
       {
         q: 'Do you have a customer service hotline?',
-        a: 'Yes, our customer service line (+354 555 1234) is available 24/7 for emergencies and booking inquiries. For non-urgent matters, email or WhatsApp usually gets the fastest response.',
+        a: 'Yes, our customer service line (+354 857 5955) is available 24/7 for emergencies and booking inquiries. For non-urgent matters, email or WhatsApp usually gets the fastest response.',
       },
     ],
   },
@@ -346,10 +346,10 @@ export default function FAQPage() {
               Contact Us
             </Link>
             <Link
-              href="tel:+3545551234"
+              href="tel:+3548575955"
               className="px-8 py-3 bg-white/30 text-black font-bold rounded-xl hover:bg-white/50 transition-colors"
             >
-              Call +354 555 1234
+              Call +354 857 5955
             </Link>
           </div>
         </div>

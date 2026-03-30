@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -22,6 +22,9 @@ import {
 import { cn } from '@/lib/utils';
 import { POPULAR_LOCATIONS } from '@/lib/locations';
 import { BookingSummary } from './BookingSummary';
+import { useJsApiLoader, Autocomplete, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
+
+const libraries: ("places")[] = ["places"];
 
 type BookingStep = 1 | 2 | 3 | 4 | 5;
 type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR' | 'BLUE_LAGOON';
@@ -93,6 +96,62 @@ export function BookingForm() {
   });
   const [additionalInfo, setAdditionalInfo] = useState('');
 
+  const [minDate, setMinDate] = useState<string>('');
+
+  useEffect(() => {
+    // Generate accurate local date strictly on the client to avoid SSR/Caching bugs
+    const today = new Date();
+    const offset = today.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(today.getTime() - offset).toISOString().split('T')[0];
+    setMinDate(localISOTime);
+
+    // If initial date is empty, or was set in the past (from cache or URL params), force it to today
+    if (!formData.date || formData.date < localISOTime) {
+      setFormData(prev => ({ ...prev, date: localISOTime }));
+    }
+  }, []);
+
+  // Google Maps State
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries,
+  });
+
+  const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
+  const [distanceKm, setDistanceKm] = useState<number>(0);
+  const [durationStr, setDurationStr] = useState<string>('');
+
+  const [pickupAutocomplete, setPickupAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const [dropoffAutocomplete, setDropoffAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+  const calculateRoute = async () => {
+    if (!formData.pickupLocation || !formData.dropoffLocation) return;
+    try {
+      // eslint-disable-next-line no-undef
+      const directionsService = new google.maps.DirectionsService();
+      const results = await directionsService.route({
+        origin: formData.pickupLocation,
+        destination: formData.dropoffLocation,
+        // eslint-disable-next-line no-undef
+        travelMode: google.maps.TravelMode.DRIVING,
+      });
+      setDirectionsResponse(results);
+      if (results.routes[0]?.legs[0]) {
+        const distVal = results.routes[0].legs[0].distance?.value || 0;
+        setDistanceKm(Math.round(distVal / 1000));
+        setDurationStr(results.routes[0].legs[0].duration?.text || '');
+      }
+    } catch (e) {
+      console.error('Error calculating route:', e);
+    }
+  };
+
+  // Recalculate route whenever locations change and map is loaded
+  // We use an effect to run it lazily whenever both are present
+  // but to avoid infinite loops, we trigger it only when explicit changes happen.
+  // We will call calculateRoute manually onPlaceChanged or blur.
+
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -111,10 +170,7 @@ export function BookingForm() {
     if (!formData.date) {
       newErrors.date = 'Please select a date';
     } else {
-      const selectedDate = new Date(formData.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
+      if (minDate && formData.date < minDate) {
         newErrors.date = 'Date cannot be in the past';
       }
     }
@@ -225,11 +281,20 @@ export function BookingForm() {
 
       const data = await response.json();
 
-      // Redirect to payment page with booking details
+      // Redirect to confirmation page if it is a metered taxi ride
+      if (serviceType === 'TAXI') {
+        router.push(`/booking/confirmation?booking=${data.booking.id}`);
+        return;
+      }
+
+      // Store clientSecret in sessionStorage rather than URL to avoid
+      // it appearing in browser history, server logs, and analytics tools.
+      sessionStorage.setItem('bookingClientSecret', data.clientSecret);
+
       const params = new URLSearchParams({
         booking: data.booking.id,
         amount: data.booking.totalPrice.toString(),
-        clientSecret: data.clientSecret,
+        type: serviceType,
       });
 
       router.push(`/booking/payment?${params.toString()}`);
@@ -326,7 +391,7 @@ export function BookingForm() {
                     type="date"
                     value={formData.date}
                     onChange={(e) => updateFormData('date', e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={minDate || new Date().toISOString().split('T')[0]}
                     className={cn(
                       "w-full rounded-lg bg-slate-50 p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
                       errors.date ? "border-red-500 border-2" : "border-slate-200"
@@ -396,18 +461,45 @@ export function BookingForm() {
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
                   <div className="relative">
-                    <Plane className="absolute left-3 top-3.5 text-primary size-5" />
-                    <input
-                      type="text"
-                      list="locations-list"
-                      value={formData.pickupLocation}
-                      onChange={(e) => updateFormData('pickupLocation', e.target.value)}
-                      placeholder="Enter airport, hotel, or address"
-                      className={cn(
-                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                        errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
-                      )}
-                    />
+                    <Plane className="absolute left-3 top-3.5 text-primary size-5 z-10" />
+                    {isLoaded ? (
+                      <Autocomplete
+                        onLoad={(auto) => setPickupAutocomplete(auto)}
+                        onPlaceChanged={() => {
+                          if (pickupAutocomplete !== null) {
+                            const place = pickupAutocomplete.getPlace();
+                            updateFormData('pickupLocation', place.formatted_address || place.name || '');
+                            if (formData.dropoffLocation) {
+                              setTimeout(calculateRoute, 100);
+                            }
+                          }
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.pickupLocation}
+                          onChange={(e) => updateFormData('pickupLocation', e.target.value)}
+                          onBlur={calculateRoute}
+                          placeholder="Enter airport, hotel, or address"
+                          className={cn(
+                            "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                            errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
+                          )}
+                        />
+                      </Autocomplete>
+                    ) : (
+                      <input
+                        type="text"
+                        value={formData.pickupLocation}
+                        onChange={(e) => updateFormData('pickupLocation', e.target.value)}
+                        placeholder="Loading maps..."
+                        disabled
+                        className={cn(
+                          "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                          errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
+                        )}
+                      />
+                    )}
                   </div>
                   {errors.pickupLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">
@@ -422,18 +514,45 @@ export function BookingForm() {
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
                   <div className="relative">
-                    <Flag className="absolute left-3 top-3.5 text-red-500 size-5" />
-                    <input
-                      type="text"
-                      list="locations-list"
-                      value={formData.dropoffLocation}
-                      onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
-                      placeholder="Enter destination"
-                      className={cn(
-                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                        errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
-                      )}
-                    />
+                    <Flag className="absolute left-3 top-3.5 text-red-500 size-5 z-10" />
+                    {isLoaded ? (
+                      <Autocomplete
+                        onLoad={(auto) => setDropoffAutocomplete(auto)}
+                        onPlaceChanged={() => {
+                          if (dropoffAutocomplete !== null) {
+                            const place = dropoffAutocomplete.getPlace();
+                            updateFormData('dropoffLocation', place.formatted_address || place.name || '');
+                            if (formData.pickupLocation) {
+                              setTimeout(calculateRoute, 100);
+                            }
+                          }
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.dropoffLocation}
+                          onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
+                          onBlur={calculateRoute}
+                          placeholder="Enter destination"
+                          className={cn(
+                            "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                            errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
+                          )}
+                        />
+                      </Autocomplete>
+                    ) : (
+                      <input
+                        type="text"
+                        value={formData.dropoffLocation}
+                        onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
+                        placeholder="Loading maps..."
+                        disabled
+                        className={cn(
+                          "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                          errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
+                        )}
+                      />
+                    )}
                   </div>
                   {errors.dropoffLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">
@@ -455,6 +574,7 @@ export function BookingForm() {
                             updateFormData('pickupLocation', place);
                           } else {
                             updateFormData('dropoffLocation', place);
+                            setTimeout(calculateRoute, 100);
                           }
                         }}
                         className={cn(
@@ -470,10 +590,23 @@ export function BookingForm() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl overflow-hidden bg-slate-100 relative h-64 md:h-auto border border-slate-200">
-                <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                  <MapPin className="size-12" />
-                </div>
+              <div className="rounded-xl overflow-hidden bg-slate-100 relative h-64 md:h-auto md:min-h-[400px] border border-slate-200">
+                {isLoaded ? (
+                  <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                    center={{ lat: 64.1466, lng: -21.9426 }} // Reykjavik center
+                    zoom={10}
+                    options={{ disableDefaultUI: true, zoomControl: true }}
+                  >
+                    {directionsResponse && (
+                      <DirectionsRenderer directions={directionsResponse} />
+                    )}
+                  </GoogleMap>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+                    <MapPin className="size-12 animate-pulse" />
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -782,6 +915,8 @@ export function BookingForm() {
           options={options}
           step={step}
           packageType={initialPackage || undefined}
+          realDistanceKm={distanceKm}
+          realDurationStr={durationStr}
         />
       </div>
     </div>

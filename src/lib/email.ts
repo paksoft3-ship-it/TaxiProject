@@ -118,7 +118,7 @@ export async function sendBookingConfirmation(booking: BookingEmailData): Promis
             </tr>
             <tr style="border-top: 1px solid #e2e8f0;">
               <td style="padding: 12px 0 8px; color: #64748b; font-size: 16px;">Total Amount:</td>
-              <td style="padding: 12px 0 8px; font-weight: bold; font-size: 18px; color: #16a34a;">${formatCurrency(booking.totalPrice, booking.currency)}</td>
+              <td style="padding: 12px 0 8px; font-weight: bold; font-size: 18px; color: #16a34a;">${booking.type === 'TAXI' ? 'Metered Rate' : formatCurrency(booking.totalPrice, booking.currency)}</td>
             </tr>
           </table>
         </div>
@@ -141,7 +141,7 @@ export async function sendBookingConfirmation(booking: BookingEmailData): Promis
 
         <p style="margin-top: 30px;">If you have any questions or need to modify your booking, please contact us:</p>
         <p style="margin: 5px 0;">
-          <strong>Phone:</strong> +354 555 1234<br>
+          <strong>Phone:</strong> +354 857 5955<br>
           <strong>Email:</strong> info@primetaxi.is
         </p>
 
@@ -208,7 +208,7 @@ export async function sendAdminBookingNotification(booking: BookingEmailData): P
           ` : ''}
 
           <div style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
-            <strong style="font-size: 18px; color: #16a34a;">${formatCurrency(booking.totalPrice, booking.currency)}</strong>
+            <strong style="font-size: 18px; color: #16a34a;">${booking.type === 'TAXI' ? 'Metered Rate' : formatCurrency(booking.totalPrice, booking.currency)}</strong>
           </div>
         </div>
 
@@ -368,7 +368,7 @@ export async function sendMessageReply(
           <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 13px; color: #475569; white-space: pre-wrap;">${originalMessage}</div>
         </div>
         <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-          Need further assistance? Contact us at <a href="mailto:info@primetaxi.is" style="color: #3b82f6;">info@primetaxi.is</a> or call +354 555 1234.
+          Need further assistance? Contact us at <a href="mailto:info@primetaxi.is" style="color: #3b82f6;">info@primetaxi.is</a> or call +354 857 5955.
         </p>
       </div>
       <div style="background: #1e293b; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">

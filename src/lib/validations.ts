@@ -8,7 +8,7 @@ export const bookingSchema = z.object({
   passengers: z.number().min(1).max(50),
   pickupLocation: z.string().min(3, 'Pickup location is required'),
   dropoffLocation: z.string().optional(),
-  pickupDate: z.string(),
+  pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   pickupTime: z.string(),
   tourId: z.string().optional(),
   flightNumber: z.string().optional(),

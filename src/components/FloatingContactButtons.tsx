@@ -27,12 +27,12 @@ const quickReplies = [
 ];
 
 const botResponses: Record<string, string> = {
-  'book a taxi': 'I can help you book a taxi! You can book online at /booking or call us at +354 555 1234 for immediate pickup.',
+  'book a taxi': 'I can help you book a taxi! You can book online at /booking or call us at +354 857 5955 for immediate pickup.',
   'airport transfer': 'Our airport transfers from Keflavík (KEF) to Reykjavik start at 20,000 ISK. We offer meet & greet service and flight monitoring. Would you like to book?',
   'tour information': 'We offer various private tours including Golden Circle (6h), Northern Lights hunting (4-5h), South Coast adventure (10h), and Blue Lagoon transfers. Check our /tours page for details!',
   'pricing': 'Our pricing:\n• Airport Transfer: from 20,000 ISK\n• KEF ↔ Blue Lagoon: from 10,500 ISK\n• Private Tours: from 10,500 ISK\nVisit /pricing for full details.',
-  'contact support': 'You can reach us:\n• Phone: +354 555 1234 (24/7)\n• Email: booking@primetaxi.is\n• WhatsApp: +354 555 1234\nOr fill out our contact form at /contact',
-  'default': 'Thanks for your message! For immediate assistance, please call us at +354 555 1234 or use our booking page. Our team will respond to your inquiry shortly.',
+  'contact support': 'You can reach us:\n• Phone: +354 857 5955 (24/7)\n• Email: booking@primetaxi.is\n• WhatsApp: +354 857 5955\nOr fill out our contact form at /contact',
+  'default': 'Thanks for your message! For immediate assistance, please call us at +354 857 5955 or use our booking page. Our team will respond to your inquiry shortly.',
 };
 
 export function FloatingContactButtons() {
@@ -134,7 +134,7 @@ export function FloatingContactButtons() {
 
           {/* WhatsApp Button */}
           <a
-            href="https://wa.me/3545551234?text=Hello!%20I%20would%20like%20to%20book%20a%20ride."
+            href="https://wa.me/3548575955?text=Hello!%20I%20would%20like%20to%20book%20a%20ride."
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 pl-4 pr-3 py-3 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-all"
@@ -147,7 +147,7 @@ export function FloatingContactButtons() {
 
           {/* Phone Button */}
           <a
-            href="tel:+3545551234"
+            href="tel:+3548575955"
             className="group flex items-center gap-3 pl-4 pr-3 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all"
           >
             <span className="text-sm font-medium">Call Now</span>
@@ -289,7 +289,7 @@ export function FloatingContactButtons() {
         <div className="flex items-center justify-around max-w-md mx-auto">
           {/* Call */}
           <a
-            href="tel:+3545551234"
+            href="tel:+3548575955"
             className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
           >
             <Phone className="size-6" />
@@ -298,7 +298,7 @@ export function FloatingContactButtons() {
 
           {/* WhatsApp */}
           <a
-            href="https://wa.me/3545551234"
+            href="https://wa.me/3548575955"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"

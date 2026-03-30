@@ -46,10 +46,10 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-bold text-slate-900 dark:text-white">Phone</h3>
                     <a
-                      href="tel:+3545551234"
+                      href="tel:+3548575955"
                       className="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
                     >
-                      +354 555 1234
+                      +354 857 5955
                     </a>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function ContactPage() {
                 </label>
                 <input
                   type="tel"
-                  placeholder="+354 555 1234"
+                  placeholder="+354 857 5955"
                   className="w-full rounded-lg border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 p-3 text-slate-900 dark:text-white focus:border-primary focus:ring-primary"
                 />
               </div>

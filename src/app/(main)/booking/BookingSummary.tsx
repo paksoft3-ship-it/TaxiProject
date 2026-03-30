@@ -25,6 +25,8 @@ interface BookingSummaryProps {
   };
   step: number;
   packageType?: string;
+  realDistanceKm?: number;
+  realDurationStr?: string;
 }
 
 const serviceLabels: Record<string, string> = {
@@ -81,9 +83,11 @@ const passengerFees = {
   largeGroup: 5000, // Group of 6+
 };
 
-export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType }: BookingSummaryProps) {
+export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '' }: BookingSummaryProps) {
   // Calculate estimated distance based on locations
   const estimatedDistance = useMemo(() => {
+    if (realDistanceKm > 0) return realDistanceKm;
+
     const pickup = formData.pickupLocation.toLowerCase();
     const dropoff = formData.dropoffLocation.toLowerCase();
 
@@ -103,7 +107,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
       return routeDistances.default_airport;
     }
     return routeDistances.default_city;
-  }, [formData.pickupLocation, formData.dropoffLocation, serviceType]);
+  }, [formData.pickupLocation, formData.dropoffLocation, serviceType, realDistanceKm]);
 
   // Calculate time-based surcharge
   const timeSurcharge = useMemo(() => {
@@ -128,7 +132,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
 
     // Blue Lagoon Packages
     if (serviceType === 'BLUE_LAGOON') {
-      let amount = 19500;
+      let amount = 20000;
       let label = 'One-Way Transfer';
 
       if (packageType === 'roundtrip') {
@@ -179,11 +183,6 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
       }
     }
 
-    // Large group fee
-    if (formData.passengers >= 6 && serviceType !== 'AIRPORT_TRANSFER' && serviceType !== 'BLUE_LAGOON') {
-      breakdown.push({ label: 'Large group surcharge', amount: passengerFees.largeGroup, type: 'add' });
-    }
-
     // Options & Extras
     if (options.premiumCar) {
       breakdown.push({ label: 'Premium Luxury Vehicle', amount: 5000, type: 'add' });
@@ -215,6 +214,8 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
 
   // Estimated duration
   const estimatedDuration = useMemo(() => {
+    if (realDurationStr) return realDurationStr;
+    
     if (serviceType === 'TAXI') {
       return `${Math.ceil(estimatedDistance / 40 * 60)} min`; // ~40 km/h avg
     }
@@ -225,7 +226,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
       return '4-6 hours';
     }
     return '6-8 hours';
-  }, [serviceType, estimatedDistance]);
+  }, [serviceType, estimatedDistance, realDurationStr]);
 
   return (
     <div className="sticky top-24">
@@ -353,46 +354,56 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
         </div>
 
         {/* Price Breakdown Section */}
-        <div className="bg-slate-800/80 p-6 border-t border-slate-700 backdrop-blur-sm">
-          {/* Price breakdown */}
-          <div className="space-y-2 mb-4">
-            {priceBreakdown.map((item, index) => (
-              <div key={index} className="flex justify-between text-sm">
-                <span className="text-slate-400">{item.label}</span>
-                <span className="text-slate-200 font-medium">{formatCurrency(item.amount)}</span>
-              </div>
-            ))}
-            {timeSurcharge && timeSurchargeAmount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-amber-400 flex items-center gap-1">
-                  <Sparkles className="size-3" />
-                  {timeSurcharge.label}
-                </span>
-                <span className="text-amber-400 font-medium">+{formatCurrency(timeSurchargeAmount)}</span>
-              </div>
-            )}
-          </div>
+        {serviceType !== 'TAXI' ? (
+          <div className="bg-slate-800/80 p-6 border-t border-slate-700 backdrop-blur-sm">
+            {/* Price breakdown */}
+            <div className="space-y-2 mb-4">
+              {priceBreakdown.map((item, index) => (
+                <div key={index} className="flex justify-between text-sm">
+                  <span className="text-slate-400">{item.label}</span>
+                  <span className="text-slate-200 font-medium">{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+              {timeSurcharge && timeSurchargeAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-amber-400 flex items-center gap-1">
+                    <Sparkles className="size-3" />
+                    {timeSurcharge.label}
+                  </span>
+                  <span className="text-amber-400 font-medium">+{formatCurrency(timeSurchargeAmount)}</span>
+                </div>
+              )}
+            </div>
 
-          {/* Divider */}
-          <div className="border-t border-slate-600 my-4" />
+            {/* Divider */}
+            <div className="border-t border-slate-600 my-4" />
 
-          {/* Total */}
-          <div className="flex justify-between items-end mb-1">
-            <p className="text-slate-400 text-sm font-medium">Estimated Total</p>
-            <p className="text-primary text-3xl font-extrabold tracking-tight transition-all duration-300">
-              {formatCurrency(totalPrice)}
-            </p>
-          </div>
-          <p className="text-right text-xs text-slate-500 mb-4">Final price may vary based on actual route</p>
+            {/* Total */}
+            <div className="flex justify-between items-end mb-1">
+              <p className="text-slate-400 text-sm font-medium">Estimated Total</p>
+              <p className="text-primary text-3xl font-extrabold tracking-tight transition-all duration-300">
+                {formatCurrency(totalPrice)}
+              </p>
+            </div>
+            <p className="text-right text-xs text-slate-500 mb-4">Final price may vary based on actual route</p>
 
-          {/* Info note */}
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-700/50 border border-slate-600">
-            <Info className="size-4 text-slate-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Price updates automatically based on your selections. Payment is processed securely via Stripe.
-            </p>
+            {/* Info note */}
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-700/50 border border-slate-600">
+              <Info className="size-4 text-slate-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Price updates automatically based on your selections. Payment is processed securely via Stripe.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-slate-800/80 p-6 border-t border-slate-700 backdrop-blur-sm flex flex-col items-center justify-center text-center">
+             <Car className="size-8 text-slate-400 mb-3" />
+             <p className="text-slate-200 font-bold text-lg">Metered Taxi Fare</p>
+             <p className="text-sm text-slate-400 mt-2">
+               City Taxi fares are metered. You will pay the driver directly at the end of your ride.
+             </p>
+          </div>
+        )}
       </div>
 
       {/* Help Box */}
@@ -404,10 +415,10 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
             Call our 24/7 support line if you have special requirements.
           </p>
           <a
-            href="tel:+3545551234"
+            href="tel:+3548575955"
             className="text-blue-600 dark:text-blue-400 font-bold text-sm mt-2 block hover:underline"
           >
-            +354 555 1234
+            +354 857 5955
           </a>
         </div>
       </div>

@@ -94,7 +94,7 @@ export function Header() {
           {/* CTA Button */}
           <div className="flex items-center gap-4">
             <Link
-              href="tel:+3545551234"
+              href="tel:+3548575955"
               className="hidden sm:flex items-center justify-center gap-2 h-10 px-6 bg-primary hover:bg-yellow-400 text-slate-900 text-sm font-bold rounded-lg transition-colors shadow-lg shadow-yellow-500/20"
             >
               <Phone className="size-4" />

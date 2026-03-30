@@ -126,11 +126,11 @@ export default async function KefBlueLagoonPage() {
                 <ArrowRight className="size-4" />
               </Link>
               <Link
-                href="tel:+3545551234"
+                href="tel:+3548575955"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors"
               >
                 <Phone className="size-4" />
-                +354 555 1234
+                +354 857 5955
               </Link>
             </div>
           </div>

@@ -82,7 +82,7 @@ function BookingConfirmationContent() {
           throw new Error('Failed to fetch booking');
         }
         const data = await response.json();
-        setBooking(data.booking);
+        setBooking(data);
       } catch (err) {
         setError('Could not load booking details');
       } finally {
@@ -153,7 +153,7 @@ function BookingConfirmationContent() {
               </div>
               <div className="text-right">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/30 text-slate-900">
-                  {booking.paymentStatus === 'PAID' ? 'Paid' : booking.paymentStatus}
+                  {booking.type === 'TAXI' ? 'Pay in Car' : (booking.paymentStatus === 'PAID' ? 'Paid' : booking.paymentStatus)}
                 </span>
               </div>
             </div>
@@ -252,10 +252,10 @@ function BookingConfirmationContent() {
             <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
-                  Total Paid
+                  {booking.type === 'TAXI' ? 'Fare' : 'Total Paid'}
                 </span>
                 <span className="text-2xl font-black text-green-600 dark:text-green-400">
-                  {formatCurrency(booking.totalPrice, booking.currency)}
+                  {booking.type === 'TAXI' ? 'Metered' : formatCurrency(booking.totalPrice, booking.currency)}
                 </span>
               </div>
             </div>
@@ -302,13 +302,13 @@ function BookingConfirmationContent() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <a
-              href="tel:+3545551234"
+              href="tel:+3548575955"
               className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
             >
               <Phone className="size-5 text-primary" />
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Call us</p>
-                <p className="font-medium text-slate-900 dark:text-white">+354 555 1234</p>
+                <p className="font-medium text-slate-900 dark:text-white">+354 857 5955</p>
               </div>
             </a>
             <a

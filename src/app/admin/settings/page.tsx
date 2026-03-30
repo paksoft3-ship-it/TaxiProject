@@ -46,7 +46,7 @@ const defaultSettings: Settings = {
   siteName: 'PrimeTaxi & Tours',
   siteDescription: 'Premium taxi and tour services in Iceland',
   contactEmail: 'info@primetaxi.is',
-  contactPhone: '+354 555 1234',
+  contactPhone: '+354 857 5955',
   address: 'Reykjavik, Iceland',
   timezone: 'Atlantic/Reykjavik',
   currency: 'ISK',

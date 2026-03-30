@@ -85,44 +85,54 @@ function CheckoutForm({ amount, bookingId }: { amount: number; bookingId: string
   );
 }
 
+const serviceLabels: Record<string, string> = {
+  TAXI: 'City Taxi',
+  AIRPORT_TRANSFER: 'Airport Transfer',
+  PRIVATE_TOUR: 'Private Tour',
+  CUSTOM_TOUR: 'Custom Tour',
+  BLUE_LAGOON: 'Blue Lagoon Transfer',
+};
+
 function PaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [amount, setAmount] = useState(19500);
+  const [amount, setAmount] = useState(0);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [serviceType, setServiceType] = useState('');
 
   useEffect(() => {
     // Get booking details from URL params
     const bookingAmount = searchParams.get('amount');
     const booking = searchParams.get('booking');
-    const secret = searchParams.get('clientSecret');
+    const type = searchParams.get('type');
 
-    if (bookingAmount) {
-      setAmount(parseInt(bookingAmount));
-    }
-    if (booking) {
-      setBookingId(booking);
-    }
-    if (secret) {
-      setClientSecret(secret);
+    if (bookingAmount) setAmount(parseInt(bookingAmount));
+    if (booking) setBookingId(booking);
+    if (type) setServiceType(type);
+
+    // Read clientSecret from sessionStorage (never from URL)
+    const storedSecret = sessionStorage.getItem('bookingClientSecret');
+    if (storedSecret) {
+      sessionStorage.removeItem('bookingClientSecret');
+      setClientSecret(storedSecret);
       return;
     }
 
-    // Create payment intent if no client secret provided
-    fetch('/api/stripe/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency: 'isk' }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        }
+    // Fallback: create a new payment intent if no secret is available
+    if (bookingAmount) {
+      fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parseInt(bookingAmount), currency: 'isk' }),
       })
-      .catch(console.error);
-  }, [amount, searchParams]);
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.clientSecret) setClientSecret(data.clientSecret);
+        })
+        .catch(console.error);
+    }
+  }, [searchParams]);
 
   return (
     <main className="py-10 px-4 max-w-4xl mx-auto">
@@ -173,12 +183,8 @@ function PaymentContent() {
 
           <div className="space-y-4 mb-6">
             <div className="flex justify-between">
-              <span className="text-slate-300">Airport Transfer</span>
-              <span>{formatCurrency(19500)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-300">Service Fee</span>
-              <span>{formatCurrency(0)}</span>
+              <span className="text-slate-300">{serviceLabels[serviceType] || 'Service'}</span>
+              <span>{formatCurrency(amount)}</span>
             </div>
             <div className="border-t border-slate-700 pt-4">
               <div className="flex justify-between text-lg font-bold">

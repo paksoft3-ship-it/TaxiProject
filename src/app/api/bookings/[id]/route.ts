@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
 import prisma from '@/lib/db';
+import { authOptions } from '@/lib/auth';
 
 // GET /api/bookings/[id] - Get a single booking
 export async function GET(
@@ -35,18 +37,29 @@ export async function GET(
   }
 }
 
-// PATCH /api/bookings/[id] - Update a booking
+// PATCH /api/bookings/[id] - Update a booking (admin only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
 
+    // Whitelist only the fields admins are permitted to update
+    const allowedFields = ['status', 'paymentStatus', 'paymentIntentId', 'driverId', 'vehicleId', 'specialRequests', 'notes'];
+    const safeData = Object.fromEntries(
+      Object.entries(body).filter(([key]) => allowedFields.includes(key))
+    );
+
     const booking = await prisma.booking.update({
       where: { id },
-      data: body,
+      data: safeData,
     });
 
     return NextResponse.json(booking);
@@ -59,11 +72,16 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/bookings/[id] - Delete a booking
+// DELETE /api/bookings/[id] - Delete a booking (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
 
