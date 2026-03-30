@@ -74,8 +74,8 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen w-full bg-background-light dark:bg-background-dark">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-sidebar-bg flex-col justify-between shrink-0 transition-all duration-300 sticky top-0 h-screen z-50">
-        <div className="flex flex-col gap-8 py-6 px-4">
+      <aside className="hidden lg:flex w-64 bg-sidebar-bg flex-col shrink-0 transition-all duration-300 sticky top-0 h-screen z-50">
+        <div className="py-6 px-4 shrink-0">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
             <Image
@@ -86,10 +86,11 @@ export default function AdminLayout({
               className="h-14 w-auto object-contain brightness-0 invert"
             />
           </Link>
+        </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-col gap-2">
-            {navigation.map((item) => {
+        {/* Navigation */}
+        <nav className="flex flex-col gap-2 flex-1 overflow-y-auto px-4 pb-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -115,10 +116,9 @@ export default function AdminLayout({
               );
             })}
           </nav>
-        </div>
 
         {/* User Profile Bottom */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 shrink-0">
           <div className="flex items-center gap-3 p-2 rounded-lg">
             <div
               className="size-9 rounded-full bg-cover bg-center shrink-0 border border-slate-700 bg-slate-600"
@@ -151,14 +151,13 @@ export default function AdminLayout({
       )}
 
       {/* Mobile Sidebar */}
-      {/* Mobile Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 w-72 bg-sidebar-bg flex flex-col justify-between z-50 transform transition-transform duration-300 ease-in-out lg:hidden',
+          'fixed inset-y-0 left-0 w-72 bg-sidebar-bg flex flex-col z-50 transform transition-transform duration-300 ease-in-out lg:hidden',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex flex-col gap-6 py-6 px-4">
+        <div className="flex items-center justify-between gap-6 py-6 px-4 shrink-0">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 px-2">
             <Image
@@ -178,7 +177,7 @@ export default function AdminLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col gap-1 px-4">
+        <nav className="flex flex-col gap-1 flex-1 overflow-y-auto px-4 pb-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (

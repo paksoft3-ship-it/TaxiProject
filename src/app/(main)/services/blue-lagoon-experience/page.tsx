@@ -59,6 +59,13 @@ const highlights = [
   'Free WiFi in all vehicles',
 ];
 
+const galleryImages = [
+  '/images/blue_lagoon.png',
+  '/images/gallery_bluelagoon_1.png',
+  '/images/gallery_bluelagoon_2.png',
+  '/images/south_coast.png'
+];
+
 export default async function BlueLagoonExperiencePage() {
   const packages = await prisma.transferRoute.findMany({
     where: { category: 'BLUE_LAGOON', active: true },
@@ -70,7 +77,7 @@ export default async function BlueLagoonExperiencePage() {
       <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPXvrb1aP9kpKx-HXmoSB6b-3abWjRApv-GTl4XbGpqtH071cxb1IJjdrtCxu170xPeyH72NQvSpcof3QAdzoEAF2F1poyoUxQGiwcSpkipgI6QyODOAjU-d_MH4TyO-ZZscbMoy5ZIHNF1KJQPCTS8H2Su8McBPDILWZlVEBtnCrCE4Vn3CfQ7k8QrUQeg9rqD0mWtqpoKw7MfZmas0T1bJhf4AIyf9_rt5UzmikNpDwZHKboFVOBlnBTyMNFhGFvKnMbdztl0JmW"
+            src="/images/blue_lagoon.png"
             alt="Blue Lagoon Iceland"
             fill
             className="object-cover opacity-30"
@@ -171,7 +178,7 @@ export default async function BlueLagoonExperiencePage() {
             </div>
             <div className="relative h-[400px] rounded-2xl overflow-hidden">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPXvrb1aP9kpKx-HXmoSB6b-3abWjRApv-GTl4XbGpqtH071cxb1IJjdrtCxu170xPeyH72NQvSpcof3QAdzoEAF2F1poyoUxQGiwcSpkipgI6QyODOAjU-d_MH4TyO-ZZscbMoy5ZIHNF1KJQPCTS8H2Su8McBPDILWZlVEBtnCrCE4Vn3CfQ7k8QrUQeg9rqD0mWtqpoKw7MfZmas0T1bJhf4AIyf9_rt5UzmikNpDwZHKboFVOBlnBTyMNFhGFvKnMbdztl0JmW"
+                src="/images/blue_lagoon.png"
                 alt="Blue Lagoon geothermal spa"
                 fill
                 className="object-cover"
@@ -263,11 +270,11 @@ export default async function BlueLagoonExperiencePage() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+            {galleryImages.map((src, i) => (
+              <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPXvrb1aP9kpKx-HXmoSB6b-3abWjRApv-GTl4XbGpqtH071cxb1IJjdrtCxu170xPeyH72NQvSpcof3QAdzoEAF2F1poyoUxQGiwcSpkipgI6QyODOAjU-d_MH4TyO-ZZscbMoy5ZIHNF1KJQPCTS8H2Su8McBPDILWZlVEBtnCrCE4Vn3CfQ7k8QrUQeg9rqD0mWtqpoKw7MfZmas0T1bJhf4AIyf9_rt5UzmikNpDwZHKboFVOBlnBTyMNFhGFvKnMbdztl0JmW"
-                  alt={`Blue Lagoon photo ${i}`}
+                  src={src}
+                  alt={`Blue Lagoon photo ${i + 1}`}
                   fill
                   className="object-cover hover:scale-110 transition-transform duration-500"
                 />

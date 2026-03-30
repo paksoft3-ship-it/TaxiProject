@@ -83,9 +83,17 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Map Placeholder */}
-            <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-64 flex items-center justify-center">
-              <MapPin className="size-12 text-slate-400" />
+            {/* Google Map */}
+            <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-80 overflow-hidden shadow-card">
+              <iframe
+                src="https://maps.google.com/maps?q=Borgartún%2025,%20105%20Reykjavík,%20Iceland&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
           </div>
 

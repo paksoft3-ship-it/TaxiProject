@@ -25,7 +25,7 @@ const tours = [
     shortDescription: 'Thingvellir, Geysir & Gullfoss',
     price: 92500,
     currency: 'ISK',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/golden_circle.png',
     badge: { text: 'Most Popular', type: 'popular' as const },
     highlights: ['Gullfoss Waterfall', 'Geysir Area', 'Thingvellir National Park'],
   },
@@ -38,7 +38,7 @@ const tours = [
     shortDescription: 'Hunt for the Aurora Borealis',
     price: 65000,
     currency: 'ISK',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCk0iDzJFS5IZBLpTWewxYw5leR1y4O_MbUU9RqbyLUXfcDTSHIl9UvOKrkFzRPhKW93Ymc7cqjsAKqXnhU9ANQYFVqes9U79cSo5651HXzfZui3bXewJwgDMmnM9waJ7KMi1FqJH4parVXHGn6TZX_OY8FMzQ6YPGc2Tt88nEHQAj_yacHyR3o-WfEsWvurjLI_bKTKYszNFsBGsDqCcKPb-F7CZVemjISx36raDWENU0D_3FG5_jDaJTKjjx1kvmldOsntIBJ5ys1',
+    image: '/images/northern_lights.png',
     highlights: ['Expert Aurora Tracking', 'Dark Sky Locations', 'Hot Chocolate & Blankets'],
   },
   {
@@ -50,7 +50,7 @@ const tours = [
     shortDescription: 'Relaxing Geothermal Spa',
     price: 20000,
     currency: 'ISK',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAPXvrb1aP9kpKx-HXmoSB6b-3abWjRApv-GTl4XbGpqtH071cxb1IJjdrtCxu170xPeyH72NQvSpcof3QAdzoEAF2F1poyoUxQGiwcSpkipgI6QyODOAjU-d_MH4TyO-ZZscbMoy5ZIHNF1KJQPCTS8H2Su8McBPDILWZlVEBtnCrCE4Vn3CfQ7k8QrUQeg9rqD0mWtqpoKw7MfZmas0T1bJhf4AIyf9_rt5UzmikNpDwZHKboFVOBlnBTyMNFhGFvKnMbdztl0JmW',
+    image: '/images/blue_lagoon.png',
     highlights: ['Door-to-door Service', 'Admission Assistance', 'Flexible Timing'],
   },
   {
@@ -62,7 +62,7 @@ const tours = [
     shortDescription: 'Waterfalls & Black Sand Beach',
     price: 138500,
     currency: 'ISK',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAy-wRBE2pi35c1rrz7yalG2SVTHDeKqIm24koyvSHUf3c5MjHQb_o211pgV1tEERgV8rpnyccSQ3vkF-0OVOIca3hQYca6fUmOAcMpbAIS46Ep_ZDTZ4CWPq6EMk88fvLx97o9j5YfW0NITT3Jan1CpNLzzc3C9W5GnfE2dJyiHbiPV8mkUsESSD6EAkFxrUA1OpS5Y5OxP9oDxhyWACV6RDKflGXOw7M5D0vP_tSN1Z4MCXE7hITji-lUCq2-kCjktwXvEPYwxogX',
+    image: '/images/south_coast.png',
     highlights: ['Seljalandsfoss Waterfall', 'Reynisfjara Beach', 'Vik Village'],
   },
 ];
@@ -75,7 +75,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqSHelj7tuPiGCpHEDjjUoN2Ya8U2VNeYvul3FZWALp27_job5h2-idvL1W5So0IfXMEUhBt7NcVke75hC7_qNG1b3TNh_xePzwFLcb4GJL1JJGmE2uO0XK4VzfB6L2SU7I_M88R4komC5LI0wJdHt_t0m9m05pVzPioz-HueN-cTOZ5hrjiXKOW9N4S4oZefwEq6Z73GcCETvh-vzFibMuJFUIM8FZF65MHm2s_tFmRcMfS8xiZ31aRjYGl60YJmgD51WoRf1HBpK"
+            src="/images/south_coast.png"
             alt="Scenic road through Icelandic mountains with moody sky"
             fill
             className="object-cover"
