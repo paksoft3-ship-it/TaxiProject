@@ -38,9 +38,9 @@ export function Header() {
             <Image
               src="/logo-v2.png"
               alt="PrimeTaxi & Tours"
-              width={90}
-              height={64}
-              className="h-16 w-auto object-contain"
+              width={120}
+              height={40}
+              className="h-10 w-auto object-contain"
               priority
             />
           </Link>
