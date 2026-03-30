@@ -45,10 +45,10 @@ export default async function BlogPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-secondary text-white py-16 lg:py-24">
+      <section className="bg-secondary text-white py-10 sm:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl font-black mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">
               Travel Blog & <span className="text-primary">Iceland Guide</span>
             </h1>
             <p className="text-lg text-slate-300">
@@ -194,7 +194,7 @@ export default async function BlogPage() {
       )}
 
       {/* Newsletter CTA */}
-      <section className="py-16 px-4 bg-primary">
+      <section className="py-10 sm:py-16 px-4 bg-primary">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-black text-black mb-4">
             Get Iceland Travel Tips in Your Inbox

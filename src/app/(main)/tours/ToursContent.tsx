@@ -124,7 +124,7 @@ export function ToursContent() {
         />
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-secondary/80 to-secondary/95" />
         <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col items-center text-center gap-6">
-          <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
             Explore Iceland <span className="text-primary">Privately</span>
           </h1>
           <p className="text-slate-200 text-base md:text-lg max-w-2xl font-light">

@@ -137,27 +137,27 @@ export default function ServicesPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-secondary text-white py-14 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-secondary via-slate-800 to-slate-900" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
+        <div className="absolute inset-0 opacity-10 overflow-hidden">
+          <div className="absolute top-10 -left-10 sm:top-20 sm:left-20 w-48 h-48 sm:w-72 sm:h-72 bg-primary rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -right-10 sm:bottom-20 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full blur-3xl" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-bold mb-6">
+            <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/20 text-primary rounded-full text-xs sm:text-sm font-bold mb-4 sm:mb-6">
               <Star className="size-4" />
               Premium Transportation Services
             </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 leading-tight">
               Your Journey, <br />
               <span className="text-primary">Our Expertise</span>
             </h1>
-            <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+            <p className="text-sm sm:text-lg text-slate-300 mb-6 sm:mb-8 leading-relaxed">
               From quick city rides to epic adventures across Iceland's stunning landscapes.
               Professional drivers, premium vehicles, and service that exceeds expectations.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Link
                 href="/booking"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
@@ -192,7 +192,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="section-title">Our Services</h2>
@@ -230,13 +230,13 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-8 lg:p-10 flex flex-col justify-center">
-                  <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                <div className="p-5 sm:p-8 lg:p-10 flex flex-col justify-center">
+                  <p className="text-slate-600 dark:text-slate-400 mb-5 sm:mb-6 leading-relaxed text-sm sm:text-base">
                     {service.description}
                   </p>
 
                   {/* Features */}
-                  <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-5 sm:mb-6">
                     {service.features.map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
                         <Check className="size-4 text-green-500 shrink-0" />
@@ -276,7 +276,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="section-title">Why Choose PrimeTaxi & Tours</h2>
@@ -321,9 +321,9 @@ export default function ServicesPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4 bg-primary">
+      <section className="py-12 sm:py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-4">
             Ready to Explore Iceland?
           </h2>
           <p className="text-slate-800 text-lg mb-8">

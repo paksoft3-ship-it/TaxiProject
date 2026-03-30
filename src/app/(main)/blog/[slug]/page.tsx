@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="relative h-[400px] lg:h-[500px]">
+      <section className="relative h-[280px] sm:h-[400px] lg:h-[500px]">
         {post.featuredImage ? (
           <Image src={post.featuredImage} alt={post.title} fill className="object-cover" priority />
         ) : (

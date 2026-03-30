@@ -149,15 +149,15 @@ export default function ReviewsPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-secondary text-white py-16 lg:py-24">
+      <section className="bg-secondary text-white py-10 sm:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center gap-1 mb-6">
+            <div className="inline-flex items-center justify-center gap-1 mb-4 sm:mb-6">
               {[1, 2, 3, 4, 5].map((star) => (
-                <Star key={star} className="size-8 text-primary fill-primary" />
+                <Star key={star} className="size-6 sm:size-8 text-primary fill-primary" />
               ))}
             </div>
-            <h1 className="text-4xl sm:text-5xl font-black mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">
               What Our <span className="text-primary">Customers Say</span>
             </h1>
             <p className="text-lg text-slate-300">
@@ -228,7 +228,7 @@ export default function ReviewsPage() {
       {/* Featured Review */}
       <section className="py-12 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl p-8 md:p-12 mb-12 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl p-5 sm:p-8 md:p-12 mb-8 sm:mb-12 relative overflow-hidden">
             <Quote className="absolute top-4 right-4 size-24 text-primary/20" />
             <div className="relative z-10">
               <div className="flex items-center gap-1 mb-4">

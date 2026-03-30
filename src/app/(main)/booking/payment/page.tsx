@@ -133,21 +133,21 @@ function PaymentContent() {
   }, [searchParams]);
 
   return (
-    <main className="py-10 px-4 max-w-4xl mx-auto">
+    <main className="py-6 sm:py-10 px-4 max-w-4xl mx-auto">
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-8"
+        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 sm:mb-8"
       >
         <ArrowLeft className="size-5" />
         Back to Booking
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Payment Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+        <div className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 border border-slate-100">
           <div className="flex items-center gap-3 mb-6">
             <CreditCard className="size-6 text-primary" />
-            <h1 className="text-2xl font-bold text-slate-900">Payment Details</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Payment Details</h1>
           </div>
 
           {clientSecret ? (

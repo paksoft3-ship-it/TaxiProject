@@ -74,7 +74,7 @@ export default async function BlueLagoonExperiencePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-secondary text-white py-14 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/images/blue_lagoon.png"
@@ -150,7 +150,7 @@ export default async function BlueLagoonExperiencePage() {
       </section>
 
       {/* About Section */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -189,9 +189,9 @@ export default async function BlueLagoonExperiencePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Why Book With Us</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               We make your Blue Lagoon experience seamless from start to finish
@@ -212,9 +212,9 @@ export default async function BlueLagoonExperiencePage() {
       </section>
 
       {/* Packages Section */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Transfer Packages</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Choose the package that best suits your needs
@@ -224,7 +224,7 @@ export default async function BlueLagoonExperiencePage() {
             {packages.map((pkg) => (
               <div
                 key={pkg.id}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-8 border-2 ${pkg.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
               >
                 {pkg.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -261,9 +261,9 @@ export default async function BlueLagoonExperiencePage() {
       </section>
 
       {/* Photo Gallery */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Gallery</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               A glimpse of what awaits you at the Blue Lagoon
@@ -285,7 +285,7 @@ export default async function BlueLagoonExperiencePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-primary">
+      <section className="py-12 sm:py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <Camera className="size-12 mx-auto mb-6 text-black/60" />
           <h2 className="text-3xl md:text-4xl font-black text-black mb-4">

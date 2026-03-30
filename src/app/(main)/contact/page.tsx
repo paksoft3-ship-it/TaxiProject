@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="py-20 px-4">
+    <div className="py-12 sm:py-20 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <h1 className="section-title">Get in Touch</h1>
           <p className="section-subtitle">
             Have questions? We're here to help 24/7. Reach out to us through any of
@@ -20,10 +20,10 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Contact Info */}
-          <div className="space-y-8">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-card">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-8 shadow-card">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
                 Contact Information
               </h2>
@@ -84,7 +84,7 @@ export default function ContactPage() {
             </div>
 
             {/* Google Map */}
-            <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-80 overflow-hidden shadow-card">
+            <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-56 sm:h-72 lg:h-80 overflow-hidden shadow-card">
               <iframe
                 src="https://maps.google.com/maps?q=Borgartún%2025,%20105%20Reykjavík,%20Iceland&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
@@ -98,7 +98,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-card">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-8 shadow-card">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="size-6 text-primary" />
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">

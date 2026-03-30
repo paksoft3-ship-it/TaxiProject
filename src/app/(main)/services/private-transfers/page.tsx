@@ -116,7 +116,7 @@ export default async function PrivateTransfersPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-secondary text-white py-14 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/images/airport_transfer.png"
@@ -192,9 +192,9 @@ export default async function PrivateTransfersPage() {
       </section>
 
       {/* Vehicle Options */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Our Vehicles</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Choose the perfect vehicle for your journey
@@ -204,7 +204,7 @@ export default async function PrivateTransfersPage() {
             {vehicleOptions.map((vehicle) => (
               <div
                 key={vehicle.name}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${vehicle.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-8 border-2 ${vehicle.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'
                   }`}
               >
                 {vehicle.popular && (
@@ -248,9 +248,9 @@ export default async function PrivateTransfersPage() {
       </section>
 
       {/* Transfer Types */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Transfer Services</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Whatever your transportation needs, we've got you covered
@@ -271,9 +271,9 @@ export default async function PrivateTransfersPage() {
       </section>
 
       {/* Popular Routes */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Popular Routes & Prices</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Fixed prices for our most requested transfer routes
@@ -297,7 +297,7 @@ export default async function PrivateTransfersPage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative h-[400px] rounded-2xl overflow-hidden">
@@ -335,7 +335,7 @@ export default async function PrivateTransfersPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-primary to-yellow-500">
+      <section className="py-12 sm:py-20 px-4 bg-gradient-to-r from-primary to-yellow-500">
         <div className="max-w-4xl mx-auto text-center">
           <Car className="size-12 mx-auto mb-6 text-black/60" />
           <h2 className="text-3xl md:text-4xl font-black text-black mb-4">

@@ -86,7 +86,7 @@ export default async function KefBlueLagoonPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-secondary text-white py-14 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/images/blue_lagoon.png"
@@ -162,9 +162,9 @@ export default async function KefBlueLagoonPage() {
       </section>
 
       {/* Route Options */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Transfer Options</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Choose the route that fits your travel plans
@@ -174,7 +174,7 @@ export default async function KefBlueLagoonPage() {
             {routes.map((route) => (
               <div
                 key={route.id}
-                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 ${route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
+                className={`relative bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-8 border-2 ${route.popular ? 'border-primary' : 'border-slate-100 dark:border-slate-700'}`}
               >
                 {route.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-black text-xs font-bold rounded-full">
@@ -213,7 +213,7 @@ export default async function KefBlueLagoonPage() {
       </section>
 
       {/* Why This Transfer */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -256,9 +256,9 @@ export default async function KefBlueLagoonPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Frequently Asked Questions</h2>
             <p className="section-subtitle">
               Everything you need to know about this transfer
@@ -279,7 +279,7 @@ export default async function KefBlueLagoonPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-primary">
+      <section className="py-12 sm:py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center gap-4 mb-6">
             <Plane className="size-10 text-black/60" />

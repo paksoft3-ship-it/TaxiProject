@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function BookingPage() {
   return (
-    <main className="w-full py-10 px-4 md:px-12 max-w-7xl mx-auto">
+    <main className="w-full py-6 sm:py-10 px-4 sm:px-6 md:px-12 max-w-7xl mx-auto">
       <Suspense fallback={<BookingFormSkeleton />}>
         <BookingForm />
       </Suspense>

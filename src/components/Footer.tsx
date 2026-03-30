@@ -24,9 +24,9 @@ const serviceLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-secondary text-slate-300 py-16 border-t border-slate-800">
+    <footer className="bg-secondary text-slate-300 py-10 md:py-16 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-6">
@@ -204,7 +204,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <div className="border-t border-slate-800 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
           <p>&copy; {new Date().getFullYear()} PrimeTaxi & Tours. All rights reserved.</p>
 
           <div className="flex justify-center items-center gap-2">

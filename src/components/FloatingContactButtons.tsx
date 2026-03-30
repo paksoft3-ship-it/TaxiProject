@@ -173,7 +173,7 @@ export function FloatingContactButtons() {
 
       {/* Chat Window */}
       {showChat && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[500px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div className="fixed bottom-6 right-2 sm:right-6 z-50 w-[calc(100vw-16px)] sm:w-[380px] h-[500px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
           {/* Chat Header */}
           <div className="bg-primary px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">

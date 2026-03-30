@@ -330,15 +330,15 @@ export function BookingForm() {
   const progress = (step / 5) * 100;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
       {/* Left Column: Booking Steps */}
-      <div className="lg:col-span-8 flex flex-col gap-8">
+      <div className="lg:col-span-8 flex flex-col gap-6 sm:gap-8">
         {/* Page Heading */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-secondary text-3xl md:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-secondary text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
             Book Your Journey
           </h1>
-          <p className="text-slate-500 text-lg">
+          <p className="text-slate-500 text-base sm:text-lg">
             Secure your ride in Iceland in just a few steps.
           </p>
         </div>
@@ -361,14 +361,14 @@ export function BookingForm() {
 
         {/* Step 1: Service Selection */}
         {step === 1 && (
-          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 1
               </span>
               Select Service Type
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {serviceTypes.map((service) => (
                 <button
                   key={service.id}
@@ -396,7 +396,7 @@ export function BookingForm() {
 
         {/* Step 2: Date & Time */}
         {step === 2 && (
-          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 2
@@ -461,7 +461,7 @@ export function BookingForm() {
 
         {/* Step 3: Locations */}
         {step === 3 && (
-          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 3
@@ -554,7 +554,7 @@ export function BookingForm() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl overflow-hidden bg-slate-100 relative h-64 md:h-auto md:min-h-[400px] border border-slate-200">
+              <div className="rounded-xl overflow-hidden bg-slate-100 relative h-48 sm:h-64 md:h-auto md:min-h-[400px] border border-slate-200">
                 {isLoaded ? (
                   <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -578,7 +578,7 @@ export function BookingForm() {
 
         {/* Step 4: Options & Details (NEW) */}
         {step === 4 && (
-          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 4
@@ -814,7 +814,7 @@ export function BookingForm() {
 
         {/* Step 5: Passenger Details (Previously Step 4) */}
         {step === 5 && (
-          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 md:p-8">
+          <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 5
@@ -908,7 +908,7 @@ export function BookingForm() {
           <button
             onClick={prevStep}
             disabled={step === 1}
-            className="px-6 py-3 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-6 py-3 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowLeft className="size-5" />
             Back
@@ -916,7 +916,7 @@ export function BookingForm() {
           {step < 5 ? (
             <button
               onClick={nextStep}
-              className="px-8 py-3 rounded-lg bg-primary text-secondary font-bold hover:bg-yellow-400 shadow-md shadow-yellow-400/20 transition-all transform hover:scale-[1.02] flex items-center gap-2"
+              className="px-6 sm:px-8 py-3 rounded-lg bg-primary text-secondary font-bold hover:bg-yellow-400 shadow-md shadow-yellow-400/20 transition-all transform hover:scale-[1.02] flex items-center gap-2"
             >
               Continue
               <ArrowRight className="size-5" />
@@ -925,7 +925,7 @@ export function BookingForm() {
             <button
               onClick={handleSubmitBooking}
               disabled={isSubmitting}
-              className="px-8 py-3 rounded-lg bg-primary text-secondary font-bold hover:bg-yellow-400 shadow-md shadow-yellow-400/20 transition-all transform hover:scale-[1.02] flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              className="px-6 sm:px-8 py-3 rounded-lg bg-primary text-secondary font-bold hover:bg-yellow-400 shadow-md shadow-yellow-400/20 transition-all transform hover:scale-[1.02] flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isSubmitting ? (
                 <>

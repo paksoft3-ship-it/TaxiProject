@@ -188,16 +188,16 @@ export default function FAQPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-secondary text-white py-16 lg:py-24">
+      <section className="bg-secondary text-white py-12 sm:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center size-16 bg-primary/20 rounded-2xl mb-6">
-              <HelpCircle className="size-8 text-primary" />
+            <div className="inline-flex items-center justify-center size-12 sm:size-16 bg-primary/20 rounded-2xl mb-4 sm:mb-6">
+              <HelpCircle className="size-6 sm:size-8 text-primary" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-black mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-3 sm:mb-4">
               Frequently Asked <span className="text-primary">Questions</span>
             </h1>
-            <p className="text-lg text-slate-300">
+            <p className="text-sm sm:text-lg text-slate-300">
               Find answers to common questions about our taxi services, tours, booking process, and more.
             </p>
           </div>
@@ -330,7 +330,7 @@ export default function FAQPage() {
       </section>
 
       {/* Still Have Questions CTA */}
-      <section className="py-16 px-4 bg-primary">
+      <section className="py-10 sm:py-16 px-4 bg-primary">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-black text-black mb-4">
             Still Have Questions?

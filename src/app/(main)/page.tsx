@@ -71,7 +71,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <header className="relative w-full h-[600px] lg:h-[700px] flex flex-col justify-start items-center pt-20 lg:pt-32 text-center px-4 overflow-hidden">
+      <header className="relative w-full h-[420px] sm:h-[540px] lg:h-[700px] flex flex-col justify-start items-center pt-14 sm:pt-20 lg:pt-32 text-center px-4 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -85,12 +85,12 @@ export default function HomePage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-6">
-          <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight drop-shadow-lg">
+        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-4 sm:gap-6">
+          <h1 className="text-white text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight drop-shadow-lg">
             Explore Iceland in <br className="hidden sm:block" />
             <span className="text-primary">Comfort & Style</span>
           </h1>
-          <p className="text-slate-100 text-base sm:text-lg font-medium max-w-2xl leading-relaxed drop-shadow-md">
+          <p className="text-slate-100 text-sm sm:text-base lg:text-lg font-medium max-w-2xl leading-relaxed drop-shadow-md hidden sm:block">
             Reliable airport transfers, premium city taxis, and bespoke private
             tours tailored to your Icelandic adventure.
           </p>
@@ -122,7 +122,7 @@ export default function HomePage() {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section id="services" className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="section-title">Our Premium Services</h2>
@@ -159,7 +159,7 @@ export default function HomePage() {
       </section>
 
       {/* Popular Tours */}
-      <section className="py-20 px-4 bg-white dark:bg-[#1a180e]">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-[#1a180e]">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
@@ -191,16 +191,16 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-slate-100 dark:bg-[#15120a] overflow-hidden">
-        <div className="max-w-7xl mx-auto bg-primary rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
+      <section className="py-12 sm:py-20 px-4 bg-slate-100 dark:bg-[#15120a] overflow-hidden">
+        <div className="max-w-7xl mx-auto bg-primary rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16 relative overflow-hidden">
           {/* Decorative circle */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-10">
             <div className="flex-1 text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-3 sm:mb-4">
                 Ready to start your journey?
               </h2>
-              <p className="text-slate-800 text-lg mb-8 font-medium max-w-lg">
+              <p className="text-slate-800 text-base sm:text-lg mb-6 sm:mb-8 font-medium max-w-lg">
                 Book your ride now and enjoy a seamless travel experience across
                 Iceland's stunning landscapes.
               </p>
@@ -220,9 +220,9 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="flex-1 w-full max-w-md">
+            <div className="flex-1 w-full max-w-sm md:max-w-md">
               {/* Journey Card */}
-              <div className="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+              <div className="bg-white/90 backdrop-blur rounded-2xl p-5 sm:p-6 shadow-xl sm:transform sm:rotate-2 sm:hover:rotate-0 transition-transform duration-500">
                 <div className="flex items-center gap-4 mb-4 border-b border-slate-100 pb-4">
                   <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center">
                     <User className="size-5 text-slate-600" />

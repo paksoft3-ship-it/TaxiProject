@@ -84,31 +84,31 @@ export function BookingWidget() {
   };
 
   return (
-    <div className="relative z-20 w-full px-4 -mt-32 mb-12">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-[#1a180e] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/5">
-        
+    <div className="relative z-20 w-full px-3 sm:px-4 -mt-16 sm:-mt-24 lg:-mt-32 mb-8 sm:mb-12">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-[#1a180e] rounded-xl sm:rounded-2xl shadow-2xl border border-slate-100 dark:border-white/5">
+
         {/* Widget Tabs (Scrollable on mobile) */}
-        <div className="flex overflow-x-auto custom-scrollbar rounded-t-2xl border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
+        <div className="flex overflow-x-auto custom-scrollbar rounded-t-xl sm:rounded-t-2xl border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as BookingType)}
               className={cn(
-                'flex items-center justify-center gap-2 flex-1 min-w-[140px] py-4 border-b-[3px] font-bold text-sm sm:text-base transition-colors whitespace-nowrap px-4',
+                'flex items-center justify-center gap-1.5 sm:gap-2 flex-1 min-w-[100px] sm:min-w-[120px] py-3 sm:py-4 border-b-[3px] font-bold text-xs sm:text-sm lg:text-base transition-colors whitespace-nowrap px-2 sm:px-4',
                 activeTab === tab.id
                   ? 'border-primary text-slate-900 dark:text-white bg-white dark:bg-transparent'
                   : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'
               )}
               type="button"
             >
-              <tab.icon className={cn('size-5', activeTab === tab.id && 'text-primary')} />
-              {tab.label}
+              <tab.icon className={cn('size-4 sm:size-5 shrink-0', activeTab === tab.id && 'text-primary')} />
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Widget Form */}
-        <form onSubmit={handleSearch} className="p-6 lg:p-8">
+        <form onSubmit={handleSearch} className="p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col md:flex-row flex-wrap gap-4 items-end">
             
             {/* --- DYNAMIC FIELDS BASED ON TAB --- */}
@@ -225,31 +225,31 @@ export function BookingWidget() {
             )}
 
             {/* SHARED FIELDS: DATE & PASSENGERS */}
-            <div className="flex gap-4 flex-[1.5] min-w-[280px]">
+            <div className="flex gap-3 sm:gap-4 w-full md:flex-[1.5] md:min-w-[240px]">
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-5 pointer-events-none" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4 sm:size-5 pointer-events-none" />
                   <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     min={minDate}
-                    className="w-full pl-10 pr-2 h-12 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full pl-9 sm:pl-10 pr-2 h-11 sm:h-12 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
                     required
                   />
                 </div>
               </div>
 
               {activeTab !== 'TAXI' && (
-                <div className="flex flex-col gap-2 w-24 shrink-0">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0 truncate">Guests</label>
+                <div className="flex flex-col gap-2 w-20 sm:w-24 shrink-0">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 truncate">Guests</label>
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
+                    <Users className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4 sm:size-5" />
                     <select
                       value={passengers}
                       onChange={(e) => setPassengers(e.target.value)}
-                      className="w-full pl-10 h-12 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none appearance-none"
+                      className="w-full pl-8 sm:pl-10 h-11 sm:h-12 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none appearance-none"
                     >
                       {[1,2,3,4,5,6,7,8].map(n => (
                         <option key={n} value={n}>{n}</option>
@@ -261,10 +261,10 @@ export function BookingWidget() {
             </div>
 
             {/* SUBMIT BUTTON */}
-            <div className="mt-4 md:mt-0 flex-1 min-w-[140px] md:max-w-[200px]">
+            <div className="w-full md:flex-1 md:min-w-[130px] md:max-w-[200px]">
               <button
                 type="submit"
-                className="w-full h-12 bg-primary hover:bg-yellow-400 text-slate-900 font-bold rounded-lg shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                className="w-full h-11 sm:h-12 bg-primary hover:bg-yellow-400 text-slate-900 font-bold rounded-lg shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
               >
                 <span>Search</span>
                 <ArrowRight className="size-5" />

@@ -148,8 +148,8 @@ export default async function PricingPage() {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background-light dark:to-background-dark opacity-90" />
-        <div className="relative z-10 max-w-[960px] mx-auto px-4 text-center py-16">
-          <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight mb-4 drop-shadow-md">
+        <div className="relative z-10 max-w-[960px] mx-auto px-4 text-center py-12 sm:py-16">
+          <h1 className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight mb-4 drop-shadow-md">
             Transparent Pricing for Your{' '}
             <span className="text-primary">Icelandic Journey</span>
           </h1>
@@ -161,7 +161,7 @@ export default async function PricingPage() {
       </div>
 
       {/* Pricing Section */}
-      <main className="flex-grow px-4 md:px-10 py-10 -mt-20 z-20 relative">
+      <main className="flex-grow px-4 md:px-10 py-10 sm:-mt-20 z-20 relative">
         <div className="max-w-[1100px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pricingCards.map((card) => (
@@ -179,7 +179,7 @@ export default async function PricingPage() {
                     Most Popular
                   </div>
                 )}
-                <div className="p-8 flex flex-col h-full">
+                <div className="p-5 sm:p-8 flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-4">
                     <div
                       className={cn(

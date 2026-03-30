@@ -118,7 +118,7 @@ export default function SightseeingToursPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-secondary text-white py-14 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/images/northern_lights.png"
@@ -194,9 +194,9 @@ export default function SightseeingToursPage() {
       </section>
 
       {/* Tours Grid */}
-      <section className="py-20 px-4 bg-background-light dark:bg-background-dark">
+      <section className="py-12 sm:py-20 px-4 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <h2 className="section-title">Popular Tours</h2>
             <p className="section-subtitle max-w-2xl mx-auto">
               Choose from our most loved sightseeing experiences
@@ -258,7 +258,7 @@ export default function SightseeingToursPage() {
       </section>
 
       {/* Why Book With Us */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-800">
+      <section className="py-12 sm:py-20 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -299,7 +299,7 @@ export default function SightseeingToursPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-primary">
+      <section className="py-12 sm:py-20 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <Sparkles className="size-12 mx-auto mb-6 text-black/60" />
           <h2 className="text-3xl md:text-4xl font-black text-black mb-4">
