@@ -117,11 +117,38 @@ export async function POST(request: NextRequest) {
       if (validated.options.extraTime) extras += 14000;
     }
 
-    const totalPrice = basePrice + extras;
+    let totalPrice = basePrice + extras;
+
+    // Apply time-based surcharge (matches BookingSummary.tsx display logic)
+    let appliedSurchargeLabel = '';
+    if (validated.type !== 'TAXI' && validated.pickupTime) {
+      const pickupHour = parseInt(validated.pickupTime.split(':')[0], 10);
+      let surchargeMultiplier = 1.0;
+
+      if (pickupHour >= 22 || pickupHour < 6) {
+        surchargeMultiplier = 1.25;
+        appliedSurchargeLabel = 'Night rate (22:00-06:00)';
+      } else if (pickupHour >= 6 && pickupHour < 8) {
+        surchargeMultiplier = 1.15;
+        appliedSurchargeLabel = 'Early morning (06:00-08:00)';
+      } else if ((pickupHour >= 8 && pickupHour < 9) || (pickupHour >= 17 && pickupHour < 19)) {
+        surchargeMultiplier = 1.1;
+        appliedSurchargeLabel = 'Peak hours';
+      }
+
+      if (surchargeMultiplier > 1.0) {
+        const surchargeAmount = Math.round(totalPrice * (surchargeMultiplier - 1));
+        extras += surchargeAmount;
+        totalPrice += surchargeAmount;
+      }
+    }
 
     // Compile special requests string
     let specialRequests = validated.specialRequests || '';
     const details = [];
+    if (appliedSurchargeLabel) {
+      details.push(`Surcharge: ${appliedSurchargeLabel}`);
+    }
 
     // Map types for DB compatibility
     type DbBookingType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR';

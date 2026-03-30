@@ -468,7 +468,6 @@ export function BookingForm() {
               </span>
               Locations
             </h3>
-// ... inside BookingForm component
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-4">
@@ -954,7 +953,10 @@ export function BookingForm() {
         <BookingSummary
           serviceType={serviceType}
           formData={formData}
-          options={options}
+          options={{
+            ...options,
+            hourlyDuration: customFields.hourlyDuration,
+          }}
           step={step}
           packageType={initialPackage || undefined}
           realDistanceKm={distanceKm}

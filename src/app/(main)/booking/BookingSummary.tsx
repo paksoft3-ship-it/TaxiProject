@@ -22,6 +22,7 @@ interface BookingSummaryProps {
     childSeats: number;
     extraStop: boolean;
     extraTime: boolean;
+    hourlyDuration?: string;
   };
   step: number;
   packageType?: string;
@@ -33,23 +34,21 @@ const serviceLabels: Record<string, string> = {
   TAXI: 'City Taxi',
   AIRPORT_TRANSFER: 'Airport Transfer',
   PRIVATE_TOUR: 'Private Tour',
-  CUSTOM_TOUR: 'Custom Tour',
+  HOURLY_HIRE: 'Hourly Hire',
   BLUE_LAGOON: 'Blue Lagoon Transfer',
 };
 
-// Base prices per service type
+// Base prices per service type (TAXI is metered — no fixed price shown)
 const basePrices: Record<string, number> = {
-  TAXI: 850, // Base fare for city taxi
-  AIRPORT_TRANSFER: 20000, // KEF Airport standard rate
-  PRIVATE_TOUR: 45000, // 4-hour tour base
-  CUSTOM_TOUR: 60000, // Custom tour base
-  BLUE_LAGOON: 20000, // Default base
+  AIRPORT_TRANSFER: 20000,
+  PRIVATE_TOUR: 45000,
+  BLUE_LAGOON: 20000,
+  // HOURLY_HIRE is dynamic: hours × 12,000
 };
 
-// Price per km for taxi services
+// Price per km (only used for distance display on AIRPORT_TRANSFER map badge)
 const pricePerKm: Record<string, number> = {
-  TAXI: 350,
-  AIRPORT_TRANSFER: 150, // Included in base mostly
+  AIRPORT_TRANSFER: 150,
 };
 
 // Popular route distances (in km) - estimates
@@ -158,9 +157,16 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
       return breakdown;
     }
 
-    // Base price
-    const base = basePrices[serviceType] || 0;
-    breakdown.push({ label: 'Base fare', amount: base, type: 'add' });
+    // Base price computation
+    let base = basePrices[serviceType] || 0;
+    
+    if (serviceType === 'HOURLY_HIRE') {
+       const hours = parseInt(options?.hourlyDuration || '4', 10);
+       base = hours * 12000;
+       breakdown.push({ label: `Hourly Hire (${hours} hrs @ 12k/hr)`, amount: base, type: 'add' });
+    } else {
+       breakdown.push({ label: 'Base fare', amount: base, type: 'add' });
+    }
 
     // Distance-based pricing for taxi/transfer
     if (serviceType === 'TAXI' && formData.pickupLocation && formData.dropoffLocation) {
