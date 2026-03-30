@@ -28,7 +28,7 @@ import { PlaceAutocomplete } from '@/components/PlaceAutocomplete';
 const libraries: any[] = [];
 
 type BookingStep = 1 | 2 | 3 | 4 | 5;
-type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR' | 'BLUE_LAGOON';
+type ServiceType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'HOURLY_HIRE' | 'BLUE_LAGOON';
 
 interface ValidationErrors {
   date?: string;
@@ -41,9 +41,11 @@ interface ValidationErrors {
 }
 
 const serviceTypes = [
-  { id: 'TAXI', label: 'City Taxi', icon: Car, description: 'Rides within Reykjavik' },
   { id: 'AIRPORT_TRANSFER', label: 'Airport Transfer', icon: Plane, description: 'To/from Keflavik Airport' },
-  { id: 'PRIVATE_TOUR', label: 'Private Tour', icon: MapPin, description: 'Custom day tours' },
+  { id: 'TAXI', label: 'City Taxi', icon: Car, description: 'Point-to-point rides' },
+  { id: 'PRIVATE_TOUR', label: 'Day Tours', icon: MapPin, description: 'Classic sightseeing' },
+  { id: 'BLUE_LAGOON', label: 'Blue Lagoon', icon: Flag, description: 'Spa transfers' },
+  { id: 'HOURLY_HIRE', label: 'Hourly Hire', icon: Clock, description: 'Flexible private driver' },
 ];
 
 export function BookingForm() {
@@ -55,6 +57,11 @@ export function BookingForm() {
   const initialPickup = searchParams.get('pickup') || '';
   const initialDropoff = searchParams.get('dropoff') || '';
   const initialDate = searchParams.get('date') || '';
+  const initialPassengers = Number(searchParams.get('passengers')) || 2;
+  const initialFlightNumber = searchParams.get('flightNumber') || '';
+  const initialTourName = searchParams.get('tourName') || '';
+  const initialDirection = searchParams.get('direction') || '';
+  const initialHours = searchParams.get('hours') || '4';
 
   // Determine initial step and form data based on package
   let startStep: BookingStep = 1;
@@ -78,7 +85,7 @@ export function BookingForm() {
     dropoffLocation: defaultDropoff,
     date: initialDate,
     time: '10:00',
-    passengers: 2,
+    passengers: initialPassengers,
     name: '',
     email: '',
     phone: '',
@@ -91,9 +98,15 @@ export function BookingForm() {
     extraTime: false,
   });
   const [flightDetails, setFlightDetails] = useState({
-    flightNumber: '',
+    flightNumber: initialFlightNumber,
     flightTime: '',
     luggageCount: 0,
+  });
+  const [customFields, setCustomFields] = useState({
+    tourName: initialTourName,
+    blDirection: initialDirection,
+    hourlyDuration: initialHours,
+    tourStartTime: '',
   });
   const [additionalInfo, setAdditionalInfo] = useState('');
 
@@ -194,7 +207,7 @@ export function BookingForm() {
       newErrors.pickupLocation = 'Please enter a pickup location';
     }
 
-    if (!formData.dropoffLocation.trim()) {
+    if ((serviceType === 'TAXI' || serviceType === 'AIRPORT_TRANSFER') && !formData.dropoffLocation.trim()) {
       newErrors.dropoffLocation = 'Please enter a drop-off location';
     }
 
@@ -265,15 +278,19 @@ export function BookingForm() {
           customerPhone: formData.phone,
           passengers: formData.passengers,
           pickupLocation: formData.pickupLocation,
-          dropoffLocation: formData.dropoffLocation,
+          dropoffLocation: formData.dropoffLocation || undefined,
           pickupDate: formData.date,
           pickupTime: formData.time,
-          specialRequests: additionalInfo, // Using the new additional info field
-          flightNumber: flightDetails.flightNumber,
-          flightTime: flightDetails.flightTime,
-          luggageCount: flightDetails.luggageCount,
+          specialRequests: additionalInfo,
+          flightNumber: serviceType === 'AIRPORT_TRANSFER' ? flightDetails.flightNumber : undefined,
+          flightTime: serviceType === 'AIRPORT_TRANSFER' ? flightDetails.flightTime : undefined,
+          luggageCount: (serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') ? flightDetails.luggageCount : undefined,
           options: {
             ...options,
+            tourName: customFields.tourName || undefined,
+            blDirection: customFields.blDirection || undefined,
+            hourlyDuration: customFields.hourlyDuration || undefined,
+            tourStartTime: customFields.tourStartTime || undefined,
             packageType: initialPackage || undefined,
           },
         }),
@@ -574,6 +591,8 @@ export function BookingForm() {
             <div className="space-y-6 mb-8">
               <h4 className="font-bold text-slate-900 border-b pb-2">Travel Details</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* AIRPORT TRANSFER */}
                 {serviceType === 'AIRPORT_TRANSFER' && (
                   <>
                     <div className="flex flex-col gap-2">
@@ -585,34 +604,104 @@ export function BookingForm() {
                         placeholder="e.g. FI502"
                         className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
                       />
+                      <p className="text-xs text-green-600 font-medium flex items-center gap-1 mt-1">
+                        <Check className="size-3" /> We monitor your flight for delays (Free waiting time)
+                      </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="text-slate-700 font-semibold text-sm">
-                        {formData.pickupLocation.toLowerCase().includes('airport') ? 'Expected Landing Time' : 'Flight Departure Time'}
-                      </label>
-                      <input
-                        type="time"
-                        value={flightDetails.flightTime}
-                        onChange={(e) => setFlightDetails(prev => ({ ...prev, flightTime: e.target.value }))}
-                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
-                      />
+                       <label className="text-slate-700 font-semibold text-sm">
+                         {formData.pickupLocation.toLowerCase().includes('airport') ? 'Expected Landing Time' : 'Flight Departure Time'}
+                       </label>
+                       <input
+                         type="time"
+                         value={flightDetails.flightTime}
+                         onChange={(e) => setFlightDetails(prev => ({ ...prev, flightTime: e.target.value }))}
+                         className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                       />
                     </div>
                   </>
                 )}
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-700 font-semibold text-sm">Number of Suitcases</label>
-                  <select
-                    value={flightDetails.luggageCount}
-                    onChange={(e) => setFlightDetails(prev => ({ ...prev, luggageCount: parseInt(e.target.value) }))}
-                    className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
-                  >
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                      <option key={num} value={num}>{num}</option>
-                    ))}
-                    <option value={9}>9+</option>
-                  </select>
-                </div>
+                {/* PRIVATE TOUR */}
+                {serviceType === 'PRIVATE_TOUR' && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-slate-700 font-semibold text-sm">Selected Tour</label>
+                      <input
+                        type="text"
+                        value={customFields.tourName}
+                        onChange={(e) => setCustomFields(prev => ({ ...prev, tourName: e.target.value }))}
+                        placeholder="e.g. Golden Circle"
+                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-slate-700 font-semibold text-sm">Preferred Start Time</label>
+                      <input
+                        type="time"
+                        value={customFields.tourStartTime}
+                        onChange={(e) => setCustomFields(prev => ({ ...prev, tourStartTime: e.target.value }))}
+                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Default is typical optimal daylight hours.</p>
+                    </div>
+                  </>
+                )}
+
+                {/* BLUE LAGOON */}
+                {serviceType === 'BLUE_LAGOON' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-700 font-semibold text-sm">Route Plan</label>
+                    <select
+                      value={customFields.blDirection}
+                      onChange={(e) => setCustomFields(prev => ({ ...prev, blDirection: e.target.value }))}
+                      className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                    >
+                      <option value="KEF_BL_RV">KEF Airport → Blue Lagoon → Reykjavík</option>
+                      <option value="RV_BL_RV">Reykjavík → Blue Lagoon → Reykjavík</option>
+                      <option value="RV_BL_KEF">Reykjavík → Blue Lagoon → KEF Airport</option>
+                      <option value="ONE_WAY">One-Way Transfer</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* HOURLY HIRE */}
+                {serviceType === 'HOURLY_HIRE' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-700 font-semibold text-sm">Charter Duration</label>
+                    <select
+                      value={customFields.hourlyDuration}
+                      onChange={(e) => setCustomFields(prev => ({ ...prev, hourlyDuration: e.target.value }))}
+                      className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                    >
+                      <option value="3">3 Hours</option>
+                      <option value="4">4 Hours</option>
+                      <option value="6">6 Hours</option>
+                      <option value="8">8 Hours</option>
+                      <option value="10">10 Hours</option>
+                      <option value="12">12 Hours (Full Day)</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Luggage (Show for Airport & Blue Lagoon) */}
+                {(serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') && (
+                  <div className="flex flex-col gap-2 md:max-w-xs">
+                    <label className="text-slate-700 font-semibold text-sm">Number of Suitcases</label>
+                    <select
+                      value={flightDetails.luggageCount}
+                      onChange={(e) => setFlightDetails(prev => ({ ...prev, luggageCount: parseInt(e.target.value) }))}
+                      className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <option key={num} value={num}>{num}</option>
+                      ))}
+                      <option value={9}>9+</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">Our premium vehicles easily accommodate large luggage volumes.</p>
+                  </div>
+                )}
+
               </div>
             </div>
 

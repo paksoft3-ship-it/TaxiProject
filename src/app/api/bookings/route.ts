@@ -75,6 +75,12 @@ export async function POST(request: NextRequest) {
 
     let basePrice = basePrices[validated.type] || 0;
 
+    // Dynamic pricing for hourly hire (ISK 12,000 per hour, default 4 hrs)
+    if (validated.type === 'HOURLY_HIRE') {
+      const hours = parseInt(String(validated.options?.hourlyDuration || '4'), 10);
+      basePrice = hours * 12000;
+    }
+
     // Handle Blue Lagoon Packages specifically
     if (validated.type === 'BLUE_LAGOON' && validated.options?.packageType) {
       if (validated.options.packageType === 'roundtrip') {
@@ -103,7 +109,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // New Options calculations
+    // Options add-ons (applied once for all types)
     if (validated.options) {
       if (validated.options.premiumCar) extras += 5000;
       if (validated.options.childSeats) extras += validated.options.childSeats * 2000;
@@ -111,25 +117,7 @@ export async function POST(request: NextRequest) {
       if (validated.options.extraTime) extras += 14000;
     }
 
-    // Special logic for fixed price airport transfer > 4 pax
-    let totalPrice = basePrice + extras;
-
-    if (validated.type === 'AIRPORT_TRANSFER' && validated.passengers > 4) {
-      // Fixed base of 25000 logic...
-      // Already handled above by setting extras to (25000 - basePrice)
-      // So totalPrice = basePrice + (25000 - basePrice) = 25000.
-
-      // Add other extras on top
-      if (validated.options) {
-        if (validated.options.premiumCar) totalPrice += 5000;
-        if (validated.options.childSeats) totalPrice += validated.options.childSeats * 2000;
-        if (validated.options.extraStop) totalPrice += 7000;
-        if (validated.options.extraTime) totalPrice += 14000;
-      }
-
-      // Recalculate 'extras' field for DB
-      extras = totalPrice - basePrice;
-    }
+    const totalPrice = basePrice + extras;
 
     // Compile special requests string
     let specialRequests = validated.specialRequests || '';
@@ -139,15 +127,31 @@ export async function POST(request: NextRequest) {
     type DbBookingType = 'TAXI' | 'AIRPORT_TRANSFER' | 'PRIVATE_TOUR' | 'CUSTOM_TOUR';
     let dbType: DbBookingType = validated.type as DbBookingType;
     if (validated.type === 'BLUE_LAGOON') {
-      dbType = 'AIRPORT_TRANSFER'; // Map to supported DB enum
+      dbType = 'AIRPORT_TRANSFER';
       details.push('Service: Blue Lagoon Transfer');
       if (validated.options?.packageType) {
         details.push(`Package: ${validated.options.packageType}`);
       }
+      if (validated.options?.blDirection) {
+        details.push(`Route: ${validated.options.blDirection}`);
+      }
+    } else if (validated.type === 'HOURLY_HIRE') {
+      dbType = 'CUSTOM_TOUR';
+      details.push('Service: Hourly Hire');
+      if (validated.options?.hourlyDuration) {
+        details.push(`Duration: ${validated.options.hourlyDuration} hours`);
+      }
+    } else if (validated.type === 'PRIVATE_TOUR') {
+      if (validated.options?.tourName) {
+        details.push(`Tour: ${validated.options.tourName}`);
+      }
+      if (validated.options?.tourStartTime) {
+        details.push(`Start Time: ${validated.options.tourStartTime}`);
+      }
     }
 
     if (validated.flightNumber) details.push(`Flight: ${validated.flightNumber}`);
-    if (validated.flightTime) details.push(`Time: ${validated.flightTime}`);
+    if (validated.flightTime) details.push(`Flight Time: ${validated.flightTime}`);
     if (validated.luggageCount) details.push(`Luggage: ${validated.luggageCount}`);
 
     if (validated.options) {
