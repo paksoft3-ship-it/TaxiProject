@@ -49,8 +49,8 @@ export function PlaceAutocomplete({
 
   // Fetch suggestions
   useEffect(() => {
-    if (!query || query === value || query.length < 2) {
-      if (!query || query.length < 2) setSuggestions([]);
+    if (!query || query === value) {
+      setSuggestions([]);
       return;
     }
 
