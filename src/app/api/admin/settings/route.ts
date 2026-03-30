@@ -33,6 +33,12 @@ const settingsSchema = z.object({
   kefBlueLagoonPrice: z.number().optional(),
   cruisePortPrice: z.number().optional(),
   cityTourBasePrice: z.number().optional(),
+  privateTourBasePrice: z.number().optional(),
+  customTourBasePrice: z.number().optional(),
+  blueLagoonRoundtripPrice: z.number().optional(),
+  blueLagoonComboPrice: z.number().optional(),
+  blueLagoonComboLargeGroupPrice: z.number().optional(),
+  hourlyHireRate: z.number().optional(),
 });
 
 const defaultSettings: Record<string, string> = {
@@ -62,6 +68,12 @@ const defaultSettings: Record<string, string> = {
   kefBlueLagoonPrice: '15000',
   cruisePortPrice: '25000',
   cityTourBasePrice: '10500',
+  privateTourBasePrice: '45000',
+  customTourBasePrice: '60000',
+  blueLagoonRoundtripPrice: '39000',
+  blueLagoonComboPrice: '40000',
+  blueLagoonComboLargeGroupPrice: '14000',
+  hourlyHireRate: '12000',
 };
 
 function parseValue(key: string, value: string): any {
@@ -73,7 +85,13 @@ function parseValue(key: string, value: string): any {
     key === 'blueLagoonTransferPrice' ||
     key === 'kefBlueLagoonPrice' ||
     key === 'cruisePortPrice' ||
-    key === 'cityTourBasePrice'
+    key === 'cityTourBasePrice' ||
+    key === 'privateTourBasePrice' ||
+    key === 'customTourBasePrice' ||
+    key === 'blueLagoonRoundtripPrice' ||
+    key === 'blueLagoonComboPrice' ||
+    key === 'blueLagoonComboLargeGroupPrice' ||
+    key === 'hourlyHireRate'
   ) {
     return parseFloat(value) || 0;
   }

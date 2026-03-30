@@ -75,32 +75,51 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = bookingSchema.parse(body);
 
+    // Fetch dynamic pricing from DB (falls back to defaults if not set)
+    const pricingDefaults: Record<string, number> = {
+      airportTransferPrice: 20000,
+      privateTourBasePrice: 45000,
+      customTourBasePrice: 60000,
+      blueLagoonTransferPrice: 20000,
+      blueLagoonRoundtripPrice: 39000,
+      blueLagoonComboPrice: 40000,
+      blueLagoonComboLargeGroupPrice: 14000,
+      hourlyHireRate: 12000,
+    };
+    const dbPricing = await prisma.setting.findMany({
+      where: { key: { in: Object.keys(pricingDefaults) } },
+    });
+    const pricing: Record<string, number> = { ...pricingDefaults };
+    for (const s of dbPricing) {
+      pricing[s.key] = parseFloat(s.value) || pricingDefaults[s.key];
+    }
+
     // Calculate price based on service type
     const basePrices: Record<string, number> = {
       TAXI: 0,
-      AIRPORT_TRANSFER: 20000,
-      PRIVATE_TOUR: 45000,
-      CUSTOM_TOUR: 60000,
-      BLUE_LAGOON: 20000, // Default base
+      AIRPORT_TRANSFER: pricing.airportTransferPrice,
+      PRIVATE_TOUR: pricing.privateTourBasePrice,
+      CUSTOM_TOUR: pricing.customTourBasePrice,
+      BLUE_LAGOON: pricing.blueLagoonTransferPrice,
     };
 
     let basePrice = basePrices[validated.type] || 0;
 
-    // Dynamic pricing for hourly hire (ISK 12,000 per hour, default 4 hrs)
+    // Dynamic pricing for hourly hire (rate per hour, default 4 hrs)
     if (validated.type === 'HOURLY_HIRE') {
       const hours = parseInt(String(validated.options?.hourlyDuration || '4'), 10);
-      basePrice = hours * 12000;
+      basePrice = hours * pricing.hourlyHireRate;
     }
 
     // Handle Blue Lagoon Packages specifically
     if (validated.type === 'BLUE_LAGOON' && validated.options?.packageType) {
       if (validated.options.packageType === 'roundtrip') {
-        basePrice = 39000;
+        basePrice = pricing.blueLagoonRoundtripPrice;
       } else if (validated.options.packageType === 'combo') {
         if (validated.passengers > 4) {
-          basePrice = 14000;
+          basePrice = pricing.blueLagoonComboLargeGroupPrice;
         } else {
-          basePrice = 40000;
+          basePrice = pricing.blueLagoonComboPrice;
         }
       }
     }

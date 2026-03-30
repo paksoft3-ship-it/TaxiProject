@@ -39,6 +39,12 @@ interface Settings {
   kefBlueLagoonPrice: number;
   cruisePortPrice: number;
   cityTourBasePrice: number;
+  privateTourBasePrice: number;
+  customTourBasePrice: number;
+  blueLagoonRoundtripPrice: number;
+  blueLagoonComboPrice: number;
+  blueLagoonComboLargeGroupPrice: number;
+  hourlyHireRate: number;
   [key: string]: any;
 }
 
@@ -57,6 +63,12 @@ const defaultSettings: Settings = {
   kefBlueLagoonPrice: 15000,
   cruisePortPrice: 25000,
   cityTourBasePrice: 10500,
+  privateTourBasePrice: 45000,
+  customTourBasePrice: 60000,
+  blueLagoonRoundtripPrice: 39000,
+  blueLagoonComboPrice: 40000,
+  blueLagoonComboLargeGroupPrice: 14000,
+  hourlyHireRate: 12000,
 };
 
 export default function SettingsPage() {
@@ -317,11 +329,43 @@ export default function SettingsPage() {
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Percent className="size-5" />
-                  Tour Base Prices (ISK)
+                  Blue Lagoon Package Prices (ISK)
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
+                    { key: 'blueLagoonRoundtripPrice', label: 'Blue Lagoon Roundtrip Package' },
+                    { key: 'blueLagoonComboPrice', label: 'Blue Lagoon Combo Package (≤4 pax)' },
+                    { key: 'blueLagoonComboLargeGroupPrice', label: 'Blue Lagoon Combo (5+ pax)' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        {label}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={settings[key]}
+                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
+                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Percent className="size-5" />
+                  Tour &amp; Hire Base Prices (ISK)
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[
+                    { key: 'privateTourBasePrice', label: 'Private Tour Base Price' },
+                    { key: 'customTourBasePrice', label: 'Custom Tour Base Price' },
                     { key: 'cityTourBasePrice', label: 'City Tour Base Price' },
+                    { key: 'hourlyHireRate', label: 'Hourly Hire Rate (per hour)' },
                   ].map(({ key, label }) => (
                     <div key={key}>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -340,7 +384,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
-                  Note: Individual tour prices can be managed in the <strong>Tours</strong> section.
+                  Note: Individual tour prices can also be managed in the <strong>Tours</strong> section.
                 </p>
               </div>
             </div>

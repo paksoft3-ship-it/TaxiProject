@@ -9,6 +9,12 @@ const defaultPricing = {
   kefBlueLagoonPrice: 15000,
   cruisePortPrice: 25000,
   cityTourBasePrice: 10500,
+  privateTourBasePrice: 45000,
+  customTourBasePrice: 60000,
+  blueLagoonRoundtripPrice: 39000,
+  blueLagoonComboPrice: 40000,
+  blueLagoonComboLargeGroupPrice: 14000,
+  hourlyHireRate: 12000,
 };
 
 const pricingKeys = Object.keys(defaultPricing);
