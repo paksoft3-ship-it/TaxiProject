@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Module-level cache shared across all instances — survives re-renders
+const suggestionsCache = new Map<string, any[]>();
+
 export interface PlaceAutocompleteProps {
   value: string;
   onChange: (val: string) => void;
@@ -26,6 +29,7 @@ export function PlaceAutocomplete({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Sync prop value
   useEffect(() => {
@@ -45,13 +49,24 @@ export function PlaceAutocomplete({
 
   // Fetch suggestions
   useEffect(() => {
-    // Avoid fetching if query is completely empty, or exactly matches the selected value
-    if (!query || query === value) {
-      setSuggestions([]);
+    if (!query || query === value || query.length < 2) {
+      if (!query || query.length < 2) setSuggestions([]);
+      return;
+    }
+
+    // Cache hit — instant, no loading state
+    const cacheKey = query.toLowerCase().trim();
+    if (suggestionsCache.has(cacheKey)) {
+      setSuggestions(suggestionsCache.get(cacheKey)!);
+      setIsOpen(true);
       return;
     }
 
     const fetchPlaces = async () => {
+      // Cancel any in-flight request
+      abortRef.current?.abort();
+      abortRef.current = new AbortController();
+
       setIsLoading(true);
       try {
         const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
@@ -64,24 +79,27 @@ export function PlaceAutocomplete({
             input: query,
             includedRegionCodes: ['IS'],
           }),
+          signal: abortRef.current.signal,
         });
         const data = await res.json();
-        if (data.suggestions) {
-          setSuggestions(data.suggestions);
-          setIsOpen(true);
-        } else {
-          setSuggestions([]);
+        const results = data.suggestions ?? [];
+        suggestionsCache.set(cacheKey, results);
+        setSuggestions(results);
+        if (results.length > 0) setIsOpen(true);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching places:', error);
         }
-      } catch (error) {
-        console.error('Error fetching places:', error);
-        setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(fetchPlaces, 300);
-    return () => clearTimeout(debounceTimer);
+    // 150ms debounce — fast enough to feel instant, slow enough to batch keystrokes
+    const debounceTimer = setTimeout(fetchPlaces, 150);
+    return () => {
+      clearTimeout(debounceTimer);
+    };
   }, [query, value]);
 
   const handleSelect = (suggestion: any) => {
