@@ -126,7 +126,6 @@ export function PlaceAutocomplete({
           required={required}
           onChange={(e) => {
             setQuery(e.target.value);
-            setIsLoading(true);
           }}
           onFocus={() => {
             if (suggestions.length > 0) setIsOpen(true);
