@@ -144,7 +144,7 @@ export default async function PricingPage() {
       <div
         className="relative w-full bg-cover bg-center bg-no-repeat min-h-[400px] flex items-center justify-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(15, 76, 129, 0.7), rgba(0, 0, 0, 0.5)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBG_BgALCGifP2s8Et2QuajazO0UX5lMYEgNyw1lpBMKoHkgB2w88dG95vAtGKh2sl3d3g1qM9yxE-VHla2kt4oHAkV8gztrNS46YfsEQ98FCF559tpHP7ttfWm1f3LRTJfo2ESN0lJHmN_aIcTzhF30xF616y982G0FzHlhHcDZ-_Sv9YwDOyk3EgqT4IUYPswBdfBQzG1-l3wn5d2UL1QbNMrdpGDDGVuQ9AJ0jouX6C9hKQrZCuaHeJePW2gpBve7l_zH28gNKNi')`,
+          backgroundImage: `linear-gradient(rgba(15, 76, 129, 0.7), rgba(0, 0, 0, 0.5)), url('/images/south_coast.png')`,
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background-light dark:to-background-dark opacity-90" />

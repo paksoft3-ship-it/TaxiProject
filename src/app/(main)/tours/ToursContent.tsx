@@ -119,7 +119,7 @@ export function ToursContent() {
         <div
           className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuAw5paTld6pu6V7ft9GBdNx9lyyXeGTryceFVopMGZHV4TxsknhXVUzypqiEgax-jDUWJc8q_Epo-ZI9rlTqLh9lD2vbB0PSdDWxJNMSBTReOdtI9eAO7c8gPp77eGWl7hPY5RP6DmuPoPVZw4izze1f1tLdh9D9ULggK7l6GM3GYbWVL5K3ozKf-hv0J3slLFBNkkdnt-q5Z1xG50xW05DsPCP03sym1DW0zNpYRzZYvsW10JBtjJ2xMqmUEQcyhuzczXYRzJz4_rw')`,
+            backgroundImage: `url('/images/golden_circle.png')`,
           }}
         />
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-secondary/80 to-secondary/95" />

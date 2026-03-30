@@ -18,7 +18,7 @@ const toursData = [
     highlights: ['Hallgrímskirkja Church', 'Harpa Concert Hall', 'Sun Voyager & Old Harbour'],
     includes: ['Private luxury vehicle', 'Professional driver-guide', 'WiFi on board', 'Bottled water'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAT4xAiwOYzy5D3pJWuGoHH7APGUplommRj1qLquuXgM3dH_DSqzY9ZE74j7kz-I4a5EYSWm-ymsUkdHZiHmKqgBzLwq-z0bJF4A9vnYvWGdL9dG2lNSNtzYl9dzj37nfDpuwa_LBg86bznhs9wE4QqoPZFU1XBFm8dc4WliNXy2jRQQz41Z_gR2qFB9kyoGp8BjwmPMpFYXfl7iJ-bpYTMPMO0jjiWl8K0buWMIf_MdcvM2DoIKlYh_8ZF2hG-K_LT4L7gK5lw3cv6',
+      '/images/reykjavik_city.png',
     ],
     featured: false,
     active: true,
@@ -37,7 +37,7 @@ const toursData = [
     highlights: ['Gullfoss Waterfall & Geysir Area', 'Thingvellir National Park', 'Luxury Vehicle & WiFi'],
     includes: ['Private luxury vehicle', 'Professional driver-guide', 'WiFi on board', 'Bottled water', 'Hotel pickup & drop-off', 'All taxes and fees'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAT4xAiwOYzy5D3pJWuGoHH7APGUplommRj1qLquuXgM3dH_DSqzY9ZE74j7kz-I4a5EYSWm-ymsUkdHZiHmKqgBzLwq-z0bJF4A9vnYvWGdL9dG2lNSNtzYl9dzj37nfDpuwa_LBg86bznhs9wE4QqoPZFU1XBFm8dc4WliNXy2jRQQz41Z_gR2qFB9kyoGp8BjwmPMpFYXfl7iJ-bpYTMPMO0jjiWl8K0buWMIf_MdcvM2DoIKlYh_8ZF2hG-K_LT4L7gK5lw3cv6',
+      '/images/golden_circle.png',
     ],
     featured: true,
     active: true,
@@ -56,7 +56,7 @@ const toursData = [
     highlights: ['Reynisfjara Black Sand Beach', 'Skógafoss & Seljalandsfoss', 'Vík Village Visit'],
     includes: ['Private luxury vehicle', 'Professional driver-guide', 'WiFi on board', 'Bottled water', 'Hotel pickup & drop-off', 'All taxes and fees'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCKs6YqO20c1r3pE0D8sWRH66wzozCBCzK31rodsy877bxh-F_7A9ZbB4y5EMO1ymwb_JYsNs6icv6zTmCTFNKvX-ERHUWzyyowKLo0F4j1ctYByW2zCmXJ6ROG88q_oMJT1_HidGHogvc6MmiJokry1fkBj1NpbRGSx8e9VOCKQ9elH7dUFL1czKF7asn5GELd63XMPR_AR8wNG0N4opKnTtPb4nxOcmaa12r6USvTMMO9sxD0m9anIypH-N11ricL6apczJp2e6gO',
+      '/images/south_coast.png',
     ],
     featured: false,
     active: true,
@@ -75,7 +75,7 @@ const toursData = [
     highlights: ['Kirkjufell Mountain', 'Snæfellsjökull Glacier', 'Arnarstapi Cliffs'],
     includes: ['Private luxury vehicle', 'Professional driver-guide', 'WiFi on board', 'Bottled water', 'Hotel pickup & drop-off', 'All taxes and fees'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuB9yJ3B9Al8bmIxJTD2BbEOAMvpW_0scC-MVjvxKzeH2C_2rKO9waZoL87HNtEuD-9iHl7u-psWVdEStLcU4-oR3aSX7girGHTq-3SEnfK6sxJ6blhPgUrDasXtg7c7zFxzQj6Au4EezoprIK5uiuffZsuAg9f68xi-rJaThDWQfHaZheDl2E4Hv4eE4mZQ5BRu6L_GjGjEdfJgv5nHDhIHAdlCiZZt-GZQVka3N-PZ_7fQaPnfKXHfaL8XxcOkyEOuuVQOGGfHqHI9',
+      '/images/snaefellsnes.png',
     ],
     featured: false,
     active: true,
@@ -94,7 +94,7 @@ const toursData = [
     highlights: ['Jökulsárlón Glacier Lagoon', 'Diamond Beach', 'Vatnajökull Views'],
     includes: ['Private luxury vehicle', 'Professional driver-guide', 'WiFi on board', 'Bottled water', 'Hotel pickup & drop-off', 'All taxes and fees'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCKs6YqO20c1r3pE0D8sWRH66wzozCBCzK31rodsy877bxh-F_7A9ZbB4y5EMO1ymwb_JYsNs6icv6zTmCTFNKvX-ERHUWzyyowKLo0F4j1ctYByW2zCmXJ6ROG88q_oMJT1_HidGHogvc6MmiJokry1fkBj1NpbRGSx8e9VOCKQ9elH7dUFL1czKF7asn5GELd63XMPR_AR8wNG0N4opKnTtPb4nxOcmaa12r6USvTMMO9sxD0m9anIypH-N11ricL6apczJp2e6gO',
+      '/images/glacier_lagoon.png',
     ],
     featured: true,
     active: true,
@@ -113,7 +113,7 @@ const toursData = [
     highlights: ['Door-to-door Luxury Service', 'Luggage Assistance', 'Flexible Timing'],
     includes: ['Private luxury vehicle', 'Professional driver', 'Luggage assistance', 'Meet & Greet'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBVWeCbujmlEyrgmQ8GQQ4KrfCo9ELZ_L573wLwgKBck7PWSCwohWC6tPekru2ZS7aM6XrDpisc1IXVB4XWg6DQOWEtAak0-ybxa5aPf7A0VKzNCo0smbeNWrr1VFCCJYKL8RY0CrVdKYBER2B4EY0L8WpaahjiMg-SNTM4Q5sRgFPb7XQMkgW9YHw43sDx0I7p9rZfaTp3qMEB_a_X_RKtXOEqikacLPpoD9hYmNg_gpNRFg5vMXR49lbdM0yU7Nk_yoBF3Zg57OmZ',
+      '/images/blue_lagoon.png',
     ],
     featured: false,
     active: true,
@@ -132,7 +132,7 @@ const toursData = [
     highlights: ['Expert Aurora Forecasting', 'Prime Viewing Locations', 'Hot Chocolate & Snacks'],
     includes: ['Private luxury vehicle', 'Professional guide', 'Hot chocolate & snacks', 'Photography assistance'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAT4xAiwOYzy5D3pJWuGoHH7APGUplommRj1qLquuXgM3dH_DSqzY9ZE74j7kz-I4a5EYSWm-ymsUkdHZiHmKqgBzLwq-z0bJF4A9vnYvWGdL9dG2lNSNtzYl9dzj37nfDpuwa_LBg86bznhs9wE4QqoPZFU1XBFm8dc4WliNXy2jRQQz41Z_gR2qFB9kyoGp8BjwmPMpFYXfl7iJ-bpYTMPMO0jjiWl8K0buWMIf_MdcvM2DoIKlYh_8ZF2hG-K_LT4L7gK5lw3cv6',
+      '/images/northern_lights.png',
     ],
     featured: false,
     active: true,
@@ -151,7 +151,7 @@ const toursData = [
     highlights: ['Flight Monitoring', 'Meet & Greet', '24/7 Service'],
     includes: ['Private luxury vehicle', 'Professional driver', 'Flight tracking', 'Luggage assistance', 'Meet & Greet service'],
     images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBVWeCbujmlEyrgmQ8GQQ4KrfCo9ELZ_L573wLwgKBck7PWSCwohWC6tPekru2ZS7aM6XrDpisc1IXVB4XWg6DQOWEtAak0-ybxa5aPf7A0VKzNCo0smbeNWrr1VFCCJYKL8RY0CrVdKYBER2B4EY0L8WpaahjiMg-SNTM4Q5sRgFPb7XQMkgW9YHw43sDx0I7p9rZfaTp3qMEB_a_X_RKtXOEqikacLPpoD9hYmNg_gpNRFg5vMXR49lbdM0yU7Nk_yoBF3Zg57OmZ',
+      '/images/airport_transfer.png',
     ],
     featured: false,
     active: true,

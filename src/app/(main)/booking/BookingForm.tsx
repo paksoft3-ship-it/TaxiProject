@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { POPULAR_LOCATIONS } from '@/lib/locations';
 import { BookingSummary } from './BookingSummary';
 import { useJsApiLoader, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
+import { PlaceAutocomplete } from '@/components/PlaceAutocomplete';
 
 const libraries: any[] = [];
 
@@ -146,10 +147,14 @@ export function BookingForm() {
     }
   };
 
-  // Recalculate route whenever locations change and map is loaded
-  // We use an effect to run it lazily whenever both are present
-  // but to avoid infinite loops, we trigger it only when explicit changes happen.
-  // We will call calculateRoute manually onPlaceChanged or blur.
+  // Automatically trace the route right when the map script finishes loading
+  // if the user arrived from the homepage widget with predefined locations!
+  useEffect(() => {
+    if (isLoaded && formData.pickupLocation && formData.dropoffLocation) {
+      calculateRoute();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -459,20 +464,19 @@ export function BookingForm() {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
-                  <div className="relative">
-                    <Plane className="absolute left-3 top-3.5 text-primary size-5 z-10" />
-                    <input
-                      type="text"
-                      value={formData.pickupLocation}
-                      onChange={(e) => updateFormData('pickupLocation', e.target.value)}
-                      onBlur={calculateRoute}
-                      placeholder="Enter airport, hotel, or address"
-                      className={cn(
-                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                        errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
-                      )}
-                    />
-                  </div>
+                  <PlaceAutocomplete
+                    value={formData.pickupLocation}
+                    onChange={(val) => {
+                      updateFormData('pickupLocation', val);
+                      setTimeout(calculateRoute, 100);
+                    }}
+                    placeholder="Enter airport, hotel, or address"
+                    icon={<Plane className="text-primary size-5" />}
+                    className={cn(
+                      "bg-slate-50 text-slate-700 border",
+                      errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
+                    )}
+                  />
                   {errors.pickupLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">
                       <AlertCircle className="size-4" />
@@ -485,20 +489,19 @@ export function BookingForm() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
-                  <div className="relative">
-                    <Flag className="absolute left-3 top-3.5 text-red-500 size-5 z-10" />
-                    <input
-                      type="text"
-                      value={formData.dropoffLocation}
-                      onChange={(e) => updateFormData('dropoffLocation', e.target.value)}
-                      onBlur={calculateRoute}
-                      placeholder="Enter destination"
-                      className={cn(
-                        "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
-                        errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
-                      )}
-                    />
-                  </div>
+                  <PlaceAutocomplete
+                    value={formData.dropoffLocation}
+                    onChange={(val) => {
+                      updateFormData('dropoffLocation', val);
+                      setTimeout(calculateRoute, 100);
+                    }}
+                    placeholder="Enter destination"
+                    icon={<Flag className="text-red-500 size-5" />}
+                    className={cn(
+                      "bg-slate-50 text-slate-700 border",
+                      errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
+                    )}
+                  />
                   {errors.dropoffLocation && (
                     <p className="text-red-500 text-sm flex items-center gap-1">
                       <AlertCircle className="size-4" />
@@ -840,6 +843,11 @@ export function BookingForm() {
                 <>
                   <Loader2 className="size-5 animate-spin" />
                   Processing...
+                </>
+              ) : serviceType === 'TAXI' ? (
+                <>
+                  <Check className="size-5" />
+                  Confirm Booking
                 </>
               ) : (
                 <>

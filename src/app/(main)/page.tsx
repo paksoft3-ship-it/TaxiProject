@@ -75,7 +75,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/south_coast.png"
+            src="/images/northern_lights.png"
             alt="Scenic road through Icelandic mountains with moody sky"
             fill
             className="object-cover"

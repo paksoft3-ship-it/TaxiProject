@@ -89,7 +89,7 @@ export default async function KefBlueLagoonPage() {
       <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyNrM-b0O1gLH2FKFjF2HyYQY0uJJxXPfSLTlVFMKqL8j0jXqWYJjLsKQpVJFpDEWOXsMFxX8ND8k8vLqVZqFnPF8WtPEGxXYqK9wXxF8w"
+            src="/images/blue_lagoon.png"
             alt="Keflavik Airport to Blue Lagoon"
             fill
             className="object-cover opacity-30"

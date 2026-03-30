@@ -81,7 +81,7 @@ export default function AboutPage() {
           </div>
           <div className="relative h-[400px] rounded-2xl overflow-hidden">
             <Image
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqSHelj7tuPiGCpHEDjjUoN2Ya8U2VNeYvul3FZWALp27_job5h2-idvL1W5So0IfXMEUhBt7NcVke75hC7_qNG1b3TNh_xePzwFLcb4GJL1JJGmE2uO0XK4VzfB6L2SU7I_M88R4komC5LI0wJdHt_t0m9m05pVzPioz-HueN-cTOZ5hrjiXKOW9N4S4oZefwEq6Z73GcCETvh-vzFibMuJFUIM8FZF65MHm2s_tFmRcMfS8xiZ31aRjYGl60YJmgD51WoRf1HBpK"
+              src="/images/glacier_lagoon.png"
               alt="Scenic road through Icelandic mountains"
               fill
               className="object-cover"

@@ -61,7 +61,7 @@ const tours: Tour[] = [
     name: 'Reykjavik City Tour',
     duration: '1-3 hours',
     price: '10,500 ISK',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/golden_circle.png',
     description: 'Discover the charm of Iceland\'s capital with a personalized city tour covering all major landmarks.',
     highlights: ['Hallgrímskirkja Church', 'Harpa Concert Hall', 'Sun Voyager', 'Old Harbour'],
   },
@@ -70,7 +70,7 @@ const tours: Tour[] = [
     duration: '6 hours',
     price: '92,500 ISK',
     distance: '320 km',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/south_coast.png',
     description: 'Visit Þingvellir National Park, Geysir geothermal area, and Gullfoss Waterfall.',
     highlights: ['Þingvellir National Park', 'Strokkur Geyser', 'Gullfoss Waterfall', 'Kerið Crater (optional)'],
   },
@@ -79,7 +79,7 @@ const tours: Tour[] = [
     duration: '10 hours',
     price: '138,500 ISK',
     distance: '420 km',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/snaefellsnes.png',
     description: 'Explore waterfalls, black sand beaches, and glacier views along the scenic south coast.',
     highlights: ['Seljalandsfoss Waterfall', 'Skógafoss Waterfall', 'Reynisfjara Black Beach', 'Vík Village'],
   },
@@ -88,7 +88,7 @@ const tours: Tour[] = [
     duration: '12 hours',
     price: '154,500 ISK',
     distance: '350 km',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/glacier_lagoon.png',
     description: 'Discover "Iceland in Miniature" with diverse landscapes, volcanoes, and charming villages.',
     highlights: ['Kirkjufell Mountain', 'Snæfellsjökull Glacier', 'Arnarstapi Cliffs', 'Djúpalónssandur Beach'],
   },
@@ -97,7 +97,7 @@ const tours: Tour[] = [
     duration: '15 hours',
     price: '204,500 ISK',
     distance: '800 km',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/northern_lights.png',
     description: 'Journey to the stunning Jökulsárlón glacier lagoon and the famous Diamond Beach where icebergs wash ashore.',
     highlights: ['Jökulsárlón Glacier Lagoon', 'Diamond Beach', 'Vatnajökull Glacier', 'Scenic South Coast'],
   },
@@ -121,7 +121,7 @@ export default function SightseeingToursPage() {
       <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9"
+            src="/images/northern_lights.png"
             alt="Iceland Sightseeing Tours"
             fill
             className="object-cover opacity-30"

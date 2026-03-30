@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Flag, Calendar, CarTaxiFront, Mountain, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackBookingStarted } from '@/lib/analytics';
+import { PlaceAutocomplete } from '@/components/PlaceAutocomplete';
 
 type BookingType = 'taxi' | 'tour';
 
@@ -45,9 +46,9 @@ export function BookingWidget() {
 
   return (
     <div className="relative z-20 w-full px-4 -mt-32 mb-12">
-      <div className="max-w-5xl mx-auto bg-white dark:bg-[#1a180e] rounded-2xl shadow-2xl overflow-hidden border border-slate-100 dark:border-white/5">
+      <div className="max-w-5xl mx-auto bg-white dark:bg-[#1a180e] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/5">
         {/* Widget Tabs */}
-        <div className="flex border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
+        <div className="flex rounded-t-2xl overflow-hidden border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
           <button
             onClick={() => setActiveTab('taxi')}
             className={cn(
@@ -84,17 +85,14 @@ export function BookingWidget() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Pickup Location
               </label>
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5 z-10 pointer-events-none" />
-                <input
-                  type="text"
-                  value={pickup}
-                  onChange={(e) => setPickup(e.target.value)}
-                  placeholder="KEF Airport, Hotel, etc."
-                  className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                  required
-                />
-              </div>
+              <PlaceAutocomplete
+                value={pickup}
+                onChange={setPickup}
+                placeholder="KEF Airport, Hotel, etc."
+                icon={<MapPin className="text-slate-400 size-5" />}
+                required
+                className="border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary"
+              />
             </div>
 
             {/* Dropoff */}
@@ -102,17 +100,14 @@ export function BookingWidget() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {activeTab === 'tour' ? 'Tour Destination' : 'Dropoff Location'}
               </label>
-              <div className="relative">
-                <Flag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5 z-10 pointer-events-none" />
-                <input
-                  type="text"
-                  value={dropoff}
-                  onChange={(e) => setDropoff(e.target.value)}
-                  placeholder={activeTab === 'tour' ? 'Golden Circle, South Coast...' : 'Enter destination'}
-                  className="w-full pl-12 h-12 rounded-lg border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
-                  required
-                />
-              </div>
+              <PlaceAutocomplete
+                value={dropoff}
+                onChange={setDropoff}
+                placeholder={activeTab === 'tour' ? 'Golden Circle, South Coast...' : 'Enter destination'}
+                icon={<Flag className="text-slate-400 size-5" />}
+                required
+                className="border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary"
+              />
             </div>
 
             {/* Date */}

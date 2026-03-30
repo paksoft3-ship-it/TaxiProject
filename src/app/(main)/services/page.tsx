@@ -31,7 +31,7 @@ const services = [
     title: 'Experience the Blue Lagoon',
     subtitle: 'Geothermal Paradise',
     icon: Snowflake,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAPXvrb1aP9kpKx-HXmoSB6b-3abWjRApv-GTl4XbGpqtH071cxb1IJjdrtCxu170xPeyH72NQvSpcof3QAdzoEAF2F1poyoUxQGiwcSpkipgI6QyODOAjU-d_MH4TyO-ZZscbMoy5ZIHNF1KJQPCTS8H2Su8McBPDILWZlVEBtnCrCE4Vn3CfQ7k8QrUQeg9rqD0mWtqpoKw7MfZmas0T1bJhf4AIyf9_rt5UzmikNpDwZHKboFVOBlnBTyMNFhGFvKnMbdztl0JmW',
+    image: '/images/airport_transfer.png',
     description:
       'Immerse yourself in the world-famous Blue Lagoon, Iceland\'s most iconic geothermal spa. Our premium transfer service ensures a seamless journey to this natural wonder, where mineral-rich waters await to rejuvenate your body and soul.',
     features: [
@@ -55,7 +55,7 @@ const services = [
     title: 'Sightseeing Tours',
     subtitle: 'Discover Iceland\'s Wonders',
     icon: Mountain,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC10Q-hY2ws9134hG20NMVDn8vGv-tytWbsLHTDxUGTgf8pe5Dsy3bpH5wZCtizwFcL3I5Ga--PZhMCx_bdWYkEwX_sFssIF1EwdrKoLgMC4XaYECNsLMoXIAjzjOKYMD6VxpffKEd9YVT5C5OjaWyr8NyyD0W6TWaJsyyrWU5DVkV4ZanpPaEQppc03CO1XqfHQrHNjbcIWItbD04yDM4ciLseawjJL5Ux9122v_RtFeaa2YclITWf1yjVhqZv3rdyjKcvPd3Zxej9',
+    image: '/images/reykjavik_city.png',
     description:
       'Explore Iceland\'s breathtaking landscapes with our expert-guided sightseeing tours. From the majestic Golden Circle to hidden waterfalls and volcanic wonders, experience the best of Iceland with knowledgeable local guides.',
     features: [
@@ -79,7 +79,7 @@ const services = [
     title: 'Private Transfers',
     subtitle: 'Luxury Door-to-Door Service',
     icon: CarTaxiFront,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBvP5L7B8Gj9XiIQW2M7FqVt2lRYuLhJKYh5WpXqB4Y3VcXfN8M2xLT6HqZ8RpKXwFjLxNvYtK9mCfPwQ1R5PvL7VyWqKhPgR3xZnF8wN7Q',
+    image: '/images/golden_circle.png',
     description:
       'Experience premium private transfer service anywhere in Iceland. Whether you\'re heading to your hotel, a remote destination, or need transportation for a special occasion, our professional drivers ensure a comfortable and stress-free journey.',
     features: [
@@ -103,7 +103,7 @@ const services = [
     title: 'Transfer Between Keflavik Airport and Blue Lagoon',
     subtitle: 'The Perfect Arrival Experience',
     icon: Plane,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCyNrM-b0O1gLH2FKFjF2HyYQY0uJJxXPfSLTlVFMKqL8j0jXqWYJjLsKQpVJFpDEWOXsMFxX8ND8k8vLqVZqFnPF8WtPEGxXYqK9wXxF8w',
+    image: '/images/northern_lights.png',
     description:
       'Start or end your Iceland adventure in the most relaxing way possible. Our direct transfer service between Keflavik International Airport and the Blue Lagoon lets you unwind after your flight or refresh before departure.',
     features: [

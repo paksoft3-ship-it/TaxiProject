@@ -119,7 +119,7 @@ export default async function PrivateTransfersPage() {
       <section className="relative bg-secondary text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvP5L7B8Gj9XiIQW2M7FqVt2lRYuLhJKYh5WpXqB4Y3VcXfN8M2xLT6HqZ8RpKXwFjLxNvYtK9mCfPwQ1R5PvL7VyWqKhPgR3xZnF8wN7Q"
+            src="/images/airport_transfer.png"
             alt="Private Transfer Service"
             fill
             className="object-cover opacity-30"
@@ -302,7 +302,7 @@ export default async function PrivateTransfersPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative h-[400px] rounded-2xl overflow-hidden">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvP5L7B8Gj9XiIQW2M7FqVt2lRYuLhJKYh5WpXqB4Y3VcXfN8M2xLT6HqZ8RpKXwFjLxNvYtK9mCfPwQ1R5PvL7VyWqKhPgR3xZnF8wN7Q"
+                src="/images/reykjavik_city.png"
                 alt="Premium transfer vehicle"
                 fill
                 className="object-cover"
