@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number, currency: string = 'ISK'): string {
   if (currency === 'ISK') {
-    return new Intl.NumberFormat('is-IS', {
+    return new Intl.NumberFormat('en-US', {
       style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,

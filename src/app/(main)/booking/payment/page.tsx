@@ -1,89 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
-import { CreditCard, Lock, ArrowLeft, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { Lock, ArrowLeft, ShieldCheck, Clock, Phone, Star, Loader2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
-
-function CheckoutForm({ amount, bookingId }: { amount: number; bookingId: string | null }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setError(submitError.message || 'An error occurred');
-      setIsLoading(false);
-      return;
-    }
-
-    const returnUrl = bookingId
-      ? `${window.location.origin}/booking/confirmation?booking=${bookingId}`
-      : `${window.location.origin}/booking/confirmation`;
-
-    const { error: confirmError } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: returnUrl,
-      },
-    });
-
-    if (confirmError) {
-      setError(confirmError.message || 'Payment failed');
-    }
-
-    setIsLoading(false);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Lock className="size-4" />
-        <span>Your payment is secured with 256-bit SSL encryption</span>
-      </div>
-
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        className="w-full"
-        isLoading={isLoading}
-        disabled={!stripe}
-      >
-        Pay {formatCurrency(amount)}
-      </Button>
-    </form>
-  );
-}
 
 const serviceLabels: Record<string, string> = {
   TAXI: 'City Taxi',
@@ -91,119 +12,276 @@ const serviceLabels: Record<string, string> = {
   PRIVATE_TOUR: 'Private Tour',
   CUSTOM_TOUR: 'Custom Tour',
   BLUE_LAGOON: 'Blue Lagoon Transfer',
+  HOURLY_HIRE: 'Hourly Hire',
 };
+
+const serviceIcons: Record<string, string> = {
+  TAXI: '🚖',
+  AIRPORT_TRANSFER: '✈️',
+  PRIVATE_TOUR: '🗺️',
+  CUSTOM_TOUR: '🎯',
+  BLUE_LAGOON: '♨️',
+  HOURLY_HIRE: '⏱️',
+};
+
+const ISK_TO_EUR_RATE = 150;
 
 function PaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [amount, setAmount] = useState(0);
-  const [bookingId, setBookingId] = useState<string | null>(null);
-  const [serviceType, setServiceType] = useState('');
 
-  useEffect(() => {
-    // Get booking details from URL params
-    const bookingAmount = searchParams.get('amount');
-    const booking = searchParams.get('booking');
-    const type = searchParams.get('type');
+  const amount    = parseInt(searchParams.get('amount')  || '0');
+  const bookingId = searchParams.get('booking');
+  const serviceType = searchParams.get('type') || '';
+  const amountEUR = (amount / ISK_TO_EUR_RATE).toFixed(2);
 
-    if (bookingAmount) setAmount(parseInt(bookingAmount));
-    if (booking) setBookingId(booking);
-    if (type) setServiceType(type);
+  const [error, setError]       = useState<string | null>(null);
+  const [isPaying, setIsPaying] = useState(false);
 
-    // Read clientSecret from sessionStorage (never from URL)
-    const storedSecret = sessionStorage.getItem('bookingClientSecret');
-    if (storedSecret) {
-      sessionStorage.removeItem('bookingClientSecret');
-      setClientSecret(storedSecret);
-      return;
+  const createOrder = async () => {
+    setError(null);
+    try {
+      const res  = await fetch('/api/paypal/create-order', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          description: `${serviceLabels[serviceType] || 'Booking'} — PrimeTaxi & Tours`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create order');
+      return data.orderID;
+    } catch (err: any) {
+      setError(err.message || 'Failed to initialize payment.');
+      throw err;
     }
+  };
 
-    // Fallback: recover existing client secret using the booking ID
-    // (handles tab close/refresh where sessionStorage is cleared)
-    if (booking) {
-      fetch(`/api/bookings/${booking}/client-secret`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.clientSecret) setClientSecret(data.clientSecret);
-          else console.error('Could not recover client secret:', data.error);
-        })
-        .catch(console.error);
+  const onApprove = async (data: { orderID: string }) => {
+    setIsPaying(true);
+    setError(null);
+    try {
+      const res    = await fetch('/api/paypal/capture-order', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderID: data.orderID, bookingId }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Payment capture failed');
+      router.push(`/booking/confirmation?booking=${bookingId}`);
+    } catch (err: any) {
+      setError(err.message || 'Payment failed. Please try again.');
+      setIsPaying(false);
     }
-  }, [searchParams]);
+  };
+
+  const onError = (err: any) => {
+    console.error('PayPal error:', err);
+    setError('Payment could not be processed. Please try again.');
+    setIsPaying(false);
+  };
+
+  const onCancel = () =>
+    setError('Payment was cancelled. You can try again whenever you are ready.');
+
+  if (!bookingId || !amount) {
+    return (
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-3">Invalid Payment Link</h1>
+          <p className="text-slate-500 mb-8">Booking details are missing. Please start a new booking.</p>
+          <button
+            onClick={() => router.push('/booking')}
+            className="px-8 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
+          >
+            Start New Booking
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="py-6 sm:py-10 px-4 max-w-4xl mx-auto">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 sm:mb-8"
-      >
-        <ArrowLeft className="size-5" />
-        Back to Booking
-      </button>
+    <main className="min-h-screen bg-slate-50 py-8 sm:py-12 px-4">
+      <div className="max-w-5xl mx-auto">
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-        {/* Payment Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 border border-slate-100">
-          <div className="flex items-center gap-3 mb-6">
-            <CreditCard className="size-6 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Payment Details</h1>
+        {/* Back */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors"
+        >
+          <ArrowLeft className="size-4" />
+          <span className="text-sm font-medium">Back to Booking</span>
+        </button>
+
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 rounded-full px-4 py-1.5 text-sm font-semibold mb-4">
+            <ShieldCheck className="size-4" />
+            Secured by PayPal
           </div>
-
-          {clientSecret ? (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: 'stripe',
-                  variables: {
-                    colorPrimary: '#f2cc0d',
-                    borderRadius: '8px',
-                  },
-                },
-              }}
-            >
-              <CheckoutForm amount={amount} bookingId={bookingId} />
-            </Elements>
-          ) : (
-            <div className="space-y-4">
-              <div className="h-12 skeleton rounded-lg" />
-              <div className="h-12 skeleton rounded-lg" />
-              <div className="h-12 skeleton rounded-lg" />
-            </div>
-          )}
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Complete Your Payment</h1>
+          <p className="text-slate-500 text-sm max-w-md mx-auto">
+            Pay with your PayPal account or enter your card details — no PayPal account required.
+          </p>
         </div>
 
-        {/* Order Summary */}
-        <div className="bg-secondary text-white rounded-2xl shadow-lg p-8 h-fit">
-          <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-          <div className="space-y-4 mb-6">
-            <div className="flex justify-between">
-              <span className="text-slate-300">{serviceLabels[serviceType] || 'Service'}</span>
-              <span>{formatCurrency(amount)}</span>
-            </div>
-            <div className="border-t border-slate-700 pt-4">
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-primary">{formatCurrency(amount)}</span>
+          {/* ── Left: payment panel ── */}
+          <div className="lg:col-span-3 space-y-4">
+
+            {/* Amount banner */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Amount Due</span>
+                <span className="text-xs bg-slate-100 text-slate-500 rounded-full px-2.5 py-0.5">Charged in EUR</span>
               </div>
+              <div className="flex items-end gap-3 mt-1">
+                <span className="text-3xl font-extrabold text-slate-900">{formatCurrency(amount)}</span>
+                <span className="text-slate-400 text-sm mb-1">≈ €{amountEUR}</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                ISK is converted to EUR at checkout (approx. 1 EUR = {ISK_TO_EUR_RATE} ISK).
+              </p>
+            </div>
+
+            {/* Payment card */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+              {/* Header */}
+              <div className="px-6 pt-6 pb-4 border-b border-slate-100">
+                <p className="text-sm font-semibold text-slate-700 mb-1">Choose payment method</p>
+                <p className="text-xs text-slate-400">
+                  Pay with PayPal or enter your card details directly — no account needed.
+                </p>
+              </div>
+
+              {/* Accepted cards row */}
+              <div className="px-6 pt-4 flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-slate-400 font-medium">We accept:</span>
+                {['Visa', 'Mastercard', 'Amex', 'Discover', 'PayPal'].map((c) => (
+                  <span key={c} className="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1">
+                    {c}
+                  </span>
+                ))}
+                <span className="ml-auto text-xs text-slate-400 flex items-center gap-1">
+                  <Lock className="size-3" />
+                  SSL encrypted
+                </span>
+              </div>
+
+              {/* PayPal buttons — vertical layout shows PayPal + card natively */}
+              <div className="p-6">
+                <PayPalScriptProvider
+                  options={{
+                    clientId:   process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+                    currency:   'EUR',
+                    intent:     'capture',
+                    locale:     'en_US',
+                    components: 'buttons',
+                  }}
+                >
+                  <PayPalButtons
+                    style={{
+                      layout: 'vertical',
+                      color:  'gold',
+                      shape:  'rect',
+                      label:  'pay',
+                      height: 50,
+                    }}
+                    disabled={isPaying}
+                    createOrder={createOrder}
+                    onApprove={onApprove}
+                    onError={onError}
+                    onCancel={onCancel}
+                  />
+                </PayPalScriptProvider>
+              </div>
+
+              {/* Feedback messages */}
+              {error && (
+                <div className="mx-6 mb-5 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                  {error}
+                </div>
+              )}
+              {isPaying && (
+                <div className="mx-6 mb-5 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm flex items-center gap-3">
+                  <Loader2 className="size-4 animate-spin shrink-0" />
+                  Processing your payment — please do not close this page.
+                </div>
+              )}
+
+              <div className="px-6 pb-5">
+                <p className="text-xs text-slate-400 text-center flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="size-3.5 text-green-500 shrink-0" />
+                  Your card details are handled securely by PayPal — we never store them.
+                </p>
+              </div>
+            </div>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400 py-1">
+              <span className="flex items-center gap-1.5"><Lock className="size-3.5" />256-bit SSL encryption</span>
+              <span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />PayPal Buyer Protection</span>
+              <span className="flex items-center gap-1.5"><Phone className="size-3.5" />24/7 support available</span>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Check className="size-4 text-green-400" />
-              <span>Free cancellation up to 24h before</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Check className="size-4 text-green-400" />
-              <span>Flight monitoring included</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Check className="size-4 text-green-400" />
-              <span>Meet & greet at arrivals</span>
+          {/* ── Right: order summary ── */}
+          <div className="lg:col-span-2">
+            <div className="bg-secondary text-white rounded-2xl shadow-lg p-6 sticky top-24">
+
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
+                <span className="text-3xl">{serviceIcons[serviceType] || '🚗'}</span>
+                <div>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">Service</p>
+                  <p className="font-bold">{serviceLabels[serviceType] || 'Booking'}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-300">Base fare</span>
+                  <span>{formatCurrency(amount)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-300">EUR equivalent</span>
+                  <span>€{amountEUR}</span>
+                </div>
+                <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span className="text-primary">{formatCurrency(amount)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {[
+                  { icon: Clock,        text: 'Free cancellation up to 24h before' },
+                  { icon: Phone,        text: 'Flight monitoring included'          },
+                  { icon: Star,         text: 'Meet & greet at arrivals'            },
+                  { icon: ShieldCheck,  text: 'Instant booking confirmation'        },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2.5 text-sm text-slate-300">
+                    <div className="size-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                      <Icon className="size-3 text-green-400" />
+                    </div>
+                    {text}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-5 border-t border-white/10 text-center">
+                <p className="text-xs text-slate-400">
+                  Need help?{' '}
+                  <a href="tel:+3548575955" className="text-primary hover:underline font-medium">
+                    +354 857 5955
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -214,24 +292,16 @@ function PaymentContent() {
 
 function PaymentLoading() {
   return (
-    <main className="py-10 px-4 max-w-4xl mx-auto">
-      <div className="h-8 w-32 skeleton rounded mb-8" />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-          <div className="h-8 w-48 skeleton rounded mb-6" />
-          <div className="space-y-4">
-            <div className="h-12 skeleton rounded-lg" />
-            <div className="h-12 skeleton rounded-lg" />
-            <div className="h-12 skeleton rounded-lg" />
+    <main className="min-h-screen bg-slate-50 py-12 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="h-5 w-28 bg-slate-200 rounded animate-pulse mb-8" />
+        <div className="h-10 w-64 bg-slate-200 rounded animate-pulse mx-auto mb-10" />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3 space-y-4">
+            <div className="bg-white rounded-2xl h-24 animate-pulse" />
+            <div className="bg-white rounded-2xl h-80 animate-pulse" />
           </div>
-        </div>
-        <div className="bg-slate-200 rounded-2xl p-8 h-fit">
-          <div className="h-6 w-32 skeleton rounded mb-6" />
-          <div className="space-y-4">
-            <div className="h-4 skeleton rounded" />
-            <div className="h-4 skeleton rounded" />
-            <div className="h-4 skeleton rounded" />
-          </div>
+          <div className="lg:col-span-2 bg-slate-800 rounded-2xl h-80 animate-pulse" />
         </div>
       </div>
     </main>

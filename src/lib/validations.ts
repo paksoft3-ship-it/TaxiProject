@@ -5,7 +5,7 @@ export const bookingSchema = z.object({
   customerName: z.string().min(2, 'Name must be at least 2 characters'),
   customerEmail: z.string().email('Invalid email address'),
   customerPhone: z.string().min(7, 'Invalid phone number'),
-  passengers: z.number().min(1).max(50),
+  passengers: z.coerce.number().min(1).max(50),
   pickupLocation: z.string().min(3, 'Pickup location is required'),
   dropoffLocation: z.string().optional(),
   pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
@@ -13,7 +13,7 @@ export const bookingSchema = z.object({
   tourId: z.string().optional(),
   flightNumber: z.string().optional(),
   flightTime: z.string().optional(),
-  luggageCount: z.number().optional(),
+  luggageCount: z.coerce.number().optional(),
   options: z.object({
     premiumCar: z.boolean().optional(),
     childSeats: z.number().optional(),

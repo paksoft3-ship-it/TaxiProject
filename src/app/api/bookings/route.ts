@@ -5,7 +5,7 @@ import prisma from '@/lib/db';
 import { authOptions } from '@/lib/auth';
 import { bookingSchema } from '@/lib/validations';
 import { generateBookingNumber } from '@/lib/utils';
-import { createPaymentIntent } from '@/lib/stripe';
+// PayPal payment is handled separately via /api/paypal/* routes
 import { sendBookingConfirmation, sendAdminBookingNotification } from '@/lib/email';
 import { rateLimit, getIp } from '@/lib/rateLimit';
 
@@ -222,14 +222,8 @@ export async function POST(request: NextRequest) {
       specialRequests = `${details.join(', ')}. ${specialRequests}`;
     }
 
-    // Create payment intent only for non-taxi services
-    let paymentIntent = null;
-    if (validated.type !== 'TAXI') {
-      paymentIntent = await createPaymentIntent(totalPrice, 'isk', {
-        bookingType: validated.type,
-        customerEmail: validated.customerEmail,
-      });
-    }
+    // PayPal payment is created separately via /api/paypal/create-order
+    // No Stripe payment intent needed here
 
     // Create booking
     const booking = await prisma.booking.create({
@@ -248,7 +242,6 @@ export async function POST(request: NextRequest) {
         extras,
         totalPrice,
         currency: 'ISK',
-        paymentIntentId: paymentIntent?.id,
         tourId: validated.tourId,
         specialRequests: specialRequests, // Saved combined string
       },
@@ -277,14 +270,12 @@ export async function POST(request: NextRequest) {
       ]).catch((err) => console.error('Failed to send TAXI booking emails:', err));
     }
 
-    return NextResponse.json({
-      booking,
-      clientSecret: paymentIntent?.client_secret,
-    });
+    return NextResponse.json({ booking });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('Validation error details:', JSON.stringify(error.errors, null, 2));
       return NextResponse.json(
-        { error: 'Validation failed' },
+        { error: 'Validation failed', details: error.errors },
         { status: 400 }
       );
     }

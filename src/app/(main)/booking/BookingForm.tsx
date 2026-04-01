@@ -236,6 +236,8 @@ export function BookingForm() {
 
     if (!formData.phone.trim()) {
       newErrors.phone = 'Please enter your phone number';
+    } else if (formData.phone.trim().length < 7) {
+      newErrors.phone = 'Phone number must be at least 7 digits';
     }
 
     setErrors(newErrors);
@@ -297,7 +299,9 @@ export function BookingForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create booking');
+        const errData = await response.json().catch(() => ({}));
+        const firstIssue = errData?.details?.[0]?.message || errData?.error || 'Failed to create booking';
+        throw new Error(firstIssue);
       }
 
       const data = await response.json();
@@ -308,10 +312,6 @@ export function BookingForm() {
         return;
       }
 
-      // Store clientSecret in sessionStorage rather than URL to avoid
-      // it appearing in browser history, server logs, and analytics tools.
-      sessionStorage.setItem('bookingClientSecret', data.clientSecret);
-
       const params = new URLSearchParams({
         booking: data.booking.id,
         amount: data.booking.totalPrice.toString(),
@@ -321,7 +321,7 @@ export function BookingForm() {
       router.push(`/booking/payment?${params.toString()}`);
     } catch (error) {
       console.error('Booking error:', error);
-      toast.error('Failed to create booking. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to create booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
