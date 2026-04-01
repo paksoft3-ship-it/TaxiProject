@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { Lock, ArrowLeft, ShieldCheck, Clock, Phone, Star, Loader2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -25,6 +25,44 @@ const serviceIcons: Record<string, string> = {
 };
 
 const ISK_TO_EUR_RATE = 150;
+const EUR_EXCHANGE_RATE_FORMAT = '1 EUR = 150 ISK';
+
+interface PayPalButtonsWrapperProps {
+  isPaying: boolean;
+  createOrder: () => Promise<string>;
+  onApprove: (data: { orderID: string }) => Promise<void>;
+  onError: (err: any) => void;
+  onCancel: () => void;
+}
+
+function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCancel }: PayPalButtonsWrapperProps) {
+  const [{ isPending }] = usePayPalScriptReducer();
+
+  return (
+    <div className="relative min-h-[150px]">
+      {isPending && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 z-10 gap-3">
+          <Loader2 className="size-8 animate-spin text-primary" />
+          <p className="text-xs font-semibold text-slate-500 animate-pulse">Loading payment methods...</p>
+        </div>
+      )}
+      <PayPalButtons
+        style={{
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'pay',
+          height: 50,
+        }}
+        disabled={isPaying || isPending}
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onError={onError}
+        onCancel={onCancel}
+      />
+    </div>
+  );
+}
 
 function PaymentContent() {
   const router = useRouter();
@@ -175,30 +213,30 @@ function PaymentContent() {
 
               {/* PayPal buttons — vertical layout shows PayPal + card natively */}
               <div className="p-6">
-                <PayPalScriptProvider
-                  options={{
-                    clientId:   process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-                    currency:   'EUR',
-                    intent:     'capture',
-                    locale:     'en_US',
-                    components: 'buttons',
-                  }}
-                >
-                  <PayPalButtons
-                    style={{
-                      layout: 'vertical',
-                      color:  'gold',
-                      shape:  'rect',
-                      label:  'pay',
-                      height: 50,
+                {!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <AlertCircle className="size-4 shrink-0" />
+                    Payment configuration is missing. Please contact support or try again later.
+                  </div>
+                ) : (
+                  <PayPalScriptProvider
+                    options={{
+                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+                      currency: 'EUR',
+                      intent: 'capture',
+                      locale: 'en_US',
+                      components: 'buttons',
                     }}
-                    disabled={isPaying}
-                    createOrder={createOrder}
-                    onApprove={onApprove}
-                    onError={onError}
-                    onCancel={onCancel}
-                  />
-                </PayPalScriptProvider>
+                  >
+                    <PayPalButtonsWrapper
+                      isPaying={isPaying}
+                      createOrder={createOrder}
+                      onApprove={onApprove}
+                      onError={onError}
+                      onCancel={onCancel}
+                    />
+                  </PayPalScriptProvider>
+                )}
               </div>
 
               {/* Feedback messages */}
