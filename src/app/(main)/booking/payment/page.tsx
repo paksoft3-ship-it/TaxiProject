@@ -87,11 +87,20 @@ function PaymentContent() {
           description: `${serviceLabels[serviceType] || 'Booking'} — PrimeTaxi & Tours`,
         }),
       });
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create order');
+      
+      if (!res.ok) {
+        console.error('Server-side PayPal error:', data);
+        const errorMsg = data.error || 'Failed to initialize PayPal order.';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+      
       return data.orderID;
     } catch (err: any) {
-      setError(err.message || 'Failed to initialize payment.');
+      console.error('Client-side createOrder error:', err);
+      if (!error) setError(err.message || 'Failed to initialize payment.');
       throw err;
     }
   };
