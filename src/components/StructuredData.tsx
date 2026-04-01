@@ -13,11 +13,13 @@ export function OrganizationSchema() {
     url: 'https://primetaxi.is',
     logo: 'https://primetaxi.is/logo.png',
     image: 'https://primetaxi.is/og-image.jpg',
-    telephone: '+354-555-1234',
-    email: 'info@primetaxi.is',
+    telephone: '+354 857 5955',
+    email: 'booking@primetaxi.is',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Reykjavik',
+      streetAddress: 'Krummahólum 2',
+      postalCode: '111',
+      addressLocality: 'Reykjavík',
       addressCountry: 'IS',
     },
     geo: {

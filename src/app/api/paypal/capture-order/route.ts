@@ -43,6 +43,9 @@ export async function POST(request: NextRequest) {
             paymentIntentId: orderID,
             paidAt: new Date(),
           },
+          include: {
+            tour: { select: { name: true } },
+          },
         });
         break; // success
       } catch (dbErr: any) {

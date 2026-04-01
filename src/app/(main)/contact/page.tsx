@@ -35,7 +35,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-bold text-slate-900 dark:text-white">Address</h3>
                     <p className="text-slate-600 dark:text-slate-400">
-                      Borgartún 25, 105 Reykjavík, Iceland
+                      Krummahólum 2, 111 Reykjavík, Iceland
                     </p>
                   </div>
                 </div>
@@ -86,7 +86,7 @@ export default function ContactPage() {
             {/* Google Map */}
             <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-56 sm:h-72 lg:h-80 overflow-hidden shadow-card">
               <iframe
-                src="https://maps.google.com/maps?q=Borgartún%2025,%20105%20Reykjavík,%20Iceland&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=Krummahólum%202,%20111%20Reykjavík,%20Iceland&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

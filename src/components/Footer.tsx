@@ -139,7 +139,7 @@ export function Footer() {
               <ul className="space-y-4 text-sm">
                 <li className="flex items-start gap-3">
                   <MapPin className="size-5 text-primary mt-0.5 shrink-0" />
-                  <span>Borgartún 25, 105 Reykjavík, Iceland</span>
+                  <span>Krummahólum 2, 111 Reykjavík, Iceland</span>
                 </li>
                 <li>
                   <a
@@ -205,7 +205,11 @@ export function Footer() {
         </div>
 
         <div className="border-t border-slate-800 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p>&copy; {new Date().getFullYear()} PrimeTaxi & Tours. All rights reserved.</p>
+          <div className="text-center md:text-left">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Registered Company</p>
+            <p className="text-sm font-medium text-slate-400">Prime taxi • KT: 670326-0470</p>
+            <p className="mt-1">&copy; {new Date().getFullYear()} PrimeTaxi & Tours. All rights reserved.</p>
+          </div>
 
           <div className="flex justify-center items-center gap-2">
             <a

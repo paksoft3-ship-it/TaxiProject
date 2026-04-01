@@ -64,7 +64,7 @@ export default function PrivacyPage() {
                     </p>
                     <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
                         <p className="font-bold">PrimeTaxi & Tours</p>
-                        <p>Borgartún 25, 105 Reykjavík, Iceland</p>
+                        <p>Krummahólum 2, 111 Reykjavík, Iceland</p>
                         <p>Email: booking@primetaxi.is</p>
                         <p>Phone: +354 857 5955</p>
                     </div>
