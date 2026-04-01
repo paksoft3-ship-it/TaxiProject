@@ -56,29 +56,34 @@ export async function createOrder(
   // Convert ISK to EUR (2 decimal places)
   const amountEUR = (amountISK / ISK_TO_EUR_RATE).toFixed(2);
 
+  const requestBody = {
+    intent: 'CAPTURE',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: 'EUR',
+          value: amountEUR,
+        },
+        description: description || 'PrimeTaxi & Tours Booking',
+      },
+    ],
+  };
+
+  console.log('Creating PayPal order with body:', JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'EUR',
-            value: amountEUR,
-          },
-          description: description || 'PrimeTaxi & Tours Booking',
-        },
-      ],
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`Failed to create PayPal order: ${errorData}`);
+    const errorData = await response.json();
+    console.error('PayPal API Error:', JSON.stringify(errorData, null, 2));
+    throw new Error(`PayPal API Error: ${errorData.message || JSON.stringify(errorData)}`);
   }
 
   const orderData = await response.json();

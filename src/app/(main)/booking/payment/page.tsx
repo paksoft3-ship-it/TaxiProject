@@ -84,7 +84,7 @@ function PaymentContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount,
-          description: `${serviceLabels[serviceType] || 'Booking'} — PrimeTaxi & Tours`,
+          description: `${serviceLabels[serviceType] || 'Booking'} - PrimeTaxi & Tours`,
         }),
       });
       
