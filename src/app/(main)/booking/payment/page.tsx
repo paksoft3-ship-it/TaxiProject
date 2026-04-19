@@ -94,7 +94,6 @@ function PaymentContent() {
         console.error('Server-side PayPal error:', data);
         const errorMsg = data.error || 'Failed to initialize PayPal order.';
         setError(errorMsg);
-        window.alert(`PayPal Error: ${errorMsg}`);
         throw new Error(errorMsg);
       }
       

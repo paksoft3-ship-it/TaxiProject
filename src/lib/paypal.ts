@@ -69,8 +69,6 @@ export async function createOrder(
     ],
   };
 
-  console.log('Creating PayPal order with body:', JSON.stringify(requestBody, null, 2));
-
   const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
