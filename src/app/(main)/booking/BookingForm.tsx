@@ -22,7 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { POPULAR_LOCATIONS } from '@/lib/locations';
 import { BookingSummary } from './BookingSummary';
-import { useJsApiLoader, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
+import { useJsApiLoader, GoogleMap, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import { PlaceAutocomplete } from '@/components/PlaceAutocomplete';
 
 const libraries: any[] = [];
@@ -74,8 +74,8 @@ export function BookingForm() {
   if (initialType === 'BLUE_LAGOON' && initialPackage) {
     startStep = 2; // Skip service selection — package already chosen
     if (initialPackage === 'combo') {
-      defaultPickup = 'Keflavik Airport';
-      defaultDropoff = 'Reykjavik City (via Blue Lagoon)';
+      defaultPickup = 'Keflavik International Airport, Iceland';
+      defaultDropoff = 'Blue Lagoon, Grindavík, Iceland';
     }
   } else if (initialTourId) {
     startStep = 2; // Skip service selection — tour already chosen from tour page
@@ -112,6 +112,7 @@ export function BookingForm() {
     tourStartTime: '',
   });
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [differentDropoff, setDifferentDropoff] = useState(false);
   const [pricingSettings, setPricingSettings] = useState<Record<string, number>>({});
 
   const [minDate, setMinDate] = useState<string>('');
@@ -145,6 +146,7 @@ export function BookingForm() {
   const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
   const [distanceKm, setDistanceKm] = useState<number>(0);
   const [durationStr, setDurationStr] = useState<string>('');
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
 
 
 
@@ -170,14 +172,30 @@ export function BookingForm() {
     }
   };
 
-  // Automatically trace the route right when the map script finishes loading
-  // if the user arrived from the homepage widget with predefined locations!
+  // Recalculate route whenever the user reaches step 3 with both locations filled
+  // (covers preset Blue Lagoon locations AND homepage widget predefined locations)
   useEffect(() => {
-    if (isLoaded && formData.pickupLocation && formData.dropoffLocation) {
+    if (isLoaded && step === 3 && formData.pickupLocation && formData.dropoffLocation) {
       calculateRoute();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+  }, [isLoaded, step]);
+
+  // Geocode pickup location for single-pin map (tours & hourly hire)
+  useEffect(() => {
+    if (!isLoaded || !formData.pickupLocation.trim()) {
+      setPickupCoords(null);
+      return;
+    }
+    if (serviceType !== 'PRIVATE_TOUR' && serviceType !== 'HOURLY_HIRE') return;
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: formData.pickupLocation + ', Iceland' }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        const loc = results[0].geometry.location;
+        setPickupCoords({ lat: loc.lat(), lng: loc.lng() });
+      }
+    });
+  }, [isLoaded, formData.pickupLocation, serviceType]);
 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -217,7 +235,8 @@ export function BookingForm() {
       newErrors.pickupLocation = 'Please enter a pickup location';
     }
 
-    if ((serviceType === 'TAXI' || serviceType === 'AIRPORT_TRANSFER') && !formData.dropoffLocation.trim()) {
+    const needsDropoff = serviceType === 'TAXI' || serviceType === 'AIRPORT_TRANSFER';
+    if (needsDropoff && !formData.dropoffLocation.trim()) {
       newErrors.dropoffLocation = 'Please enter a drop-off location';
     }
 
@@ -266,6 +285,10 @@ export function BookingForm() {
     }
 
     if (isValid) {
+      // For tours/hourly: if no different dropoff chosen, set dropoff = pickup (roundtrip)
+      if (step === 3 && (serviceType === 'PRIVATE_TOUR' || serviceType === 'HOURLY_HIRE') && !differentDropoff) {
+        updateFormData('dropoffLocation', formData.pickupLocation);
+      }
       setStep((prev) => Math.min(prev + 1, 5) as BookingStep);
     }
   };
@@ -474,129 +497,198 @@ export function BookingForm() {
         {step === 3 && (
           <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
-                3
-              </span>
-              Locations
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">3</span>
+              {serviceType === 'PRIVATE_TOUR' || serviceType === 'HOURLY_HIRE' ? 'Pickup Location' : 'Locations'}
             </h3>
 
-            {/* Tour info banner — shown when booking came from a specific tour page */}
-            {initialTourId && initialTourName && (
-              <div className="mb-6 flex items-start gap-3 bg-primary/10 border border-primary/20 rounded-xl p-4">
-                <MapPin className="size-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm">Booking: {initialTourName}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Please enter your pickup location (hotel / guesthouse / address). Our driver will collect you and take you on the tour.
-                  </p>
+            {/* ── PRIVATE TOUR & HOURLY HIRE: pickup only ── */}
+            {(serviceType === 'PRIVATE_TOUR' || serviceType === 'HOURLY_HIRE') ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Left: fields */}
+                <div className="flex flex-col gap-5">
+
+                  {/* Info banner */}
+                  <div className="flex items-start gap-3 bg-primary/10 border border-primary/20 rounded-xl p-4">
+                    <MapPin className="size-5 text-primary shrink-0 mt-0.5" />
+                    <div>
+                      {initialTourName
+                        ? <p className="font-semibold text-slate-900 text-sm">Booking: {initialTourName}</p>
+                        : <p className="font-semibold text-slate-900 text-sm">{serviceType === 'HOURLY_HIRE' ? 'Hourly Hire' : 'Private Tour'}</p>
+                      }
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {serviceType === 'PRIVATE_TOUR'
+                          ? "Tell us where to pick you up — your hotel, guesthouse, or address. The tour route is fixed; we'll bring you back to the same location afterwards."
+                          : 'Tell us your starting location. Your private driver will stay with you for the full duration.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pickup field */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-700 font-semibold text-sm">
+                      {serviceType === 'HOURLY_HIRE' ? 'Starting Location' : 'Your Hotel / Pickup Address'}
+                    </label>
+                    <PlaceAutocomplete
+                      value={formData.pickupLocation}
+                      onChange={(val) => updateFormData('pickupLocation', val)}
+                      placeholder="e.g. Hilton Reykjavik Nordica, or your hotel address"
+                      icon={<MapPin className="text-primary size-5" />}
+                      className={cn(
+                        "bg-slate-50 text-slate-700 border",
+                        errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
+                      )}
+                    />
+                    {errors.pickupLocation && (
+                      <p className="text-red-500 text-sm flex items-center gap-1">
+                        <AlertCircle className="size-4" />{errors.pickupLocation}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Return info / different dropoff toggle */}
+                  {serviceType === 'PRIVATE_TOUR' && (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <div className="size-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                            <Check className="size-4 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800">Return to pickup location</p>
+                            <p className="text-xs text-slate-500">We'll drop you back at the same address after the tour.</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDifferentDropoff(!differentDropoff);
+                            if (differentDropoff) updateFormData('dropoffLocation', '');
+                          }}
+                          className="text-xs text-primary font-semibold hover:underline shrink-0 ml-4"
+                        >
+                          {differentDropoff ? 'Cancel' : 'Different drop-off?'}
+                        </button>
+                      </div>
+
+                      {differentDropoff && (
+                        <div className="flex flex-col gap-2">
+                          <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
+                          <PlaceAutocomplete
+                            value={formData.dropoffLocation}
+                            onChange={(val) => updateFormData('dropoffLocation', val)}
+                            placeholder="e.g. Keflavik Airport, or another hotel"
+                            icon={<Flag className="text-red-500 size-5" />}
+                            className="bg-slate-50 text-slate-700 border border-slate-200"
+                          />
+                          <p className="text-xs text-slate-400">Note: A different drop-off location may affect the price.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: map with pickup pin */}
+                <div className="rounded-xl overflow-hidden bg-slate-100 relative h-48 sm:h-64 md:h-auto md:min-h-[350px] border border-slate-200">
+                  {isLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      center={pickupCoords ?? { lat: 64.1466, lng: -21.9426 }}
+                      zoom={pickupCoords ? 14 : 10}
+                      options={{ disableDefaultUI: true, zoomControl: true }}
+                    >
+                      {pickupCoords && <Marker position={pickupCoords} />}
+                    </GoogleMap>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+                      <MapPin className="size-12 animate-pulse" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            ) : (
+              /* ── TAXI / AIRPORT TRANSFER / BLUE LAGOON: full pickup + dropoff + map ── */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-4">
+                  <datalist id="locations-list">
+                    {POPULAR_LOCATIONS.map((loc) => <option key={loc} value={loc} />)}
+                  </datalist>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
+                    <PlaceAutocomplete
+                      value={formData.pickupLocation}
+                      onChange={(val) => { updateFormData('pickupLocation', val); setTimeout(calculateRoute, 100); }}
+                      placeholder="Enter airport, hotel, or address"
+                      icon={<Plane className="text-primary size-5" />}
+                      className={cn("bg-slate-50 text-slate-700 border", errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200")}
+                    />
+                    {errors.pickupLocation && (
+                      <p className="text-red-500 text-sm flex items-center gap-1"><AlertCircle className="size-4" />{errors.pickupLocation}</p>
+                    )}
+                  </div>
+
+                  <div className="pl-5 -my-2">
+                    <div className="h-6 border-l-2 border-dashed border-slate-300" />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
+                    <PlaceAutocomplete
+                      value={formData.dropoffLocation}
+                      onChange={(val) => { updateFormData('dropoffLocation', val); setTimeout(calculateRoute, 100); }}
+                      placeholder="Enter destination"
+                      icon={<Flag className="text-red-500 size-5" />}
+                      className={cn("bg-slate-50 text-slate-700 border", errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200")}
+                    />
+                    {errors.dropoffLocation && (
+                      <p className="text-red-500 text-sm flex items-center gap-1"><AlertCircle className="size-4" />{errors.dropoffLocation}</p>
+                    )}
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="text-xs text-slate-400 font-medium mb-2 uppercase tracking-wide">Popular Destinations:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {POPULAR_LOCATIONS.slice(0, 6).map((place) => (
+                        <button
+                          key={place}
+                          onClick={() => {
+                            if (!formData.pickupLocation) { updateFormData('pickupLocation', place); }
+                            else { updateFormData('dropoffLocation', place); setTimeout(calculateRoute, 100); }
+                          }}
+                          className={cn(
+                            'px-3 py-1 text-xs rounded-full transition-colors border',
+                            (formData.pickupLocation === place || formData.dropoffLocation === place)
+                              ? 'bg-primary/10 text-secondary border-primary/20 font-medium'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-100'
+                          )}
+                        >
+                          {place}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl overflow-hidden bg-slate-100 relative h-48 sm:h-64 md:h-auto md:min-h-[400px] border border-slate-200">
+                  {isLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      center={{ lat: 64.1466, lng: -21.9426 }}
+                      zoom={10}
+                      options={{ disableDefaultUI: true, zoomControl: true }}
+                    >
+                      {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
+                    </GoogleMap>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+                      <MapPin className="size-12 animate-pulse" />
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-4">
-                {/* Datalist for location suggestions */}
-                <datalist id="locations-list">
-                  {POPULAR_LOCATIONS.map((loc) => (
-                    <option key={loc} value={loc} />
-                  ))}
-                </datalist>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
-                  <PlaceAutocomplete
-                    value={formData.pickupLocation}
-                    onChange={(val) => {
-                      updateFormData('pickupLocation', val);
-                      setTimeout(calculateRoute, 100);
-                    }}
-                    placeholder="Enter airport, hotel, or address"
-                    icon={<Plane className="text-primary size-5" />}
-                    className={cn(
-                      "bg-slate-50 text-slate-700 border",
-                      errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200"
-                    )}
-                  />
-                  {errors.pickupLocation && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="size-4" />
-                      {errors.pickupLocation}
-                    </p>
-                  )}
-                </div>
-                <div className="pl-5 -my-2">
-                  <div className="h-6 border-l-2 border-dashed border-slate-300" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
-                  <PlaceAutocomplete
-                    value={formData.dropoffLocation}
-                    onChange={(val) => {
-                      updateFormData('dropoffLocation', val);
-                      setTimeout(calculateRoute, 100);
-                    }}
-                    placeholder="Enter destination"
-                    icon={<Flag className="text-red-500 size-5" />}
-                    className={cn(
-                      "bg-slate-50 text-slate-700 border",
-                      errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200"
-                    )}
-                  />
-                  {errors.dropoffLocation && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="size-4" />
-                      {errors.dropoffLocation}
-                    </p>
-                  )}
-                </div>
-                <div className="mt-2">
-                  <p className="text-xs text-slate-400 font-medium mb-2 uppercase tracking-wide">
-                    Popular Destinations:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {POPULAR_LOCATIONS.slice(0, 6).map((place) => (
-                      <button
-                        key={place}
-                        onClick={() => {
-                          if (!formData.pickupLocation) {
-                            updateFormData('pickupLocation', place);
-                          } else {
-                            updateFormData('dropoffLocation', place);
-                            setTimeout(calculateRoute, 100);
-                          }
-                        }}
-                        className={cn(
-                          'px-3 py-1 text-xs rounded-full transition-colors border',
-                          (formData.pickupLocation === place || formData.dropoffLocation === place)
-                            ? 'bg-primary/10 text-secondary border-primary/20 font-medium'
-                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-100'
-                        )}
-                      >
-                        {place}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-xl overflow-hidden bg-slate-100 relative h-48 sm:h-64 md:h-auto md:min-h-[400px] border border-slate-200">
-                {isLoaded ? (
-                  <GoogleMap
-                    mapContainerStyle={{ width: '100%', height: '100%' }}
-                    center={{ lat: 64.1466, lng: -21.9426 }} // Reykjavik center
-                    zoom={10}
-                    options={{ disableDefaultUI: true, zoomControl: true }}
-                  >
-                    {directionsResponse && (
-                      <DirectionsRenderer directions={directionsResponse} />
-                    )}
-                  </GoogleMap>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                    <MapPin className="size-12 animate-pulse" />
-                  </div>
-                )}
-              </div>
-            </div>
           </section>
         )}
 
