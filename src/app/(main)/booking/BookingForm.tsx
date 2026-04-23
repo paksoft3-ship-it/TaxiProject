@@ -62,6 +62,7 @@ export function BookingForm() {
   const initialTourName = searchParams.get('tourName') || '';
   const initialTourId = searchParams.get('tourId') || '';
   const initialTourPrice = Number(searchParams.get('tourPrice')) || 0;
+  const initialTourLargeGroupPrice = Number(searchParams.get('tourLargeGroupPrice')) || 0;
   const initialDirection = searchParams.get('direction') || '';
   const initialHours = searchParams.get('hours') || '4';
 
@@ -111,6 +112,7 @@ export function BookingForm() {
     tourStartTime: '',
   });
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [pricingSettings, setPricingSettings] = useState<Record<string, number>>({});
 
   const [minDate, setMinDate] = useState<string>('');
 
@@ -125,6 +127,12 @@ export function BookingForm() {
     if (!formData.date || formData.date < localISOTime) {
       setFormData(prev => ({ ...prev, date: localISOTime }));
     }
+
+    // Fetch live pricing settings so BookingSummary shows accurate prices
+    fetch('/api/settings/public')
+      .then((r) => r.json())
+      .then((data) => { if (data.pricing) setPricingSettings(data.pricing); })
+      .catch(() => {}); // silently fall back to defaults in BookingSummary
   }, []);
 
   // Google Maps State
@@ -978,6 +986,8 @@ export function BookingForm() {
           realDistanceKm={distanceKm}
           realDurationStr={durationStr}
           tourPrice={initialTourPrice || undefined}
+          tourLargeGroupPrice={initialTourLargeGroupPrice || undefined}
+          pricingSettings={pricingSettings}
         />
       </div>
     </div>

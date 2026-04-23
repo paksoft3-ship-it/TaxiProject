@@ -57,6 +57,7 @@ export async function PUT(
         ...(body.duration !== undefined && { duration: body.duration }),
         ...(body.durationHours !== undefined && { durationHours: body.durationHours }),
         ...(body.price !== undefined && { price: parseFloat(body.price) }),
+        ...(body.largeGroupPrice !== undefined && { largeGroupPrice: parseFloat(body.largeGroupPrice) || 0 }),
         ...(body.currency !== undefined && { currency: body.currency }),
         ...(body.category !== undefined && { category: body.category }),
         ...(body.highlights !== undefined && { highlights: body.highlights }),

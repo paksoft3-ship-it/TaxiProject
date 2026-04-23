@@ -26,6 +26,7 @@ interface Tour {
   duration: string;
   durationHours: number;
   price: number;
+  largeGroupPrice: number;
   currency: string;
   category: string;
   highlights: string[];
@@ -54,6 +55,7 @@ const emptyForm = {
   duration: '',
   durationHours: 1,
   price: 0,
+  largeGroupPrice: 0,
   currency: 'ISK',
   category: 'HALF_DAY',
   highlightsText: '',
@@ -128,6 +130,7 @@ export default function AdminToursPage() {
       duration: tour.duration,
       durationHours: tour.durationHours,
       price: tour.price,
+      largeGroupPrice: tour.largeGroupPrice,
       currency: tour.currency,
       category: tour.category,
       highlightsText: tour.highlights.join('\n'),
@@ -155,6 +158,7 @@ export default function AdminToursPage() {
         duration: formData.duration,
         durationHours: formData.durationHours,
         price: formData.price,
+        largeGroupPrice: formData.largeGroupPrice,
         currency: formData.currency,
         category: formData.category,
         highlights: formData.highlightsText.split('\n').map(s => s.trim()).filter(Boolean),
@@ -318,8 +322,12 @@ export default function AdminToursPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{tour.duration}</td>
-                    <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">
-                      {tour.price.toLocaleString()} {tour.currency}
+                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">
+                      <span className="font-bold">{tour.price.toLocaleString()}</span>
+                      {tour.largeGroupPrice > 0 && (
+                        <span className="block text-xs text-slate-400">5–8 pax: {tour.largeGroupPrice.toLocaleString()}</span>
+                      )}
+                      <span className="text-xs text-slate-400"> {tour.currency}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={cn(
@@ -462,12 +470,28 @@ export default function AdminToursPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price *</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Small Group Price — 1–4 pax *
+                  </label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => set('price', parseFloat(e.target.value) || 0)}
                     min="0"
+                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Large Group Price — 5–8 pax
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.largeGroupPrice}
+                    onChange={(e) => set('largeGroupPrice', parseFloat(e.target.value) || 0)}
+                    min="0"
+                    placeholder="0 = same as small group price"
                     className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 </div>

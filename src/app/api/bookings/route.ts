@@ -78,13 +78,23 @@ export async function POST(request: NextRequest) {
     // Fetch dynamic pricing from DB (falls back to defaults if not set)
     const pricingDefaults: Record<string, number> = {
       airportTransferPrice: 20000,
+      airportTransferLargeGroupPrice: 25000,
+      hourlyHireRate: 12000,
+      hourlyHireLargeGroupRate: 15000,
       privateTourBasePrice: 45000,
       customTourBasePrice: 60000,
+      customTourLargeGroupPrice: 75000,
       blueLagoonTransferPrice: 20000,
       blueLagoonRoundtripPrice: 39000,
       blueLagoonComboPrice: 40000,
       blueLagoonComboLargeGroupPrice: 14000,
-      hourlyHireRate: 12000,
+      premiumCarFee: 5000,
+      childSeatFee: 2000,
+      extraStopFee: 7000,
+      extraTimeFee: 14000,
+      nightSurchargePercent: 25,
+      earlyMorningSurchargePercent: 15,
+      peakHoursSurchargePercent: 10,
     };
     const dbPricing = await prisma.setting.findMany({
       where: { key: { in: Object.keys(pricingDefaults) } },
@@ -108,13 +118,18 @@ export async function POST(request: NextRequest) {
     // Use tour-specific price when a tourId is provided for PRIVATE_TOUR
     if (validated.type === 'PRIVATE_TOUR' && validated.tourId) {
       const tour = await prisma.tour.findUnique({ where: { id: validated.tourId } });
-      if (tour) basePrice = tour.price;
+      if (tour) {
+        basePrice = validated.passengers > 4 && tour.largeGroupPrice > 0
+          ? tour.largeGroupPrice
+          : tour.price;
+      }
     }
 
     // Dynamic pricing for hourly hire (rate per hour, default 4 hrs)
     if (validated.type === 'HOURLY_HIRE') {
       const hours = parseInt(String(validated.options?.hourlyDuration || '4'), 10);
-      basePrice = hours * pricing.hourlyHireRate;
+      const rate = validated.passengers > 4 ? pricing.hourlyHireLargeGroupRate : pricing.hourlyHireRate;
+      basePrice = hours * rate;
     }
 
     // Handle Blue Lagoon Packages specifically
@@ -136,21 +151,22 @@ export async function POST(request: NextRequest) {
     // Extra passengers fee
     if (validated.passengers > 4) {
       if (validated.type === 'AIRPORT_TRANSFER') {
-        // Override to flat 25,000 ISK for 5-8 passengers (larger vehicle)
-        basePrice = 25000;
+        basePrice = pricing.airportTransferLargeGroupPrice;
       } else if (validated.type === 'BLUE_LAGOON') {
-        // Blue Lagoon package price already set above; no additional per-pax fee
-      } else {
-        extras += (validated.passengers - 4) * 2000;
+        // package price already set above; no extra fee
+      } else if (validated.type === 'CUSTOM_TOUR') {
+        basePrice = pricing.customTourLargeGroupPrice;
       }
+      // PRIVATE_TOUR: handled above via tour.largeGroupPrice
+      // HOURLY_HIRE: handled above via hourlyHireLargeGroupRate
     }
 
     // Options add-ons (applied once for all types)
     if (validated.options) {
-      if (validated.options.premiumCar) extras += 5000;
-      if (validated.options.childSeats) extras += validated.options.childSeats * 2000;
-      if (validated.options.extraStop) extras += 7000;
-      if (validated.options.extraTime) extras += 14000;
+      if (validated.options.premiumCar) extras += pricing.premiumCarFee;
+      if (validated.options.childSeats) extras += validated.options.childSeats * pricing.childSeatFee;
+      if (validated.options.extraStop) extras += pricing.extraStopFee;
+      if (validated.options.extraTime) extras += pricing.extraTimeFee;
     }
 
     let totalPrice = basePrice + extras;
@@ -162,14 +178,14 @@ export async function POST(request: NextRequest) {
       let surchargeMultiplier = 1.0;
 
       if (pickupHour >= 22 || pickupHour < 6) {
-        surchargeMultiplier = 1.25;
-        appliedSurchargeLabel = 'Night rate (22:00-06:00)';
+        surchargeMultiplier = 1 + pricing.nightSurchargePercent / 100;
+        appliedSurchargeLabel = `Night rate (22:00-06:00) +${pricing.nightSurchargePercent}%`;
       } else if (pickupHour >= 6 && pickupHour < 8) {
-        surchargeMultiplier = 1.15;
-        appliedSurchargeLabel = 'Early morning (06:00-08:00)';
+        surchargeMultiplier = 1 + pricing.earlyMorningSurchargePercent / 100;
+        appliedSurchargeLabel = `Early morning (06:00-08:00) +${pricing.earlyMorningSurchargePercent}%`;
       } else if ((pickupHour >= 8 && pickupHour < 9) || (pickupHour >= 17 && pickupHour < 19)) {
-        surchargeMultiplier = 1.1;
-        appliedSurchargeLabel = 'Peak hours';
+        surchargeMultiplier = 1 + pricing.peakHoursSurchargePercent / 100;
+        appliedSurchargeLabel = `Peak hours +${pricing.peakHoursSurchargePercent}%`;
       }
 
       if (surchargeMultiplier > 1.0) {

@@ -93,7 +93,8 @@ model Tour {
   shortDescription String
   duration    String
   durationHours Int
-  price       Float
+  price            Float
+  largeGroupPrice  Float  @default(0)
   currency    String    @default("ISK")
   category    TourCategory
   highlights  String[]

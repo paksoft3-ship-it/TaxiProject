@@ -29,6 +29,26 @@ interface BookingSummaryProps {
   realDistanceKm?: number;
   realDurationStr?: string;
   tourPrice?: number;
+  tourLargeGroupPrice?: number;
+  pricingSettings?: {
+    airportTransferPrice?: number;
+    airportTransferLargeGroupPrice?: number;
+    hourlyHireRate?: number;
+    hourlyHireLargeGroupRate?: number;
+    customTourBasePrice?: number;
+    customTourLargeGroupPrice?: number;
+    blueLagoonTransferPrice?: number;
+    blueLagoonRoundtripPrice?: number;
+    blueLagoonComboPrice?: number;
+    blueLagoonComboLargeGroupPrice?: number;
+    premiumCarFee?: number;
+    childSeatFee?: number;
+    extraStopFee?: number;
+    extraTimeFee?: number;
+    nightSurchargePercent?: number;
+    earlyMorningSurchargePercent?: number;
+    peakHoursSurchargePercent?: number;
+  };
 }
 
 const serviceLabels: Record<string, string> = {
@@ -37,14 +57,6 @@ const serviceLabels: Record<string, string> = {
   PRIVATE_TOUR: 'Private Tour',
   HOURLY_HIRE: 'Hourly Hire',
   BLUE_LAGOON: 'Blue Lagoon Transfer',
-};
-
-// Base prices per service type (TAXI is metered — no fixed price shown)
-const basePrices: Record<string, number> = {
-  AIRPORT_TRANSFER: 20000,
-  PRIVATE_TOUR: 45000,
-  BLUE_LAGOON: 20000,
-  // HOURLY_HIRE is dynamic: hours × 12,000
 };
 
 // Price per km (only used for distance display on AIRPORT_TRANSFER map badge)
@@ -70,20 +82,29 @@ const routeDistances: Record<string, number> = {
   'default_airport': 45,
 };
 
-// Time-based surcharges
-const timeSurcharges: Record<string, { multiplier: number; label: string }> = {
-  night: { multiplier: 1.25, label: 'Night Rate (22:00-06:00)' },
-  early: { multiplier: 1.15, label: 'Early Morning (06:00-08:00)' },
-  peak: { multiplier: 1.1, label: 'Peak Hours (08:00-09:00, 17:00-19:00)' },
-};
 
-// Additional passenger fees
-const passengerFees = {
-  extraPassenger: 2000, // Per passenger above 4
-  largeGroup: 5000, // Group of 6+
-};
+export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '', tourPrice, tourLargeGroupPrice, pricingSettings }: BookingSummaryProps) {
+  const p = pricingSettings ?? {};
+  const isLargeGroup = formData.passengers > 4;
 
-export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '', tourPrice }: BookingSummaryProps) {
+  // All prices from settings (with safe fallbacks matching DB defaults)
+  const airportSmallPrice        = p.airportTransferPrice              ?? 20000;
+  const airportLargeGroupPrice   = p.airportTransferLargeGroupPrice    ?? 25000;
+  const hourlySmallRate          = p.hourlyHireRate                    ?? 12000;
+  const hourlyLargeGroupRate     = p.hourlyHireLargeGroupRate          ?? 15000;
+  const customSmallPrice         = p.customTourBasePrice               ?? 60000;
+  const customLargeGroupPrice    = p.customTourLargeGroupPrice         ?? 75000;
+  const blOneWayPrice            = p.blueLagoonTransferPrice           ?? 20000;
+  const blRoundtripPrice         = p.blueLagoonRoundtripPrice          ?? 39000;
+  const blComboPrice             = p.blueLagoonComboPrice              ?? 40000;
+  const blComboLargePrice        = p.blueLagoonComboLargeGroupPrice    ?? 14000;
+  const premiumCarFee            = p.premiumCarFee                     ?? 5000;
+  const childSeatFee             = p.childSeatFee                     ?? 2000;
+  const extraStopFee             = p.extraStopFee                     ?? 7000;
+  const extraTimeFee             = p.extraTimeFee                     ?? 14000;
+  const nightPct                 = p.nightSurchargePercent             ?? 25;
+  const earlyPct                 = p.earlyMorningSurchargePercent      ?? 15;
+  const peakPct                  = p.peakHoursSurchargePercent         ?? 10;
   // Calculate estimated distance based on locations
   const estimatedDistance = useMemo(() => {
     if (realDistanceKm > 0) return realDistanceKm;
@@ -113,18 +134,14 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
   const timeSurcharge = useMemo(() => {
     if (!formData.time) return null;
     const hour = parseInt(formData.time.split(':')[0]);
-
-    if (hour >= 22 || hour < 6) {
-      return timeSurcharges.night;
-    }
-    if (hour >= 6 && hour < 8) {
-      return timeSurcharges.early;
-    }
-    if ((hour >= 8 && hour < 9) || (hour >= 17 && hour < 19)) {
-      return timeSurcharges.peak;
-    }
+    if (hour >= 22 || hour < 6)
+      return { multiplier: 1 + nightPct / 100, label: `Night Rate (22:00–06:00) +${nightPct}%` };
+    if (hour >= 6 && hour < 8)
+      return { multiplier: 1 + earlyPct / 100, label: `Early Morning (06:00–08:00) +${earlyPct}%` };
+    if ((hour >= 8 && hour < 9) || (hour >= 17 && hour < 19))
+      return { multiplier: 1 + peakPct / 100, label: `Peak Hours +${peakPct}%` };
     return null;
-  }, [formData.time]);
+  }, [formData.time, nightPct, earlyPct, peakPct]);
 
   // Calculate all price components
   const priceBreakdown = useMemo(() => {
@@ -132,83 +149,86 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
 
     // Blue Lagoon Packages
     if (serviceType === 'BLUE_LAGOON') {
-      let amount = 20000;
+      let amount = blOneWayPrice;
       let label = 'One-Way Transfer';
-
       if (packageType === 'roundtrip') {
-        amount = 39000;
+        amount = blRoundtripPrice;
         label = 'Round Trip Transfer';
       } else if (packageType === 'combo') {
         if (formData.passengers > 4) {
-          amount = 14000;
-          label = 'Airport Combo Transfer (5-8 Pax)';
+          amount = blComboLargePrice;
+          label = 'Airport Combo Transfer (5–8 pax)';
         } else {
-          amount = 40000;
+          amount = blComboPrice;
           label = 'Airport Combo Transfer';
         }
       }
-
       breakdown.push({ label, amount, type: 'add' });
       return breakdown;
     }
 
-    // Special fixed price for Airport Transfer > 4 pax
-    if (serviceType === 'AIRPORT_TRANSFER' && formData.passengers > 4) {
-      breakdown.push({ label: 'Fixed fare (5-8 passengers)', amount: 25000, type: 'add' });
+    // Airport Transfer — two flat tiers
+    if (serviceType === 'AIRPORT_TRANSFER') {
+      if (isLargeGroup) {
+        breakdown.push({ label: 'Fixed fare (5–8 passengers)', amount: airportLargeGroupPrice, type: 'add' });
+      } else {
+        breakdown.push({ label: 'Base fare (1–4 passengers)', amount: airportSmallPrice, type: 'add' });
+      }
       return breakdown;
     }
 
-    // Base price computation
-    let base = (serviceType === 'PRIVATE_TOUR' && tourPrice) ? tourPrice : (basePrices[serviceType] || 0);
-    
+    // Hourly Hire — two flat rate tiers
     if (serviceType === 'HOURLY_HIRE') {
-       const hours = parseInt(options?.hourlyDuration || '4', 10);
-       base = hours * 12000;
-       breakdown.push({ label: `Hourly Hire (${hours} hrs @ 12k/hr)`, amount: base, type: 'add' });
-    } else {
-       breakdown.push({ label: 'Base fare', amount: base, type: 'add' });
+      const hours = parseInt(options?.hourlyDuration || '4', 10);
+      const rate = isLargeGroup ? hourlyLargeGroupRate : hourlySmallRate;
+      const base = hours * rate;
+      const groupLabel = isLargeGroup ? 'large group' : 'small group';
+      breakdown.push({ label: `Hourly Hire (${hours} hrs × ${rate.toLocaleString()} ISK/hr — ${groupLabel})`, amount: base, type: 'add' });
+      return breakdown;
     }
 
-    // Distance-based pricing for taxi/transfer
-    if (serviceType === 'TAXI' && formData.pickupLocation && formData.dropoffLocation) {
-      const distanceFee = estimatedDistance * (pricePerKm[serviceType] || 0);
+    // Private Tour — two flat tiers per tour
+    if (serviceType === 'PRIVATE_TOUR') {
+      const smallPrice = tourPrice ?? 45000;
+      const base = isLargeGroup && tourLargeGroupPrice && tourLargeGroupPrice > 0 ? tourLargeGroupPrice : smallPrice;
+      const groupLabel = isLargeGroup ? ' (5–8 pax)' : ' (1–4 pax)';
+      breakdown.push({ label: `Tour price${groupLabel}`, amount: base, type: 'add' });
+      return breakdown;
+    }
+
+    // Custom Tour — two flat tiers
+    if (serviceType === 'CUSTOM_TOUR') {
+      const base = isLargeGroup ? customLargeGroupPrice : customSmallPrice;
+      const groupLabel = isLargeGroup ? '5–8 pax' : '1–4 pax';
+      breakdown.push({ label: `Custom Tour (${groupLabel})`, amount: base, type: 'add' });
+      return breakdown;
+    }
+
+    // TAXI — metered, distance-based
+    breakdown.push({ label: 'Base fare', amount: 0, type: 'add' });
+    if (formData.pickupLocation && formData.dropoffLocation) {
+      const distanceFee = estimatedDistance * (pricePerKm.AIRPORT_TRANSFER || 0);
       if (distanceFee > 0) {
         breakdown.push({ label: `Distance (${estimatedDistance} km)`, amount: distanceFee, type: 'add' });
       }
     }
 
-    // Extra passenger fees
-    if (formData.passengers > 4) {
-      if (serviceType === 'AIRPORT_TRANSFER') {
-        // Special fixed price logic handled above
-      } else if (serviceType === 'BLUE_LAGOON') {
-        // Fixed price for Blue Lagoon packages regardless of pax count (packages handle specific tiers)
-      } else {
-        const extraPassengers = formData.passengers - 4;
-        const fee = extraPassengers * passengerFees.extraPassenger;
-        breakdown.push({ label: `Extra passengers (${extraPassengers})`, amount: fee, type: 'add' });
-      }
-    }
-
-    // Options & Extras
+    // Options & Extras (shared across non-Blue-Lagoon services)
     if (options.premiumCar) {
-      breakdown.push({ label: 'Premium Luxury Vehicle', amount: 5000, type: 'add' });
+      breakdown.push({ label: 'Premium Luxury Vehicle', amount: premiumCarFee, type: 'add' });
     }
-
     if (options.childSeats > 0) {
-      breakdown.push({ label: `Child / Booster Seat (${options.childSeats})`, amount: options.childSeats * 2000, type: 'add' });
+      breakdown.push({ label: `Child / Booster Seat (${options.childSeats})`, amount: options.childSeats * childSeatFee, type: 'add' });
     }
-
     if (options.extraStop) {
-      breakdown.push({ label: 'Extra Stop', amount: 7000, type: 'add' });
+      breakdown.push({ label: 'Extra Stop', amount: extraStopFee, type: 'add' });
     }
-
     if (options.extraTime) {
-      breakdown.push({ label: 'Extra Time', amount: 14000, type: 'add' });
+      breakdown.push({ label: 'Extra Time', amount: extraTimeFee, type: 'add' });
     }
 
     return breakdown;
-  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType, tourPrice]);
+  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType, tourPrice, tourLargeGroupPrice, isLargeGroup, airportSmallPrice, airportLargeGroupPrice, hourlySmallRate, hourlyLargeGroupRate, customSmallPrice, customLargeGroupPrice, blOneWayPrice, blRoundtripPrice, blComboPrice, blComboLargePrice, premiumCarFee, childSeatFee, extraStopFee, extraTimeFee]);
 
   // Calculate subtotal
   const subtotal = priceBreakdown.reduce((sum, item) => sum + item.amount, 0);

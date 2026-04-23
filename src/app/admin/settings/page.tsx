@@ -35,6 +35,9 @@ interface Settings {
   bookingEmailNotifications: boolean;
   autoConfirmBookings: boolean;
   airportTransferPrice: number;
+  airportTransferLargeGroupPrice: number;
+  hourlyHireLargeGroupRate: number;
+  customTourLargeGroupPrice: number;
   blueLagoonTransferPrice: number;
   kefBlueLagoonPrice: number;
   cruisePortPrice: number;
@@ -45,6 +48,13 @@ interface Settings {
   blueLagoonComboPrice: number;
   blueLagoonComboLargeGroupPrice: number;
   hourlyHireRate: number;
+  premiumCarFee: number;
+  childSeatFee: number;
+  extraStopFee: number;
+  extraTimeFee: number;
+  nightSurchargePercent: number;
+  earlyMorningSurchargePercent: number;
+  peakHoursSurchargePercent: number;
   [key: string]: any;
 }
 
@@ -59,6 +69,9 @@ const defaultSettings: Settings = {
   bookingEmailNotifications: true,
   autoConfirmBookings: false,
   airportTransferPrice: 20000,
+  airportTransferLargeGroupPrice: 25000,
+  hourlyHireLargeGroupRate: 15000,
+  customTourLargeGroupPrice: 75000,
   blueLagoonTransferPrice: 20000,
   kefBlueLagoonPrice: 15000,
   cruisePortPrice: 25000,
@@ -68,6 +81,13 @@ const defaultSettings: Settings = {
   blueLagoonRoundtripPrice: 39000,
   blueLagoonComboPrice: 40000,
   blueLagoonComboLargeGroupPrice: 14000,
+  premiumCarFee: 5000,
+  childSeatFee: 2000,
+  extraStopFee: 7000,
+  extraTimeFee: 14000,
+  nightSurchargePercent: 25,
+  earlyMorningSurchargePercent: 15,
+  peakHoursSurchargePercent: 10,
   hourlyHireRate: 12000,
 };
 
@@ -303,7 +323,8 @@ export default function SettingsPage() {
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
-                    { key: 'airportTransferPrice', label: 'Airport Transfer (KEF ↔ Reykjavik)' },
+                    { key: 'airportTransferPrice', label: 'Airport Transfer — Small Group (1–4 pax)' },
+                    { key: 'airportTransferLargeGroupPrice', label: 'Airport Transfer — Large Group (5–8 pax)' },
                     { key: 'blueLagoonTransferPrice', label: 'Blue Lagoon Transfer (Reykjavik ↔ Blue Lagoon)' },
                     { key: 'kefBlueLagoonPrice', label: 'KEF ↔ Blue Lagoon Direct' },
                     { key: 'cruisePortPrice', label: 'Cruise Port Transfer' },
@@ -362,10 +383,11 @@ export default function SettingsPage() {
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
-                    { key: 'privateTourBasePrice', label: 'Private Tour Base Price' },
-                    { key: 'customTourBasePrice', label: 'Custom Tour Base Price' },
+                    { key: 'customTourBasePrice', label: 'Custom Tour — Small Group (1–4 pax)' },
+                    { key: 'customTourLargeGroupPrice', label: 'Custom Tour — Large Group (5–8 pax)' },
+                    { key: 'hourlyHireRate', label: 'Hourly Hire — Small Group rate (per hour, 1–4 pax)' },
+                    { key: 'hourlyHireLargeGroupRate', label: 'Hourly Hire — Large Group rate (per hour, 5–8 pax)' },
                     { key: 'cityTourBasePrice', label: 'City Tour Base Price' },
-                    { key: 'hourlyHireRate', label: 'Hourly Hire Rate (per hour)' },
                   ].map(({ key, label }) => (
                     <div key={key}>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -384,8 +406,66 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
-                  Note: Individual tour prices can also be managed in the <strong>Tours</strong> section.
+                  Note: Private tour small &amp; large group prices are set individually in the <strong>Tours</strong> section.
                 </p>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Banknote className="size-5" />
+                  Booking Add-on Fees (ISK)
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[
+                    { key: 'premiumCarFee', label: 'Premium / Luxury Vehicle upgrade' },
+                    { key: 'childSeatFee', label: 'Child / Booster Seat (per seat)' },
+                    { key: 'extraStopFee', label: 'Extra Stop' },
+                    { key: 'extraTimeFee', label: 'Extra Time' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={settings[key]}
+                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
+                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                  <Clock className="size-5" />
+                  Time-Based Surcharges (%)
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Enter as a whole number — e.g. 25 means +25% added to the base price.</p>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[
+                    { key: 'nightSurchargePercent', label: 'Night Rate (22:00–06:00)' },
+                    { key: 'earlyMorningSurchargePercent', label: 'Early Morning (06:00–08:00)' },
+                    { key: 'peakHoursSurchargePercent', label: 'Peak Hours (08–09 & 17–19)' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={settings[key]}
+                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
+                          min="0"
+                          max="100"
+                          className="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
