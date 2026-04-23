@@ -179,7 +179,7 @@ export default async function TourPage({ params }: Props) {
 
               <div className="space-y-4">
                 <Link
-                  href={`/booking?type=PRIVATE_TOUR&tour=${tour.slug}`}
+                  href={`/booking?type=PRIVATE_TOUR&tourId=${tour.id}&tourName=${encodeURIComponent(tour.name)}&tourPrice=${tour.price}`}
                   className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors shadow-lg shadow-primary/20"
                 >
                   Book Now

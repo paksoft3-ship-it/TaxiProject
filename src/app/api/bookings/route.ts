@@ -105,6 +105,12 @@ export async function POST(request: NextRequest) {
 
     let basePrice = basePrices[validated.type] || 0;
 
+    // Use tour-specific price when a tourId is provided for PRIVATE_TOUR
+    if (validated.type === 'PRIVATE_TOUR' && validated.tourId) {
+      const tour = await prisma.tour.findUnique({ where: { id: validated.tourId } });
+      if (tour) basePrice = tour.price;
+    }
+
     // Dynamic pricing for hourly hire (rate per hour, default 4 hrs)
     if (validated.type === 'HOURLY_HIRE') {
       const hours = parseInt(String(validated.options?.hourlyDuration || '4'), 10);
@@ -130,10 +136,10 @@ export async function POST(request: NextRequest) {
     // Extra passengers fee
     if (validated.passengers > 4) {
       if (validated.type === 'AIRPORT_TRANSFER') {
-        extras += 25000 - basePrice; // Fixed price of 25000 for > 4 pax
+        // Override to flat 25,000 ISK for 5-8 passengers (larger vehicle)
+        basePrice = 25000;
       } else if (validated.type === 'BLUE_LAGOON') {
-        // Assume same fixed price logic or keep base? 
-        // For now, keep base price for Blue Lagoon as fixed vehicle price.
+        // Blue Lagoon package price already set above; no additional per-pax fee
       } else {
         extras += (validated.passengers - 4) * 2000;
       }

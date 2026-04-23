@@ -28,6 +28,7 @@ interface BookingSummaryProps {
   packageType?: string;
   realDistanceKm?: number;
   realDurationStr?: string;
+  tourPrice?: number;
 }
 
 const serviceLabels: Record<string, string> = {
@@ -82,7 +83,7 @@ const passengerFees = {
   largeGroup: 5000, // Group of 6+
 };
 
-export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '' }: BookingSummaryProps) {
+export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '', tourPrice }: BookingSummaryProps) {
   // Calculate estimated distance based on locations
   const estimatedDistance = useMemo(() => {
     if (realDistanceKm > 0) return realDistanceKm;
@@ -158,7 +159,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
     }
 
     // Base price computation
-    let base = basePrices[serviceType] || 0;
+    let base = (serviceType === 'PRIVATE_TOUR' && tourPrice) ? tourPrice : (basePrices[serviceType] || 0);
     
     if (serviceType === 'HOURLY_HIRE') {
        const hours = parseInt(options?.hourlyDuration || '4', 10);
@@ -207,7 +208,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
     }
 
     return breakdown;
-  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType]);
+  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType, tourPrice]);
 
   // Calculate subtotal
   const subtotal = priceBreakdown.reduce((sum, item) => sum + item.amount, 0);
@@ -397,7 +398,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
             <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-700/50 border border-slate-600">
               <Info className="size-4 text-slate-400 shrink-0 mt-0.5" />
               <p className="text-xs text-slate-400 leading-relaxed">
-                Price updates automatically based on your selections. Payment is processed securely via Stripe.
+                Price updates automatically based on your selections. Payment is processed securely via PayPal.
               </p>
             </div>
           </div>

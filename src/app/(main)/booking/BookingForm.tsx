@@ -60,6 +60,8 @@ export function BookingForm() {
   const initialPassengers = Number(searchParams.get('passengers')) || 2;
   const initialFlightNumber = searchParams.get('flightNumber') || '';
   const initialTourName = searchParams.get('tourName') || '';
+  const initialTourId = searchParams.get('tourId') || '';
+  const initialTourPrice = Number(searchParams.get('tourPrice')) || 0;
   const initialDirection = searchParams.get('direction') || '';
   const initialHours = searchParams.get('hours') || '4';
 
@@ -295,6 +297,7 @@ export function BookingForm() {
             tourStartTime: customFields.tourStartTime || undefined,
             packageType: initialPackage || undefined,
           },
+          tourId: initialTourId || undefined,
         }),
       });
 
@@ -961,6 +964,7 @@ export function BookingForm() {
           packageType={initialPackage || undefined}
           realDistanceKm={distanceKm}
           realDurationStr={durationStr}
+          tourPrice={initialTourPrice || undefined}
         />
       </div>
     </div>

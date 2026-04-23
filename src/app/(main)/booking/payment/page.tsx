@@ -36,7 +36,16 @@ interface PayPalButtonsWrapperProps {
 }
 
 function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCancel }: PayPalButtonsWrapperProps) {
-  const [{ isPending }] = usePayPalScriptReducer();
+  const [{ isPending, isRejected }] = usePayPalScriptReducer();
+
+  if (isRejected) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+        <AlertCircle className="size-4 shrink-0" />
+        Failed to load payment methods. Please refresh the page or contact support.
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-[150px]">
@@ -230,11 +239,12 @@ function PaymentContent() {
                 ) : (
                   <PayPalScriptProvider
                     options={{
-                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
                       currency: 'EUR',
                       intent: 'capture',
                       locale: 'en_US',
                       components: 'buttons',
+                      enableFunding: ['card', 'credit'],
                     }}
                   >
                     <PayPalButtonsWrapper
