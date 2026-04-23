@@ -253,9 +253,8 @@ function PaymentContent() {
                       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
                       currency: 'EUR',
                       intent: 'capture',
-                      locale: 'en_US',
                       components: 'buttons',
-                      enableFunding: ['card', 'credit'],
+                      enableFunding: 'card',
                     }}
                   >
                     <PayPalButtonsWrapper
