@@ -65,19 +65,19 @@ export function BookingForm() {
   const initialDirection = searchParams.get('direction') || '';
   const initialHours = searchParams.get('hours') || '4';
 
-  // Determine initial step and form data based on package
+  // Determine initial step and form data based on package / tour pre-selection
   let startStep: BookingStep = 1;
   let defaultPickup = initialPickup;
   let defaultDropoff = initialDropoff;
 
   if (initialType === 'BLUE_LAGOON' && initialPackage) {
-    startStep = 2; // Skip service selection
+    startStep = 2; // Skip service selection — package already chosen
     if (initialPackage === 'combo') {
       defaultPickup = 'Keflavik Airport';
       defaultDropoff = 'Reykjavik City (via Blue Lagoon)';
-    } else if (initialPackage === 'oneway') {
-      // User needs to specify direction, so maybe don't prefill completely or use generic
     }
+  } else if (initialTourId) {
+    startStep = 2; // Skip service selection — tour already chosen from tour page
   }
 
   const [step, setStep] = useState<BookingStep>(startStep);
@@ -262,7 +262,7 @@ export function BookingForm() {
     }
   };
 
-  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1) as BookingStep);
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, startStep) as BookingStep);
 
   const handleSubmitBooking = async () => {
     if (!validateStep5()) {
@@ -471,6 +471,19 @@ export function BookingForm() {
               </span>
               Locations
             </h3>
+
+            {/* Tour info banner — shown when booking came from a specific tour page */}
+            {initialTourId && initialTourName && (
+              <div className="mb-6 flex items-start gap-3 bg-primary/10 border border-primary/20 rounded-xl p-4">
+                <MapPin className="size-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900 text-sm">Booking: {initialTourName}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Please enter your pickup location (hotel / guesthouse / address). Our driver will collect you and take you on the tour.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-4">

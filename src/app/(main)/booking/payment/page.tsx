@@ -36,13 +36,24 @@ interface PayPalButtonsWrapperProps {
 }
 
 function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCancel }: PayPalButtonsWrapperProps) {
-  const [{ isPending, isRejected }] = usePayPalScriptReducer();
+  const [sdkState] = usePayPalScriptReducer();
+  const { isPending, isRejected } = sdkState;
+  // loadingStatusErrorMessage is present at runtime but not in the TS type
+  const sdkErrorMsg = (sdkState as unknown as Record<string, unknown>).loadingStatusErrorMessage as string | undefined;
 
   if (isRejected) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
-        <AlertCircle className="size-4 shrink-0" />
-        Failed to load payment methods. Please refresh the page or contact support.
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-xl text-sm space-y-2">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="size-4 shrink-0" />
+          <span className="font-semibold">Failed to load payment methods.</span>
+        </div>
+        <p className="text-xs text-red-600">Please refresh the page or contact support.</p>
+        {sdkErrorMsg && (
+          <p className="text-xs text-red-500 font-mono bg-red-100 rounded px-2 py-1 break-all">
+            {sdkErrorMsg}
+          </p>
+        )}
       </div>
     );
   }
