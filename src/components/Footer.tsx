@@ -166,11 +166,6 @@ export function Footer() {
             <div className="mt-auto pt-8 border-t border-slate-800/50 lg:border-t-0 lg:pt-0">
               <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mb-3 lg:text-right">Secured Payments By</p>
               <div className="flex flex-nowrap items-center gap-1.5 lg:justify-end">
-                {/* Stripe */}
-                <div className="bg-white px-1.5 py-1 rounded-sm shadow-sm border border-slate-200 flex flex-shrink-0 items-center justify-center h-[34px] w-[56px] hover:scale-105 transition-transform">
-                  <img src="/stripe-logo.png" alt="Stripe" className="w-[44px] h-auto object-contain" />
-                </div>
-
                 {/* Visa */}
                 <div className="bg-white px-1.5 py-1 rounded-sm shadow-sm border border-slate-200 flex flex-shrink-0 items-center justify-center h-[34px] w-[56px] hover:scale-105 transition-transform">
                   <svg viewBox="0 0 50 16" xmlns="http://www.w3.org/2000/svg" className="w-[40px] h-auto fill-[#1434CB]">

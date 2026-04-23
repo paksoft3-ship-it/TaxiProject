@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageCircle, Phone, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, Phone, X, Send, Bot, User, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // WhatsApp icon as SVG component
@@ -310,9 +310,10 @@ export function FloatingContactButtons() {
           {/* Book Now - Main CTA */}
           <a
             href="/booking"
-            className="flex flex-col items-center gap-1 px-6 py-2 -mt-4 bg-primary text-black rounded-xl shadow-lg hover:bg-yellow-400 transition-colors"
+            className="-mt-5 flex flex-col items-center justify-center gap-1 bg-primary text-black rounded-2xl shadow-[0_4px_20px_rgba(234,179,8,0.5)] hover:bg-yellow-400 active:scale-95 transition-all px-5 py-3 min-w-[88px] border-2 border-yellow-300/80 ring-2 ring-white"
           >
-            <span className="text-xs font-bold">Book Now</span>
+            <CalendarDays className="size-5 stroke-[2.5]" />
+            <span className="text-[11px] font-extrabold tracking-wide leading-none">Book Now</span>
           </a>
 
           {/* Chat */}
