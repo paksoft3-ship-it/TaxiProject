@@ -14,60 +14,31 @@ import {
 import { BookingWidget } from '@/components/BookingWidget';
 import { ServiceCard } from '@/components/ServiceCard';
 import { TourCard } from '@/components/TourCard';
+import prisma from '@/lib/db';
+import type { TourCategory } from '@/types';
 
-const tours = [
-  {
-    id: '1',
-    name: 'Golden Circle',
-    slug: 'golden-circle',
-    category: 'FULL_DAY' as const,
-    duration: '8 Hours',
-    shortDescription: 'Thingvellir, Geysir & Gullfoss',
-    price: 92500,
-    currency: 'ISK',
-    image: '/images/golden_circle.png',
-    badge: { text: 'Most Popular', type: 'popular' as const },
-    highlights: ['Gullfoss Waterfall', 'Geysir Area', 'Thingvellir National Park'],
-  },
-  {
-    id: '2',
-    name: 'Northern Lights',
-    slug: 'northern-lights',
-    category: 'EVENING' as const,
-    duration: '4 Hours',
-    shortDescription: 'Hunt for the Aurora Borealis',
-    price: 65000,
-    currency: 'ISK',
-    image: '/images/northern_lights.png',
-    highlights: ['Expert Aurora Tracking', 'Dark Sky Locations', 'Hot Chocolate & Blankets'],
-  },
-  {
-    id: '3',
-    name: 'Blue Lagoon',
-    slug: 'blue-lagoon',
-    category: 'TRANSFER' as const,
-    duration: '4 Hours',
-    shortDescription: 'Relaxing Geothermal Spa',
-    price: 20000,
-    currency: 'ISK',
-    image: '/images/blue_lagoon.png',
-    highlights: ['Door-to-door Service', 'Admission Assistance', 'Flexible Timing'],
-  },
-  {
-    id: '4',
-    name: 'South Coast',
-    slug: 'south-coast',
-    category: 'FULL_DAY' as const,
-    duration: '10 Hours',
-    shortDescription: 'Waterfalls & Black Sand Beach',
-    price: 138500,
-    currency: 'ISK',
-    image: '/images/south_coast.png',
-    highlights: ['Seljalandsfoss Waterfall', 'Reynisfjara Beach', 'Vik Village'],
-  },
-];
+export const dynamic = 'force-dynamic';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const dbTours = await prisma.tour.findMany({
+    where: { active: true },
+    orderBy: [{ featured: 'desc' }, { price: 'asc' }],
+    take: 4,
+  });
+
+  const tours = dbTours.map((tour) => ({
+    id: tour.id,
+    name: tour.name,
+    slug: tour.slug,
+    category: tour.category as TourCategory,
+    duration: tour.duration,
+    shortDescription: tour.shortDescription,
+    price: tour.price,
+    currency: tour.currency,
+    image: tour.images[0] || '/images/golden_circle.png',
+    highlights: tour.highlights.slice(0, 3),
+    badge: tour.featured ? { text: 'Most Popular', type: 'popular' as const } : undefined,
+  }));
   return (
     <>
       {/* Hero Section */}
