@@ -178,20 +178,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
-    // Instead of deleting, cancel the booking
-    const cancelledBooking = await prisma.booking.update({
-      where: { id },
-      data: { status: 'CANCELLED' },
-    });
+    await prisma.booking.delete({ where: { id } });
 
-    return NextResponse.json({
-      message: 'Booking cancelled successfully',
-      booking: cancelledBooking,
-    });
+    return NextResponse.json({ message: 'Booking deleted successfully' });
   } catch (error) {
     console.error('Admin booking DELETE error:', error);
     return NextResponse.json(
-      { error: 'Failed to cancel booking' },
+      { error: 'Failed to delete booking' },
       { status: 500 }
     );
   }

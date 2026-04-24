@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import prisma from '@/lib/db';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Experience the Blue Lagoon | Premium Transfer Service',

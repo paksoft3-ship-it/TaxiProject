@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { Calendar, Clock, ArrowLeft, User, Tag, Facebook, Twitter, Linkedin, BookmarkPlus } from 'lucide-react';
 import prisma from '@/lib/db';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{ slug: string }>;

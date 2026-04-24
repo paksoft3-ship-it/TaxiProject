@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import prisma from '@/lib/db';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 import {
   Car,
   Check,
@@ -48,19 +48,17 @@ const features = [
   },
 ];
 
-const vehicleOptions = [
+const vehicleFeatures = [
   {
     name: 'Standard Sedan',
     capacity: '1-3 passengers',
     luggage: '3 bags',
-    price: 'From 10,500 ISK',
     features: ['Air conditioning', 'Free WiFi', 'Phone chargers', 'Bottled water'],
   },
   {
     name: 'Premium SUV',
     capacity: '1-4 passengers',
     luggage: '4 bags',
-    price: 'From 20,000 ISK',
     features: ['Leather seats', 'Extra legroom', 'Free WiFi', 'Climate control'],
     popular: true,
   },
@@ -68,7 +66,6 @@ const vehicleOptions = [
     name: 'Luxury Van',
     capacity: '5-8 passengers',
     luggage: '8 bags',
-    price: 'From 27,500 ISK',
     features: ['Spacious interior', 'Individual seats', 'Free WiFi', 'USB ports'],
   },
 ];
@@ -109,9 +106,27 @@ const highlights = [
 ];
 
 export default async function PrivateTransfersPage() {
-  const popularRoutes = await prisma.transferRoute.findMany({
-    where: { category: 'PRIVATE_TRANSFER', active: true },
-    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+  const pricingKeys = ['cityTourBasePrice', 'airportTransferPrice', 'airportTransferLargeGroupPrice'];
+  const [popularRoutes, pricingSettings] = await Promise.all([
+    prisma.transferRoute.findMany({
+      where: { category: 'PRIVATE_TRANSFER', active: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    }),
+    prisma.setting.findMany({ where: { key: { in: pricingKeys } } }),
+  ]);
+
+  const pricing: Record<string, number> = {
+    cityTourBasePrice: 10500,
+    airportTransferPrice: 20000,
+    airportTransferLargeGroupPrice: 25000,
+  };
+  for (const s of pricingSettings) {
+    pricing[s.key] = parseFloat(s.value) || pricing[s.key];
+  }
+
+  const vehicleOptions = vehicleFeatures.map((v, i) => {
+    const prices = [pricing.cityTourBasePrice, pricing.airportTransferPrice, pricing.airportTransferLargeGroupPrice];
+    return { ...v, price: `From ${prices[i].toLocaleString('is-IS')} ISK` };
   });
   return (
     <>

@@ -5,7 +5,7 @@ import { Calendar, Clock, ArrowRight, User, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import prisma from '@/lib/db';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Blog',

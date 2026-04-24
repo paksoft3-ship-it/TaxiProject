@@ -92,10 +92,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
     }
 
-    await prisma.tour.update({ where: { id }, data: { active: false } });
-    return NextResponse.json({ message: 'Tour deactivated successfully' });
+    await prisma.tour.delete({ where: { id } });
+    return NextResponse.json({ message: 'Tour deleted successfully' });
   } catch (error) {
     console.error('Admin Tours[id] DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to deactivate tour' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete tour' }, { status: 500 });
   }
 }

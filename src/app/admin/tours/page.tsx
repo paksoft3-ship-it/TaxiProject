@@ -197,11 +197,11 @@ export default function AdminToursPage() {
     try {
       const res = await fetch(`/api/admin/tours/${tour.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
-      toast.success('Tour deactivated');
+      toast.success('Tour deleted');
       setShowDeleteConfirm(null);
       fetchTours();
     } catch {
-      toast.error('Failed to deactivate tour');
+      toast.error('Failed to delete tour');
     } finally {
       setIsSubmitting(false);
     }
@@ -594,9 +594,9 @@ export default function AdminToursPage() {
               <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
                 <Trash2 className="size-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white mb-2">Deactivate Tour</h3>
+              <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white mb-2">Delete Tour</h3>
               <p className="text-center text-slate-500 mb-6">
-                Are you sure you want to deactivate <span className="font-semibold">{showDeleteConfirm.name}</span>? It will no longer appear on the public site.
+                Are you sure you want to permanently delete <span className="font-semibold">{showDeleteConfirm.name}</span>? This cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button
@@ -611,7 +611,7 @@ export default function AdminToursPage() {
                   className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                  Deactivate
+                  Delete Permanently
                 </button>
               </div>
             </div>

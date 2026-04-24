@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import prisma from '@/lib/db';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -24,29 +24,39 @@ export const metadata: Metadata = {
     'Transparent pricing for Iceland taxi services. City taxis, airport transfers, and private tours with no hidden fees.',
 };
 
-async function getPricing() {
-  const defaults = {
-    airportTransferPrice: 20000,
-    blueLagoonTransferPrice: 20000,
-    cityTourBasePrice: 10500,
-  };
-  try {
-    const keys = Object.keys(defaults);
-    const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
-    const result = { ...defaults };
-    for (const s of settings) {
-      if (s.key in result) {
-        (result as any)[s.key] = parseFloat(s.value) || (defaults as any)[s.key];
-      }
+const PRICING_DEFAULTS = {
+  airportTransferPrice: 20000,
+  airportTransferLargeGroupPrice: 25000,
+  blueLagoonTransferPrice: 20000,
+  kefBlueLagoonPrice: 15000,
+  blueLagoonComboPrice: 40000,
+  blueLagoonComboLargeGroupPrice: 14000,
+  cityTourBasePrice: 10500,
+};
+
+async function getData() {
+  const keys = Object.keys(PRICING_DEFAULTS);
+  const [settings, tours, privateRoutes] = await Promise.all([
+    prisma.setting.findMany({ where: { key: { in: keys } } }),
+    prisma.tour.findMany({ where: { active: true }, orderBy: { price: 'asc' } }),
+    prisma.transferRoute.findMany({
+      where: { category: 'PRIVATE_TRANSFER', active: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    }),
+  ]);
+
+  const pricing = { ...PRICING_DEFAULTS };
+  for (const s of settings) {
+    if (s.key in pricing) {
+      (pricing as any)[s.key] = parseFloat(s.value) || (PRICING_DEFAULTS as any)[s.key];
     }
-    return result;
-  } catch {
-    return defaults;
   }
+
+  return { pricing, tours, privateRoutes };
 }
 
 function formatISK(n: number) {
-  return `${n.toLocaleString('en-US')} ISK`;
+  return `${n.toLocaleString('is-IS')} ISK`;
 }
 
 const faqs = [
@@ -55,7 +65,7 @@ const faqs = [
     icon: Moon,
     question: 'Is there a surcharge for night rides?',
     answer:
-      'Yes, a standard surcharge applies between 00:00 and 06:00. This is calculated automatically by the meter for city taxis. For fixed-rate airport transfers booked in advance, the night rate is clearly displayed before you confirm your booking.',
+      'Yes, a standard surcharge applies between 22:00 and 06:00. For fixed-rate transfers and tours booked in advance, the surcharge is clearly displayed before you confirm your booking.',
   },
   {
     id: 'luggage',
@@ -69,7 +79,7 @@ const faqs = [
     icon: Baby,
     question: 'Do you offer child seats for families?',
     answer:
-      'Absolutely. Child seats are available upon request free of charge. Please specify the age and weight of the child when making your reservation to ensure we provide the correct seat type.',
+      'Absolutely. Child seats are available upon request. Please specify the age and weight of the child when making your reservation to ensure we provide the correct seat type.',
   },
   {
     id: 'payment',
@@ -81,7 +91,9 @@ const faqs = [
 ];
 
 export default async function PricingPage() {
-  const pricing = await getPricing();
+  const { pricing, tours, privateRoutes } = await getData();
+
+  const topTours = tours.slice(0, 3);
 
   const pricingCards = [
     {
@@ -90,7 +102,6 @@ export default async function PricingPage() {
       icon: CarTaxiFront,
       priceLabel: 'Starting from',
       price: formatISK(pricing.blueLagoonTransferPrice),
-      priceSubtext: '',
       priceNote: 'Reykjavik ↔ Blue Lagoon',
       features: [
         '24/7 Availability',
@@ -107,7 +118,6 @@ export default async function PricingPage() {
       icon: Plane,
       priceLabel: 'Fixed Rate',
       price: formatISK(pricing.airportTransferPrice),
-      priceSubtext: '',
       priceNote: 'Keflavik (KEF) ↔ Reykjavik',
       features: [
         'Meet & Greet in Arrivals',
@@ -125,14 +135,10 @@ export default async function PricingPage() {
       icon: Mountain,
       priceLabel: 'Starting from',
       price: formatISK(pricing.cityTourBasePrice),
-      priceSubtext: '',
       priceNote: 'Reykjavik City Tour (1-3 hrs)',
-      features: [
-        'Expert Local Guides',
-        'Golden Circle from 92,500 ISK',
-        'South Coast from 138,500 ISK',
-        'Glacier Lagoon from 204,500 ISK',
-      ],
+      features: topTours.length > 0
+        ? topTours.map(t => `${t.name} from ${formatISK(t.price)}`)
+        : ['Expert Local Guides', 'Golden Circle', 'South Coast', 'Glacier Lagoon'],
       buttonText: 'View Tours',
       href: '/services/sightseeing-tours',
     },
@@ -160,7 +166,7 @@ export default async function PricingPage() {
         </div>
       </div>
 
-      {/* Pricing Section */}
+      {/* Pricing Cards */}
       <main className="flex-grow px-4 md:px-10 py-10 sm:-mt-20 z-20 relative">
         <div className="max-w-[1100px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -199,23 +205,16 @@ export default async function PricingPage() {
                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">
                       {card.priceLabel}
                     </p>
-                    <div className="flex items-baseline gap-1">
-                      <span
-                        className={cn(
-                          'text-4xl font-extrabold tracking-tight',
-                          card.highlighted
-                            ? 'text-secondary-blue dark:text-primary'
-                            : 'text-secondary-blue dark:text-white'
-                        )}
-                      >
-                        {card.price}
-                      </span>
-                      {card.priceSubtext && (
-                        <span className="text-slate-600 dark:text-slate-300 font-semibold">
-                          {card.priceSubtext}
-                        </span>
+                    <span
+                      className={cn(
+                        'text-4xl font-extrabold tracking-tight',
+                        card.highlighted
+                          ? 'text-secondary-blue dark:text-primary'
+                          : 'text-secondary-blue dark:text-white'
                       )}
-                    </div>
+                    >
+                      {card.price}
+                    </span>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
                       {card.priceNote}
                     </p>
@@ -262,110 +261,68 @@ export default async function PricingPage() {
           </div>
 
           {/* Tours Pricing */}
-          <div className="mb-12">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              <Mountain className="size-5 text-primary" />
-              Sightseeing Tours
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700">
-                    <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Tour</th>
-                    <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Duration</th>
-                    <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Distance</th>
-                    <th className="text-right p-4 font-bold text-slate-900 dark:text-white">Price</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik City Tour</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">1-3 hours</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">-</td>
-                    <td className="p-4 text-right font-bold text-primary">10,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Golden Circle</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">6 hours</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">320 km</td>
-                    <td className="p-4 text-right font-bold text-primary">92,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">South Coast Spectacular</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">10 hours</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">420 km</td>
-                    <td className="p-4 text-right font-bold text-primary">138,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Snæfellsnes Peninsula</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">12 hours</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">350 km</td>
-                    <td className="p-4 text-right font-bold text-primary">154,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Glacier Lagoon & Diamond Beach</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">15 hours</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">800 km</td>
-                    <td className="p-4 text-right font-bold text-primary">204,500 ISK</td>
-                  </tr>
-                </tbody>
-              </table>
+          {tours.length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                <Mountain className="size-5 text-primary" />
+                Sightseeing Tours
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-700">
+                      <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Tour</th>
+                      <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Duration</th>
+                      <th className="text-right p-4 font-bold text-slate-900 dark:text-white">1–4 pax</th>
+                      <th className="text-right p-4 font-bold text-slate-900 dark:text-white">5–8 pax</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    {tours.map((tour) => (
+                      <tr key={tour.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">{tour.name}</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">{tour.duration}</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(tour.price)}</td>
+                        <td className="p-4 text-right font-bold text-primary">
+                          {tour.largeGroupPrice > 0 ? formatISK(tour.largeGroupPrice) : formatISK(tour.price)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Transfer Pricing */}
-          <div className="mb-12">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              <CarTaxiFront className="size-5 text-primary" />
-              Private Transfers
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700">
-                    <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Route</th>
-                    <th className="text-right p-4 font-bold text-slate-900 dark:text-white">Price (1-4 pax)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik ↔ Blue Lagoon</td>
-                    <td className="p-4 text-right font-bold text-primary">20,000 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from The Lava Tunnel</td>
-                    <td className="p-4 text-right font-bold text-primary">21,000 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Hveragerði</td>
-                    <td className="p-4 text-right font-bold text-primary">22,000 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Hotel ION Adventure</td>
-                    <td className="p-4 text-right font-bold text-primary">26,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Selfoss</td>
-                    <td className="p-4 text-right font-bold text-primary">27,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Hotel Grímsborgir</td>
-                    <td className="p-4 text-right font-bold text-primary">35,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Hotel Ranga</td>
-                    <td className="p-4 text-right font-bold text-primary">53,500 ISK</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Transfer to/from Hotel Búðir</td>
-                    <td className="p-4 text-right font-bold text-primary">88,000 ISK</td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Private Transfers */}
+          {privateRoutes.length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                <CarTaxiFront className="size-5 text-primary" />
+                Private Transfers
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-700">
+                      <th className="text-left p-4 font-bold text-slate-900 dark:text-white">Route</th>
+                      <th className="text-right p-4 font-bold text-slate-900 dark:text-white">Price (1–4 pax)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    {privateRoutes.map((route) => (
+                      <tr key={route.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">{route.name}</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(route.price)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Airport & Blue Lagoon Pricing */}
+          {/* Airport & Blue Lagoon */}
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
               <Plane className="size-5 text-primary" />
@@ -382,29 +339,29 @@ export default async function PricingPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (1-4 pax)</td>
+                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (1–4 pax)</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
-                    <td className="p-4 text-right font-bold text-primary">10,500 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.kefBlueLagoonPrice)}</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (5-8 pax)</td>
+                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (5–8 pax)</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
-                    <td className="p-4 text-right font-bold text-primary">14,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboLargeGroupPrice)}</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Reykjavik</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">45 min</td>
-                    <td className="p-4 text-right font-bold text-primary">20,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.airportTransferPrice)}</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">KEF → Blue Lagoon → Reykjavik</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
-                    <td className="p-4 text-right font-bold text-primary">40,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
                   </tr>
                   <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik → Blue Lagoon → KEF</td>
                     <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
-                    <td className="p-4 text-right font-bold text-primary">40,000 ISK</td>
+                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
                   </tr>
                 </tbody>
               </table>

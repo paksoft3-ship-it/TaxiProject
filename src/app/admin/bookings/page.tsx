@@ -82,6 +82,7 @@ export default function BookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
@@ -150,8 +151,34 @@ export default function BookingsPage() {
     }
   };
 
-  // Cancel booking
+  // Cancel booking (status → CANCELLED)
   const handleCancelBooking = async () => {
+    if (!selectedBooking) return;
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${selectedBooking.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to cancel booking');
+
+      toast.success('Booking cancelled');
+      setShowCancelConfirm(false);
+      const data = await response.json();
+      setSelectedBooking(data.booking);
+      fetchBookings();
+    } catch (err) {
+      toast.error('Failed to cancel booking');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Delete booking permanently
+  const handleDeleteBooking = async () => {
     if (!selectedBooking) return;
     setIsSubmitting(true);
 
@@ -160,17 +187,15 @@ export default function BookingsPage() {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to cancel booking');
-      }
+      if (!response.ok) throw new Error('Failed to delete booking');
 
-      toast.success('Booking cancelled successfully');
-      setShowCancelConfirm(false);
+      toast.success('Booking deleted from records');
+      setShowDeleteConfirm(false);
       setShowDetailModal(false);
       setSelectedBooking(null);
       fetchBookings();
     } catch (err) {
-      toast.error('Failed to cancel booking');
+      toast.error('Failed to delete booking');
     } finally {
       setIsSubmitting(false);
     }
@@ -566,53 +591,67 @@ export default function BookingsPage() {
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-              {selectedBooking.status === 'PENDING' && (
-                <>
+            <div className="flex items-center justify-between gap-3 p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+              {/* Left: Delete permanently */}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-semibold transition-colors"
+                title="Delete booking from records permanently"
+              >
+                <Trash2 className="size-4" />
+                Delete
+              </button>
+
+              {/* Right: Status actions + close */}
+              <div className="flex items-center gap-3">
+                {selectedBooking.status === 'PENDING' && (
+                  <>
+                    <button
+                      onClick={() => setShowCancelConfirm(true)}
+                      disabled={isSubmitting}
+                      className="flex items-center gap-2 px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg text-sm font-semibold transition-colors"
+                    >
+                      <X className="size-4" />
+                      Cancel Booking
+                    </button>
+                    <button
+                      onClick={() => updateBookingStatus(selectedBooking.id, 'CONFIRMED')}
+                      disabled={isSubmitting}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                      <Check className="size-4" />
+                      Confirm Booking
+                    </button>
+                  </>
+                )}
+                {selectedBooking.status === 'CONFIRMED' && (
                   <button
-                    onClick={() => setShowCancelConfirm(true)}
+                    onClick={() => updateBookingStatus(selectedBooking.id, 'IN_PROGRESS')}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-semibold transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
                   >
-                    <X className="size-4" />
-                    Cancel Booking
+                    {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                    <CarTaxiFront className="size-4" />
+                    Start Trip
                   </button>
+                )}
+                {selectedBooking.status === 'IN_PROGRESS' && (
                   <button
-                    onClick={() => updateBookingStatus(selectedBooking.id, 'CONFIRMED')}
+                    onClick={() => updateBookingStatus(selectedBooking.id, 'COMPLETED')}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                     <Check className="size-4" />
-                    Confirm Booking
+                    Complete Trip
                   </button>
-                </>
-              )}
-              {selectedBooking.status === 'CONFIRMED' && (
-                <button
-                  onClick={() => updateBookingStatus(selectedBooking.id, 'IN_PROGRESS')}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                  <CarTaxiFront className="size-4" />
-                  Start Trip
+                )}
+                <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-semibold transition-colors dark:text-slate-300 dark:hover:bg-slate-700">
+                  Close
                 </button>
-              )}
-              {selectedBooking.status === 'IN_PROGRESS' && (
-                <button
-                  onClick={() => updateBookingStatus(selectedBooking.id, 'COMPLETED')}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                  <Check className="size-4" />
-                  Complete Trip
-                </button>
-              )}
-              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-semibold transition-colors dark:text-slate-300 dark:hover:bg-slate-700">
-                Close
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -623,12 +662,12 @@ export default function BookingsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4" onClick={() => setShowCancelConfirm(false)}>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-                <X className="size-6 text-red-600" />
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-orange-100 rounded-full">
+                <X className="size-6 text-orange-600" />
               </div>
               <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white mb-2">Cancel Booking</h3>
               <p className="text-center text-slate-500 mb-6">
-                Are you sure you want to cancel booking <span className="font-semibold">{selectedBooking.bookingNumber}</span>? This action cannot be undone.
+                Mark booking <span className="font-semibold">{selectedBooking.bookingNumber}</span> as cancelled? The record will remain in the system.
               </p>
               <div className="flex gap-3">
                 <button
@@ -640,10 +679,43 @@ export default function BookingsPage() {
                 <button
                   onClick={handleCancelBooking}
                   disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                  Cancel Booking
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                <Trash2 className="size-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-center text-slate-900 dark:text-white mb-2">Delete Booking</h3>
+              <p className="text-center text-slate-500 mb-6">
+                Permanently delete booking <span className="font-semibold">{selectedBooking.bookingNumber}</span>? This cannot be undone and the record will be gone forever.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2.5 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-semibold transition-colors dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  Keep Record
+                </button>
+                <button
+                  onClick={handleDeleteBooking}
+                  disabled={isSubmitting}
                   className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                  Cancel
+                  Delete Permanently
                 </button>
               </div>
             </div>

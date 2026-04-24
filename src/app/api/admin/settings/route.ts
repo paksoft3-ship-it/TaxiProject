@@ -29,16 +29,26 @@ const settingsSchema = z.object({
   autoConfirmBookings: z.boolean().optional(),
   // Pricing fields
   airportTransferPrice: z.number().optional(),
+  airportTransferLargeGroupPrice: z.number().optional(),
   blueLagoonTransferPrice: z.number().optional(),
+  blueLagoonRoundtripPrice: z.number().optional(),
+  blueLagoonComboPrice: z.number().optional(),
+  blueLagoonComboLargeGroupPrice: z.number().optional(),
   kefBlueLagoonPrice: z.number().optional(),
   cruisePortPrice: z.number().optional(),
   cityTourBasePrice: z.number().optional(),
   privateTourBasePrice: z.number().optional(),
   customTourBasePrice: z.number().optional(),
-  blueLagoonRoundtripPrice: z.number().optional(),
-  blueLagoonComboPrice: z.number().optional(),
-  blueLagoonComboLargeGroupPrice: z.number().optional(),
+  customTourLargeGroupPrice: z.number().optional(),
   hourlyHireRate: z.number().optional(),
+  hourlyHireLargeGroupRate: z.number().optional(),
+  premiumCarFee: z.number().optional(),
+  childSeatFee: z.number().optional(),
+  extraStopFee: z.number().optional(),
+  extraTimeFee: z.number().optional(),
+  nightSurchargePercent: z.number().optional(),
+  earlyMorningSurchargePercent: z.number().optional(),
+  peakHoursSurchargePercent: z.number().optional(),
 });
 
 const defaultSettings: Record<string, string> = {
@@ -64,37 +74,42 @@ const defaultSettings: Record<string, string> = {
   bookingEmailNotifications: 'true',
   autoConfirmBookings: 'false',
   airportTransferPrice: '20000',
+  airportTransferLargeGroupPrice: '25000',
   blueLagoonTransferPrice: '20000',
+  blueLagoonRoundtripPrice: '39000',
+  blueLagoonComboPrice: '40000',
+  blueLagoonComboLargeGroupPrice: '14000',
   kefBlueLagoonPrice: '15000',
   cruisePortPrice: '25000',
   cityTourBasePrice: '10500',
   privateTourBasePrice: '45000',
   customTourBasePrice: '60000',
-  blueLagoonRoundtripPrice: '39000',
-  blueLagoonComboPrice: '40000',
-  blueLagoonComboLargeGroupPrice: '14000',
+  customTourLargeGroupPrice: '75000',
   hourlyHireRate: '12000',
+  hourlyHireLargeGroupRate: '15000',
+  premiumCarFee: '5000',
+  childSeatFee: '2000',
+  extraStopFee: '7000',
+  extraTimeFee: '14000',
+  nightSurchargePercent: '25',
+  earlyMorningSurchargePercent: '15',
+  peakHoursSurchargePercent: '10',
 };
 
+const BOOLEAN_KEYS = new Set(['bookingEmailNotifications', 'autoConfirmBookings']);
+const NUMERIC_KEYS = new Set([
+  'airportTransferPrice', 'airportTransferLargeGroupPrice',
+  'blueLagoonTransferPrice', 'blueLagoonRoundtripPrice', 'blueLagoonComboPrice', 'blueLagoonComboLargeGroupPrice',
+  'kefBlueLagoonPrice', 'cruisePortPrice', 'cityTourBasePrice',
+  'privateTourBasePrice', 'customTourBasePrice', 'customTourLargeGroupPrice',
+  'hourlyHireRate', 'hourlyHireLargeGroupRate',
+  'premiumCarFee', 'childSeatFee', 'extraStopFee', 'extraTimeFee',
+  'nightSurchargePercent', 'earlyMorningSurchargePercent', 'peakHoursSurchargePercent',
+]);
+
 function parseValue(key: string, value: string): any {
-  if (key === 'bookingEmailNotifications' || key === 'autoConfirmBookings') {
-    return value === 'true';
-  }
-  if (
-    key === 'airportTransferPrice' ||
-    key === 'blueLagoonTransferPrice' ||
-    key === 'kefBlueLagoonPrice' ||
-    key === 'cruisePortPrice' ||
-    key === 'cityTourBasePrice' ||
-    key === 'privateTourBasePrice' ||
-    key === 'customTourBasePrice' ||
-    key === 'blueLagoonRoundtripPrice' ||
-    key === 'blueLagoonComboPrice' ||
-    key === 'blueLagoonComboLargeGroupPrice' ||
-    key === 'hourlyHireRate'
-  ) {
-    return parseFloat(value) || 0;
-  }
+  if (BOOLEAN_KEYS.has(key)) return value === 'true';
+  if (NUMERIC_KEYS.has(key)) return parseFloat(value) || 0;
   return value;
 }
 
