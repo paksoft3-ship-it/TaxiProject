@@ -224,12 +224,18 @@ export function Footer() {
             </a>
           </div>
 
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-white transition-colors">
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2">
+            <Link href="/refund-policy" className="hover:text-white transition-colors">
+              Refund Policy
+            </Link>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Service
+            <Link href="/terms-and-conditions" className="hover:text-white transition-colors">
+              Terms &amp; Conditions
+            </Link>
+            <Link href="/cookie-policy" className="hover:text-white transition-colors">
+              Cookie Policy
             </Link>
           </div>
         </div>

@@ -258,3 +258,13 @@ model PasswordResetToken {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Page {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

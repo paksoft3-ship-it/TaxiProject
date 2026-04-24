@@ -20,6 +20,7 @@ import {
   X,
   Map,
   ArrowLeftRight,
+  ScrollText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,7 @@ const navigation = [
   { name: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
+  { name: 'Pages', href: '/admin/pages', icon: ScrollText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

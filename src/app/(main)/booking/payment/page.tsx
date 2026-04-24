@@ -252,8 +252,11 @@ function PaymentContent() {
                     options={{
                       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
                       currency: 'EUR',
+                      intent: 'capture',
                       components: 'buttons',
                       locale: 'en_US',
+                      'enable-funding': 'card',
+                      'disable-funding': 'paylater,venmo',
                     }}
                   >
                     <PayPalButtonsWrapper
