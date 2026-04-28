@@ -93,8 +93,9 @@ function PaymentContent() {
   const serviceType = searchParams.get('type') || '';
   const amountEUR = (amount / ISK_TO_EUR_RATE).toFixed(2);
 
-  const [error, setError]       = useState<string | null>(null);
-  const [isPaying, setIsPaying] = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [isPaying, setIsPaying]   = useState(false);
+  const [myposLoading, setMyposLoading] = useState(false);
 
   const createOrder = async () => {
     setError(null);
@@ -152,6 +153,41 @@ function PaymentContent() {
   const onCancel = () =>
     setError('Payment was cancelled. You can try again whenever you are ready.');
 
+  const payWithMyPos = async () => {
+    setError(null);
+    setMyposLoading(true);
+    try {
+      const res = await fetch('/api/mypos/create-payment', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          bookingId,
+          description: `${serviceLabels[serviceType] || 'Booking'} - PrimeTaxi & Tours`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start myPOS payment.');
+
+      // myPOS requires a form POST (not a simple redirect)
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.checkoutUrl;
+      Object.entries(data.params as Record<string, string>).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err: any) {
+      setError(err.message || 'Could not connect to myPOS. Please try again.');
+      setMyposLoading(false);
+    }
+  };
+
   if (!bookingId || !amount) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -187,11 +223,11 @@ function PaymentContent() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 rounded-full px-4 py-1.5 text-sm font-semibold mb-4">
             <ShieldCheck className="size-4" />
-            Secured by PayPal
+            Secure Payment
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Complete Your Payment</h1>
           <p className="text-slate-500 text-sm max-w-md mx-auto">
-            Pay with your PayPal account or enter your card details — no PayPal account required.
+            Pay securely with your PayPal account.
           </p>
         </div>
 
@@ -222,14 +258,14 @@ function PaymentContent() {
               <div className="px-6 pt-6 pb-4 border-b border-slate-100">
                 <p className="text-sm font-semibold text-slate-700 mb-1">Choose payment method</p>
                 <p className="text-xs text-slate-400">
-                  Pay with PayPal or enter your card details directly — no account needed.
+                  Choose PayPal or pay by card via myPOS.
                 </p>
               </div>
 
               {/* Accepted cards row */}
               <div className="px-6 pt-4 flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-slate-400 font-medium">We accept:</span>
-                {['Visa', 'Mastercard', 'Amex', 'Discover', 'PayPal'].map((c) => (
+                {['PayPal', 'Visa', 'Mastercard', 'Amex'].map((c) => (
                   <span key={c} className="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1">
                     {c}
                   </span>
@@ -255,8 +291,7 @@ function PaymentContent() {
                       intent: 'capture',
                       components: 'buttons',
                       locale: 'en_US',
-                      'enable-funding': 'card',
-                      'disable-funding': 'paylater,venmo',
+                      'disable-funding': 'card,paylater,venmo,credit',
                     }}
                   >
                     <PayPalButtonsWrapper
@@ -267,6 +302,41 @@ function PaymentContent() {
                       onCancel={onCancel}
                     />
                   </PayPalScriptProvider>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="px-6 flex items-center gap-3">
+                <div className="flex-1 h-px bg-slate-100" />
+                <span className="text-xs text-slate-400 font-medium">or pay by card</span>
+                <div className="flex-1 h-px bg-slate-100" />
+              </div>
+
+              {/* myPOS button */}
+              <div className="p-6 pt-4">
+                {!process.env.NEXT_PUBLIC_MYPOS_ENABLED ? (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <AlertCircle className="size-4 shrink-0" />
+                    myPOS card payment is not configured yet.
+                  </div>
+                ) : (
+                  <button
+                    onClick={payWithMyPos}
+                    disabled={myposLoading || isPaying}
+                    className="w-full flex items-center justify-center gap-3 bg-[#1A2E5A] hover:bg-[#152348] disabled:opacity-60 text-white font-bold rounded-xl px-6 py-3.5 transition-colors"
+                  >
+                    {myposLoading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Redirecting to myPOS…
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="size-4" />
+                        Pay with Card via myPOS
+                      </>
+                    )}
+                  </button>
                 )}
               </div>
 
@@ -287,7 +357,7 @@ function PaymentContent() {
               <div className="px-6 pb-5">
                 <p className="text-xs text-slate-400 text-center flex items-center justify-center gap-1.5">
                   <ShieldCheck className="size-3.5 text-green-500 shrink-0" />
-                  Your card details are handled securely by PayPal — we never store them.
+                  Your payment is processed securely — we never store card details.
                 </p>
               </div>
             </div>
@@ -295,7 +365,7 @@ function PaymentContent() {
             {/* Trust badges */}
             <div className="flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400 py-1">
               <span className="flex items-center gap-1.5"><Lock className="size-3.5" />256-bit SSL encryption</span>
-              <span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />PayPal Buyer Protection</span>
+              <span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Secure checkout</span>
               <span className="flex items-center gap-1.5"><Phone className="size-3.5" />24/7 support available</span>
             </div>
           </div>
