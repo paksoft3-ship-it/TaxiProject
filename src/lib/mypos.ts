@@ -6,11 +6,11 @@ export const MYPOS_CHECKOUT_URL =
     : 'https://www.mypos.com/vmp/checkout-test';
 
 interface MyPOSConfig {
-  sid:   string;
-  cn:    string;
-  pk:    string;
-  pc:    string;
-  idx:   string;
+  sid:    string;
+  cn:     string;
+  pk:     string;
+  pc:     string;
+  idx:    string;
   appid?: string;
   pid?:   string;
 }
@@ -23,36 +23,33 @@ export function getMyPOSConfig(): MyPOSConfig {
 }
 
 export function buildMyPOSParams(opts: {
-  amount:            string;
-  currency:          string;
-  orderId:           string;
-  urlOk:             string;
-  urlCancel:         string;
-  urlNotify:         string;
-  customerEmail?:    string;
+  amount:             string;
+  currency:           string;
+  orderId:            string;
+  urlOk:              string;
+  urlCancel:          string;
+  urlNotify:          string;
+  customerEmail?:     string;
   customerFirstName?: string;
   customerLastName?:  string;
-  note?:             string;
 }): Record<string, string> {
   const cfg = getMyPOSConfig();
 
   const params: Record<string, string> = {
-    IPCmethod:               'IPCPurchase',
-    IPCVersion:              '1.4',
-    IPCLanguage:             'EN',
-    SID:                     cfg.sid,
-    WalletNumber:            cfg.cn,
-    Amount:                  opts.amount,
-    Currency:                opts.currency,
-    OrderID:                 opts.orderId,
-    URL_OK:                  opts.urlOk,
-    URL_Cancel:              opts.urlCancel,
-    URL_Notify:              opts.urlNotify,
-    CardTokenRequest:        '0',
-    PaymentMethod:           '1',
-    PaymentParametersRequired: '1',
-    KeyIndex:                cfg.idx,
-    Note:                    opts.note || 'PrimeTaxi & Tours Booking',
+    IPCmethod:        'IPCPurchase',
+    IPCVersion:       '1.4',
+    IPCLanguage:      'EN',
+    SID:              cfg.sid,
+    WalletNumber:     cfg.cn,
+    Amount:           opts.amount,
+    Currency:         opts.currency,
+    OrderID:          opts.orderId,
+    URL_OK:           opts.urlOk,
+    URL_Cancel:       opts.urlCancel,
+    URL_Notify:       opts.urlNotify,
+    CardTokenRequest: '0',
+    PaymentMethod:    '1',
+    KeyIndex:         cfg.idx,
   };
 
   if (opts.customerEmail)     params.CustomerEmail      = opts.customerEmail;
@@ -62,14 +59,14 @@ export function buildMyPOSParams(opts: {
   return params;
 }
 
-// Official myPOS signing algorithm:
-// 1. Concatenate all param values with '-' separator
+// Official myPOS signing algorithm (matches the PHP SDK reference implementation):
+// 1. Concatenate all param values with NO separator
 // 2. Base64 encode the concatenated string
 // 3. Sign with RSA private key using SHA-256
-// 4. Base64 encode the signature
+// 4. Base64 encode the resulting signature
 export function signMyPOSParams(params: Record<string, string>): string {
-  const cfg         = getMyPOSConfig();
-  const concatenated = Buffer.from(Object.values(params).join('-')).toString('base64');
+  const cfg          = getMyPOSConfig();
+  const concatenated = Buffer.from(Object.values(params).join('')).toString('base64');
 
   const sign = crypto.createSign('SHA256');
   sign.update(concatenated);
@@ -78,14 +75,13 @@ export function signMyPOSParams(params: Record<string, string>): string {
   return sign.sign(cfg.pk, 'base64');
 }
 
-// Verify a notification from myPOS using the same algorithm but with the public certificate
 export function verifyMyPOSSignature(body: Record<string, string>): boolean {
   try {
     const cfg = getMyPOSConfig();
     const { Signature: signature, ...rest } = body;
     if (!signature) return false;
 
-    const concatenated = Buffer.from(Object.values(rest).join('-')).toString('base64');
+    const concatenated = Buffer.from(Object.values(rest).join('')).toString('base64');
 
     const verify = crypto.createVerify('SHA256');
     verify.update(concatenated);

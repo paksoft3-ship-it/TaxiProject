@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
       urlOk:             `${appUrl}/booking/confirmation?booking=${bookingId}&gateway=mypos`,
       urlCancel:         `${appUrl}/booking/payment?booking=${bookingId}&amount=${amount}&cancelled=1`,
       urlNotify:         `${appUrl}/api/mypos/notify`,
-      note:              description || 'PrimeTaxi & Tours Booking',
       customerEmail,
       customerFirstName,
       customerLastName,
