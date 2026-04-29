@@ -65,6 +65,8 @@ export function BookingForm() {
   const initialFrom = searchParams.get('from'); // 'service' = came from a service/tour page
   const initialPickup = searchParams.get('pickup') || '';
   const initialDropoff = searchParams.get('dropoff') || '';
+  const initialRoutePrice = Number(searchParams.get('routePrice')) || 0;
+  const initialRouteName = searchParams.get('routeName') || '';
   const initialDate = searchParams.get('date') || '';
   const initialPassengers = Number(searchParams.get('passengers')) || 2;
   const initialFlightNumber = searchParams.get('flightNumber') || '';
@@ -452,7 +454,7 @@ export function BookingForm() {
                   <div>
                     <p className="text-xs text-slate-500 font-medium">Selected service</p>
                     <p className="font-bold text-slate-900 text-sm">
-                      {initialTourName || serviceTypes.find(s => s.id === serviceType)?.label || serviceType}
+                      {initialRouteName || initialTourName || serviceTypes.find(s => s.id === serviceType)?.label || serviceType}
                     </p>
                   </div>
                 </div>
@@ -1113,6 +1115,8 @@ export function BookingForm() {
           realDurationStr={durationStr}
           tourPrice={initialTourPrice || undefined}
           tourLargeGroupPrice={initialTourLargeGroupPrice || undefined}
+          fixedRoutePrice={initialRoutePrice || undefined}
+          fixedRouteLabel={initialRouteName || undefined}
           pricingSettings={pricingSettings}
         />
       </div>

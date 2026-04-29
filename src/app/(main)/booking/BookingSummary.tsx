@@ -30,6 +30,8 @@ interface BookingSummaryProps {
   realDurationStr?: string;
   tourPrice?: number;
   tourLargeGroupPrice?: number;
+  fixedRoutePrice?: number;
+  fixedRouteLabel?: string;
   pricingSettings?: {
     airportTransferPrice?: number;
     airportTransferLargeGroupPrice?: number;
@@ -83,7 +85,7 @@ const routeDistances: Record<string, number> = {
 };
 
 
-export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '', tourPrice, tourLargeGroupPrice, pricingSettings }: BookingSummaryProps) {
+export function BookingSummary({ serviceType, formData, step, options = { premiumCar: false, childSeats: 0, extraStop: false, extraTime: false }, packageType, realDistanceKm = 0, realDurationStr = '', tourPrice, tourLargeGroupPrice, fixedRoutePrice, fixedRouteLabel, pricingSettings }: BookingSummaryProps) {
   const p = pricingSettings ?? {};
   const isLargeGroup = formData.passengers > 4;
 
@@ -151,7 +153,10 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
     if (serviceType === 'BLUE_LAGOON') {
       let amount = blOneWayPrice;
       let label = 'One-Way Transfer';
-      if (packageType === 'roundtrip') {
+      if (fixedRoutePrice) {
+        amount = fixedRoutePrice;
+        label = fixedRouteLabel || 'Transfer Package';
+      } else if (packageType === 'roundtrip') {
         amount = blRoundtripPrice;
         label = 'Round Trip Transfer';
       } else if (packageType === 'combo') {
@@ -169,7 +174,9 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
 
     // Airport Transfer — two flat tiers
     if (serviceType === 'AIRPORT_TRANSFER') {
-      if (isLargeGroup) {
+      if (fixedRoutePrice) {
+        breakdown.push({ label: fixedRouteLabel || 'Private Transfer', amount: fixedRoutePrice, type: 'add' });
+      } else if (isLargeGroup) {
         breakdown.push({ label: 'Fixed fare (5–8 passengers)', amount: airportLargeGroupPrice, type: 'add' });
       } else {
         breakdown.push({ label: 'Base fare (1–4 passengers)', amount: airportSmallPrice, type: 'add' });
@@ -228,7 +235,7 @@ export function BookingSummary({ serviceType, formData, step, options = { premiu
     }
 
     return breakdown;
-  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType, tourPrice, tourLargeGroupPrice, isLargeGroup, airportSmallPrice, airportLargeGroupPrice, hourlySmallRate, hourlyLargeGroupRate, customSmallPrice, customLargeGroupPrice, blOneWayPrice, blRoundtripPrice, blComboPrice, blComboLargePrice, premiumCarFee, childSeatFee, extraStopFee, extraTimeFee]);
+  }, [serviceType, formData.passengers, formData.pickupLocation, formData.dropoffLocation, estimatedDistance, options, packageType, tourPrice, tourLargeGroupPrice, fixedRoutePrice, fixedRouteLabel, isLargeGroup, airportSmallPrice, airportLargeGroupPrice, hourlySmallRate, hourlyLargeGroupRate, customSmallPrice, customLargeGroupPrice, blOneWayPrice, blRoundtripPrice, blComboPrice, blComboLargePrice, premiumCarFee, childSeatFee, extraStopFee, extraTimeFee]);
 
   // Calculate subtotal
   const subtotal = priceBreakdown.reduce((sum, item) => sum + item.amount, 0);
