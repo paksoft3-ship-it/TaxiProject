@@ -85,11 +85,15 @@ export function BookingForm() {
   if (initialType === 'BLUE_LAGOON' && initialPackage) {
     startStep = 2;
     if (initialPackage === 'combo') {
-      defaultPickup = 'Keflavik International Airport, Iceland';
-      defaultDropoff = 'Blue Lagoon, Grindavík, Iceland';
+      defaultPickup = defaultPickup || 'Keflavik International Airport, Iceland';
+      defaultDropoff = defaultDropoff || 'Blue Lagoon, Grindavík, Iceland';
     }
   } else if (initialTourId || initialFrom === 'service') {
     startStep = 2; // Skip Step 1 — service already chosen
+    // Pre-fill sensible default pickup for known service types
+    if (initialType === 'PRIVATE_TOUR' && !defaultPickup) {
+      defaultPickup = 'Reykjavik, Iceland';
+    }
   }
 
   const [step, setStep] = useState<BookingStep>(startStep);
