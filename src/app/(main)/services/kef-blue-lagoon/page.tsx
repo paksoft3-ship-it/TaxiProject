@@ -119,7 +119,7 @@ export default async function KefBlueLagoonPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/booking?type=KEF_BLUE_LAGOON"
+                href="/booking?type=BLUE_LAGOON&from=service"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
               >
                 Book Transfer
@@ -197,7 +197,7 @@ export default async function KefBlueLagoonPage() {
                     {route.passengers && <p className="text-xs text-slate-500">{route.passengers}</p>}
                   </div>
                   <Link
-                    href="/booking?type=KEF_BLUE_LAGOON"
+                    href="/booking?type=BLUE_LAGOON&from=service"
                     className={`inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${route.popular
                         ? 'bg-primary text-black hover:bg-yellow-400'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -294,7 +294,7 @@ export default async function KefBlueLagoonPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/booking?type=KEF_BLUE_LAGOON"
+              href="/booking?type=BLUE_LAGOON&from=service"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-white font-bold rounded-xl hover:bg-slate-700 transition-colors"
             >
               Book Transfer

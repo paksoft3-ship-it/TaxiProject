@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -48,12 +48,21 @@ const serviceTypes = [
   { id: 'HOURLY_HIRE', label: 'Hourly Hire', icon: Clock, description: 'Flexible private driver' },
 ];
 
+const serviceIcons: Record<string, React.ElementType> = {
+  AIRPORT_TRANSFER: Plane,
+  TAXI: Car,
+  PRIVATE_TOUR: MapPin,
+  BLUE_LAGOON: Flag,
+  HOURLY_HIRE: Clock,
+};
+
 export function BookingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const initialType = (searchParams.get('type') as ServiceType) || 'TAXI';
   const initialPackage = searchParams.get('package');
+  const initialFrom = searchParams.get('from'); // 'service' = came from a service/tour page
   const initialPickup = searchParams.get('pickup') || '';
   const initialDropoff = searchParams.get('dropoff') || '';
   const initialDate = searchParams.get('date') || '';
@@ -66,19 +75,19 @@ export function BookingForm() {
   const initialDirection = searchParams.get('direction') || '';
   const initialHours = searchParams.get('hours') || '4';
 
-  // Determine initial step and form data based on package / tour pre-selection
+  // Determine initial step: skip Step 1 when service is pre-selected from a service/tour page
   let startStep: BookingStep = 1;
   let defaultPickup = initialPickup;
   let defaultDropoff = initialDropoff;
 
   if (initialType === 'BLUE_LAGOON' && initialPackage) {
-    startStep = 2; // Skip service selection — package already chosen
+    startStep = 2;
     if (initialPackage === 'combo') {
       defaultPickup = 'Keflavik International Airport, Iceland';
       defaultDropoff = 'Blue Lagoon, Grindavík, Iceland';
     }
-  } else if (initialTourId) {
-    startStep = 2; // Skip service selection — tour already chosen from tour page
+  } else if (initialTourId || initialFrom === 'service') {
+    startStep = 2; // Skip Step 1 — service already chosen
   }
 
   const [step, setStep] = useState<BookingStep>(startStep);
@@ -431,6 +440,31 @@ export function BookingForm() {
         {/* Step 2: Date & Time */}
         {step === 2 && (
           <section className="bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-4 sm:p-6 md:p-8">
+
+            {/* Service confirmation banner — shown when Step 1 was skipped */}
+            {startStep === 2 && (
+              <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-6">
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const Icon = serviceIcons[serviceType] || Car;
+                    return <Icon className="size-5 text-primary shrink-0" />;
+                  })()}
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">Selected service</p>
+                    <p className="font-bold text-slate-900 text-sm">
+                      {initialTourName || serviceTypes.find(s => s.id === serviceType)?.label || serviceType}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setStep(1)}
+                  className="text-xs text-primary font-semibold hover:underline shrink-0 ml-4"
+                >
+                  Change
+                </button>
+              </div>
+            )}
+
             <h3 className="text-secondary text-xl font-bold mb-6 flex items-center gap-2">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-secondary text-sm font-bold">
                 2
