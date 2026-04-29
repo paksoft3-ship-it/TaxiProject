@@ -126,7 +126,7 @@ export default async function PricingPage() {
         'All Luggage Included',
       ],
       buttonText: 'Book Transfer',
-      href: '/booking?type=AIRPORT_TRANSFER',
+      href: '/booking?type=AIRPORT_TRANSFER&from=service',
       highlighted: true,
     },
     {

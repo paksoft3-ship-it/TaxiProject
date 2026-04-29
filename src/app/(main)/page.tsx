@@ -108,7 +108,7 @@ export default async function HomePage() {
               icon={<Plane />}
               title="Airport Transfers"
               description="Fixed price transfers between Keflavík International Airport (KEF) and Reykjavik area. Flight monitoring included."
-              href="/booking?type=AIRPORT_TRANSFER"
+              href="/booking?type=AIRPORT_TRANSFER&from=service"
               linkText="Book Transfer"
             />
             <ServiceCard

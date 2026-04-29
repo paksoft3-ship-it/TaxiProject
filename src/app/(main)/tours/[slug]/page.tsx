@@ -200,7 +200,7 @@ export default async function TourPage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
                   <Calendar className="size-5 text-primary" />
-                  <span>Book now, pay later available</span>
+                  <span>Instant booking confirmation</span>
                 </div>
               </div>
             </div>

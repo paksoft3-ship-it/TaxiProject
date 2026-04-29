@@ -5,13 +5,14 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Menu, X, Phone, CarTaxiFront, ChevronDown, Sparkles, Map, Car, Plane } from 'lucide-react';
+import { Menu, X, Phone, CarTaxiFront, ChevronDown, Sparkles, Map, Car, Plane, Clock } from 'lucide-react';
 
 const servicesDropdown = [
   { name: 'Experience the Blue Lagoon', href: '/services/blue-lagoon-experience', icon: Sparkles },
   { name: 'Sightseeing Tours', href: '/services/sightseeing-tours', icon: Map },
   { name: 'Private Transfers', href: '/services/private-transfers', icon: Car },
   { name: 'Transfer Between Keflavik Airport and Blue Lagoon', href: '/services/kef-blue-lagoon', icon: Plane },
+  { name: 'Hourly Car Hire with Driver', href: '/services/hourly-hire', icon: Clock },
 ];
 
 const navigation = [

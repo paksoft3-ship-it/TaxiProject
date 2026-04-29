@@ -104,7 +104,7 @@ export default async function FleetPage() {
                                 </div>
 
                                 <Link
-                                    href={`/booking?type=${vehicle.type === 'VAN' ? 'PRIVATE_TRANSFER' : 'TAXI'}&vehicle=${vehicle.id}`} // Simple mapping, could be better
+                                    href={`/booking?type=${vehicle.type === 'VAN' ? 'AIRPORT_TRANSFER' : 'TAXI'}&from=service`}
                                     className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-xl hover:bg-primary hover:text-slate-900 dark:hover:bg-primary transition-colors"
                                 >
                                     Book This Vehicle

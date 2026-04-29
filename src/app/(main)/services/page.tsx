@@ -122,6 +122,30 @@ const services = [
     detailsHref: '/services/kef-blue-lagoon',
     color: 'from-blue-500 to-cyan-500',
   },
+  {
+    id: 'hourly-hire',
+    title: 'Hourly Car Hire with Driver',
+    subtitle: 'Your Schedule, Your Route',
+    icon: Clock,
+    image: '/images/south_coast.png',
+    description:
+      'Hire a private driver by the hour and explore Iceland completely on your own terms. Stop wherever you like, for as long as you want. Perfect for custom itineraries, business travel, or making the most of limited time.',
+    features: [
+      'From 3 to 12 hours',
+      'No fixed route — go anywhere',
+      'Professional English-speaking driver',
+      'Free WiFi on board',
+      'Child seats available',
+      'All fuel & parking included',
+    ],
+    pricing: {
+      from: 'From 3 hrs',
+      note: 'Price calculated at checkout',
+    },
+    href: '/booking?type=HOURLY_HIRE&from=service',
+    detailsHref: '/services/hourly-hire',
+    color: 'from-green-500 to-teal-500',
+  },
 ];
 
 const vehicleFeatures = [
