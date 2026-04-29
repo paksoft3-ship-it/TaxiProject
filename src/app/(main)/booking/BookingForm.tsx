@@ -335,6 +335,8 @@ export function BookingForm() {
           flightNumber: serviceType === 'AIRPORT_TRANSFER' ? flightDetails.flightNumber : undefined,
           flightTime: serviceType === 'AIRPORT_TRANSFER' ? flightDetails.flightTime : undefined,
           luggageCount: (serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') ? flightDetails.luggageCount : undefined,
+          routePrice: initialRoutePrice || undefined,
+          routeName: initialRouteName || undefined,
           options: {
             ...options,
             tourName: customFields.tourName || undefined,
@@ -529,6 +531,53 @@ export function BookingForm() {
                   </p>
                 )}
               </div>
+
+              {/* Passengers — moved here so price updates immediately */}
+              <div className="flex flex-col gap-2">
+                <label className="text-slate-700 font-semibold text-sm flex items-center gap-2">
+                  <User className="size-4 text-slate-400" />
+                  Number of Passengers
+                </label>
+                <select
+                  value={formData.passengers}
+                  onChange={(e) => updateFormData('passengers', parseInt(e.target.value))}
+                  className="w-full rounded-lg bg-slate-50 border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <option key={num} value={num}>
+                      {num} {num === 1 ? 'Passenger' : 'Passengers'}{num >= 5 ? ' (large group rate)' : ''}
+                    </option>
+                  ))}
+                </select>
+                {formData.passengers >= 5 && (
+                  <p className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                    <AlertCircle className="size-3" />
+                    Large group pricing applies (5+ passengers)
+                  </p>
+                )}
+              </div>
+
+              {/* Hourly hire duration — here so price is visible from the start */}
+              {serviceType === 'HOURLY_HIRE' && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-slate-700 font-semibold text-sm flex items-center gap-2">
+                    <Clock className="size-4 text-slate-400" />
+                    Charter Duration
+                  </label>
+                  <select
+                    value={customFields.hourlyDuration}
+                    onChange={(e) => setCustomFields(prev => ({ ...prev, hourlyDuration: e.target.value }))}
+                    className="w-full rounded-lg bg-slate-50 border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                  >
+                    <option value="3">3 Hours — city highlights</option>
+                    <option value="4">4 Hours — city + countryside</option>
+                    <option value="6">6 Hours — Golden Circle highlights</option>
+                    <option value="8">8 Hours — South Coast essentials</option>
+                    <option value="10">10 Hours — full Golden Circle + extras</option>
+                    <option value="12">12 Hours — complete Iceland experience</option>
+                  </select>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -782,13 +831,20 @@ export function BookingForm() {
                   <>
                     <div className="flex flex-col gap-2">
                       <label className="text-slate-700 font-semibold text-sm">Selected Tour</label>
-                      <input
-                        type="text"
-                        value={customFields.tourName}
-                        onChange={(e) => setCustomFields(prev => ({ ...prev, tourName: e.target.value }))}
-                        placeholder="e.g. Golden Circle"
-                        className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
-                      />
+                      {initialTourId ? (
+                        <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                          <MapPin className="size-4 text-primary shrink-0" />
+                          <span className="font-semibold text-slate-900 text-sm">{customFields.tourName}</span>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={customFields.tourName}
+                          onChange={(e) => setCustomFields(prev => ({ ...prev, tourName: e.target.value }))}
+                          placeholder="e.g. Golden Circle"
+                          className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-slate-700 font-semibold text-sm">Preferred Start Time</label>
@@ -820,24 +876,7 @@ export function BookingForm() {
                   </div>
                 )}
 
-                {/* HOURLY HIRE */}
-                {serviceType === 'HOURLY_HIRE' && (
-                  <div className="flex flex-col gap-2">
-                    <label className="text-slate-700 font-semibold text-sm">Charter Duration</label>
-                    <select
-                      value={customFields.hourlyDuration}
-                      onChange={(e) => setCustomFields(prev => ({ ...prev, hourlyDuration: e.target.value }))}
-                      className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
-                    >
-                      <option value="3">3 Hours</option>
-                      <option value="4">4 Hours</option>
-                      <option value="6">6 Hours</option>
-                      <option value="8">8 Hours</option>
-                      <option value="10">10 Hours</option>
-                      <option value="12">12 Hours (Full Day)</option>
-                    </select>
-                  </div>
-                )}
+                {/* HOURLY HIRE — duration is in Step 2 */}
 
                 {/* Luggage (Show for Airport & Blue Lagoon) */}
                 {(serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') && (
@@ -916,39 +955,43 @@ export function BookingForm() {
                   )}
                 </div>
 
-                {/* Extra Stop */}
-                <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={options.extraStop}
-                      onChange={(e) => setOptions(prev => ({ ...prev, extraStop: e.target.checked }))}
-                      className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
-                    />
-                    <div>
-                      <p className="font-bold text-slate-900">Extra Pick up / Drop off place</p>
-                      <p className="text-sm text-slate-500">Stop at an additional location</p>
+                {/* Extra Stop — only for point-to-point transfers */}
+                {(serviceType === 'TAXI' || serviceType === 'AIRPORT_TRANSFER') && (
+                  <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={options.extraStop}
+                        onChange={(e) => setOptions(prev => ({ ...prev, extraStop: e.target.checked }))}
+                        className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                      />
+                      <div>
+                        <p className="font-bold text-slate-900">Extra Pick up / Drop off place</p>
+                        <p className="text-sm text-slate-500">Stop at an additional location</p>
+                      </div>
                     </div>
-                  </div>
-                  <span className="font-bold text-slate-900">ISK 7,000</span>
-                </label>
+                    <span className="font-bold text-slate-900">ISK 7,000</span>
+                  </label>
+                )}
 
-                {/* Extra Time */}
-                <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={options.extraTime}
-                      onChange={(e) => setOptions(prev => ({ ...prev, extraTime: e.target.checked }))}
-                      className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
-                    />
-                    <div>
-                      <p className="font-bold text-slate-900">Extra Time</p>
-                      <p className="text-sm text-slate-500">Extended waiting or service time</p>
+                {/* Extra Time — only for transfers, not tours (tours have fixed duration) */}
+                {(serviceType === 'TAXI' || serviceType === 'AIRPORT_TRANSFER') && (
+                  <label className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-primary/50 cursor-pointer transition-colors bg-slate-50/50">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={options.extraTime}
+                        onChange={(e) => setOptions(prev => ({ ...prev, extraTime: e.target.checked }))}
+                        className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+                      />
+                      <div>
+                        <p className="font-bold text-slate-900">Extra Waiting Time</p>
+                        <p className="text-sm text-slate-500">Extended waiting at pickup location</p>
+                      </div>
                     </div>
-                  </div>
-                  <span className="font-bold text-slate-900">ISK 14,000</span>
-                </label>
+                    <span className="font-bold text-slate-900">ISK 14,000</span>
+                  </label>
+                )}
               </div>
 
               {/* Additional Information */}
@@ -1040,20 +1083,6 @@ export function BookingForm() {
                     {errors.phone}
                   </p>
                 )}
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-slate-700 font-semibold text-sm">Number of Passengers</label>
-                <select
-                  value={formData.passengers}
-                  onChange={(e) => updateFormData('passengers', parseInt(e.target.value))}
-                  className="w-full rounded-lg border-slate-200 p-3 text-slate-700 focus:border-primary focus:ring-primary"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                    <option key={num} value={num}>
-                      {num} {num === 1 ? 'Passenger' : 'Passengers'}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </section>

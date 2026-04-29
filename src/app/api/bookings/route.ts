@@ -132,8 +132,16 @@ export async function POST(request: NextRequest) {
       basePrice = hours * rate;
     }
 
-    // Handle Blue Lagoon Packages specifically
-    if (validated.type === 'BLUE_LAGOON' && validated.options?.packageType) {
+    // Use routePrice (from service page route cards) when explicitly provided
+    if (validated.routePrice && validated.routePrice > 0) {
+      basePrice = validated.routePrice;
+      if (validated.routeName) {
+        // Will be added to details below
+      }
+    }
+
+    // Handle Blue Lagoon Packages specifically (only if no routePrice override)
+    if (validated.type === 'BLUE_LAGOON' && validated.options?.packageType && !validated.routePrice) {
       if (validated.options.packageType === 'roundtrip') {
         basePrice = pricing.blueLagoonRoundtripPrice;
       } else if (validated.options.packageType === 'combo') {
@@ -198,6 +206,9 @@ export async function POST(request: NextRequest) {
     // Compile special requests string
     let specialRequests = validated.specialRequests || '';
     const details = [];
+    if (validated.routeName) {
+      details.push(`Package: ${validated.routeName}`);
+    }
     if (appliedSurchargeLabel) {
       details.push(`Surcharge: ${appliedSurchargeLabel}`);
     }

@@ -11,6 +11,8 @@ export const bookingSchema = z.object({
   pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   pickupTime: z.string(),
   tourId: z.string().optional(),
+  routePrice: z.number().optional(),
+  routeName: z.string().optional(),
   flightNumber: z.string().optional(),
   flightTime: z.string().optional(),
   luggageCount: z.coerce.number().optional(),
