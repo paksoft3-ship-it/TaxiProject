@@ -50,6 +50,7 @@ export function buildMyPOSParams(opts: {
     CardTokenRequest:          '0',
     KeyIndex:                  cfg.idx,
     PaymentParametersRequired: '2',
+    PaymentMethod:             '1',
   };
 
   if (opts.customerEmail)     params.CustomerEmail      = opts.customerEmail;
