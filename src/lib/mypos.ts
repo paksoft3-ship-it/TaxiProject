@@ -59,14 +59,15 @@ export function buildMyPOSParams(opts: {
   return params;
 }
 
-// Official myPOS signing algorithm (matches the PHP SDK reference implementation):
-// 1. Concatenate all param values with NO separator
-// 2. Base64 encode the concatenated string
+// Official myPOS signing algorithm per https://developers.mypos.com/apis/checkout-api/checkout-getting-started/authentication
+// PHP reference: $concData = base64_encode(implode('-', $postData));
+// 1. Join all param values with '-' separator
+// 2. Base64 encode the joined string
 // 3. Sign with RSA private key using SHA-256
-// 4. Base64 encode the resulting signature
+// 4. Base64 encode the resulting signature bytes
 export function signMyPOSParams(params: Record<string, string>): string {
   const cfg          = getMyPOSConfig();
-  const concatenated = Buffer.from(Object.values(params).join('')).toString('base64');
+  const concatenated = Buffer.from(Object.values(params).join('-')).toString('base64');
 
   const sign = crypto.createSign('SHA256');
   sign.update(concatenated);
@@ -81,7 +82,7 @@ export function verifyMyPOSSignature(body: Record<string, string>): boolean {
     const { Signature: signature, ...rest } = body;
     if (!signature) return false;
 
-    const concatenated = Buffer.from(Object.values(rest).join('')).toString('base64');
+    const concatenated = Buffer.from(Object.values(rest).join('-')).toString('base64');
 
     const verify = crypto.createVerify('SHA256');
     verify.update(concatenated);
