@@ -36,20 +36,20 @@ export function buildMyPOSParams(opts: {
   const cfg = getMyPOSConfig();
 
   const params: Record<string, string> = {
-    IPCmethod:        'IPCPurchase',
-    IPCVersion:       '1.4',
-    IPCLanguage:      'EN',
-    SID:              cfg.sid,
-    WalletNumber:     cfg.cn,
-    Amount:           opts.amount,
-    Currency:         opts.currency,
-    OrderID:          opts.orderId,
-    URL_OK:           opts.urlOk,
-    URL_Cancel:       opts.urlCancel,
-    URL_Notify:       opts.urlNotify,
-    CardTokenRequest: '0',
-    PaymentMethod:    '1',
-    KeyIndex:         cfg.idx,
+    IPCmethod:                 'IPCPurchase',
+    IPCVersion:                '1.4',
+    IPCLanguage:               'EN',
+    SID:                       cfg.sid,
+    WalletNumber:              cfg.cn,
+    Amount:                    opts.amount,
+    Currency:                  opts.currency,
+    OrderID:                   opts.orderId,
+    URL_OK:                    opts.urlOk,
+    URL_Cancel:                opts.urlCancel,
+    URL_Notify:                opts.urlNotify,
+    CardTokenRequest:          '0',
+    KeyIndex:                  cfg.idx,
+    PaymentParametersRequired: '2',
   };
 
   if (opts.customerEmail)     params.CustomerEmail      = opts.customerEmail;
