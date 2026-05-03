@@ -1,10 +1,21 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js';
 import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { Lock, ArrowLeft, ShieldCheck, Clock, Phone, Star, Loader2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 const serviceLabels: Record<string, string> = {
   TAXI: 'City Taxi',
@@ -24,21 +35,87 @@ const serviceIcons: Record<string, string> = {
   HOURLY_HIRE: '⏱️',
 };
 
-const ISK_TO_EUR_RATE = 150;
-const EUR_EXCHANGE_RATE_FORMAT = '1 EUR = 150 ISK';
+// ── Stripe checkout form ──────────────────────────────────────────────────────
 
-interface PayPalButtonsWrapperProps {
+function StripeCheckoutForm({ bookingId }: { bookingId: string }) {
+  const stripe   = useStripe();
+  const elements = useElements();
+  const [error,     setError]     = useState<string | null>(null);
+  const [isPaying,  setIsPaying]  = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setIsPaying(true);
+    setError(null);
+
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setError(submitError.message || 'Payment failed. Please try again.');
+      setIsPaying(false);
+      return;
+    }
+
+    const returnUrl = `${window.location.origin}/booking/confirmation?booking=${bookingId}&gateway=stripe`;
+
+    const { error: confirmError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: returnUrl },
+    });
+
+    if (confirmError) {
+      setError(confirmError.message || 'Payment failed. Please try again.');
+      setIsPaying(false);
+    }
+    // On success Stripe redirects to return_url — no need to handle here
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement options={{ layout: 'tabs' }} />
+
+      {error && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+          {error}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={!stripe || isPaying}
+        className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-yellow-400 disabled:opacity-60 text-black font-bold rounded-xl px-6 py-3.5 transition-colors"
+      >
+        {isPaying ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Processing payment…
+          </>
+        ) : (
+          <>
+            <Lock className="size-4" />
+            Pay Securely with Card
+          </>
+        )}
+      </button>
+    </form>
+  );
+}
+
+// ── PayPal wrapper ────────────────────────────────────────────────────────────
+
+interface PayPalWrapperProps {
   isPaying: boolean;
   createOrder: () => Promise<string>;
   onApprove: (data: { orderID: string }) => Promise<void>;
-  onError: (err: any) => void;
+  onError: (err: unknown) => void;
   onCancel: () => void;
 }
 
-function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCancel }: PayPalButtonsWrapperProps) {
+function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCancel }: PayPalWrapperProps) {
   const [sdkState] = usePayPalScriptReducer();
   const { isPending, isRejected } = sdkState;
-  // loadingStatusErrorMessage is present at runtime but not in the TS type
   const sdkErrorMsg = (sdkState as unknown as Record<string, unknown>).loadingStatusErrorMessage as string | undefined;
 
   if (isRejected) {
@@ -46,34 +123,24 @@ function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCan
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-xl text-sm space-y-2">
         <div className="flex items-center gap-2">
           <AlertCircle className="size-4 shrink-0" />
-          <span className="font-semibold">Failed to load payment methods.</span>
+          <span className="font-semibold">Failed to load PayPal.</span>
         </div>
-        <p className="text-xs text-red-600">Please refresh the page or contact support.</p>
         {sdkErrorMsg && (
-          <p className="text-xs text-red-500 font-mono bg-red-100 rounded px-2 py-1 break-all">
-            {sdkErrorMsg}
-          </p>
+          <p className="text-xs text-red-500 font-mono bg-red-100 rounded px-2 py-1 break-all">{sdkErrorMsg}</p>
         )}
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-[150px]">
+    <div className="relative min-h-[50px]">
       {isPending && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 z-10 gap-3">
-          <Loader2 className="size-8 animate-spin text-primary" />
-          <p className="text-xs font-semibold text-slate-500 animate-pulse">Loading payment methods...</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+          <Loader2 className="size-6 animate-spin text-primary" />
         </div>
       )}
       <PayPalButtons
-        style={{
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'rect',
-          label: 'pay',
-          height: 50,
-        }}
+        style={{ layout: 'horizontal', color: 'blue', shape: 'rect', label: 'pay', height: 45, tagline: false }}
         disabled={isPaying || isPending}
         createOrder={createOrder}
         onApprove={onApprove}
@@ -84,107 +151,62 @@ function PayPalButtonsWrapper({ isPaying, createOrder, onApprove, onError, onCan
   );
 }
 
+// ── Main payment content ──────────────────────────────────────────────────────
+
 function PaymentContent() {
-  const router = useRouter();
+  const router      = useRouter();
   const searchParams = useSearchParams();
 
-  const amount    = parseInt(searchParams.get('amount')  || '0');
-  const bookingId = searchParams.get('booking');
+  const amount      = parseInt(searchParams.get('amount')  || '0');
+  const bookingId   = searchParams.get('booking');
   const serviceType = searchParams.get('type') || '';
-  const amountEUR = (amount / ISK_TO_EUR_RATE).toFixed(2);
+  const amountEUR   = (amount / 150).toFixed(2);
 
-  const [error, setError]         = useState<string | null>(null);
-  const [isPaying, setIsPaying]   = useState(false);
-  const [myposLoading, setMyposLoading] = useState(false);
+  const [clientSecret,     setClientSecret]     = useState<string | null>(null);
+  const [secretError,      setSecretError]      = useState<string | null>(null);
+  const [error,            setError]            = useState<string | null>(null);
+  const [isPayPalPaying,   setIsPayPalPaying]   = useState(false);
 
-  const createOrder = async () => {
+  // Load Stripe client secret
+  useEffect(() => {
+    if (!bookingId) return;
+    fetch(`/api/bookings/${bookingId}/client-secret`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.clientSecret) setClientSecret(data.clientSecret);
+        else setSecretError(data.error || 'Failed to load payment details.');
+      })
+      .catch(() => setSecretError('Failed to load payment details.'));
+  }, [bookingId]);
+
+  // PayPal handlers
+  const createPayPalOrder = async () => {
     setError(null);
-    try {
-      const res  = await fetch('/api/paypal/create-order', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          description: `${serviceLabels[serviceType] || 'Booking'} - PrimeTaxi & Tours`,
-        }),
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        console.error('Server-side PayPal error:', data);
-        const errorMsg = data.error || 'Failed to initialize PayPal order.';
-        setError(errorMsg);
-        throw new Error(errorMsg);
-      }
-      
-      return data.orderID;
-    } catch (err: any) {
-      console.error('Client-side createOrder error:', err);
-      if (!error) setError(err.message || 'Failed to initialize payment.');
-      throw err;
-    }
+    const res  = await fetch('/api/paypal/create-order', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ amount, description: `${serviceLabels[serviceType] || 'Booking'} - PrimeTaxi & Tours` }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error || 'Failed to initialize PayPal.'); throw new Error(data.error); }
+    return data.orderID;
   };
 
-  const onApprove = async (data: { orderID: string }) => {
-    setIsPaying(true);
+  const onPayPalApprove = async (data: { orderID: string }) => {
+    setIsPayPalPaying(true);
     setError(null);
     try {
       const res    = await fetch('/api/paypal/capture-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderID: data.orderID, bookingId }),
+        body:    JSON.stringify({ orderID: data.orderID, bookingId }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Payment capture failed');
       router.push(`/booking/confirmation?booking=${bookingId}`);
-    } catch (err: any) {
-      setError(err.message || 'Payment failed. Please try again.');
-      setIsPaying(false);
-    }
-  };
-
-  const onError = (err: any) => {
-    console.error('PayPal error:', err);
-    setError('Payment could not be processed. Please try again.');
-    setIsPaying(false);
-  };
-
-  const onCancel = () =>
-    setError('Payment was cancelled. You can try again whenever you are ready.');
-
-  const payWithMyPos = async () => {
-    setError(null);
-    setMyposLoading(true);
-    try {
-      const res = await fetch('/api/mypos/create-payment', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          bookingId,
-          description: `${serviceLabels[serviceType] || 'Booking'} - PrimeTaxi & Tours`,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to start myPOS payment.');
-
-      // myPOS requires a form POST (not a simple redirect)
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = data.checkoutUrl;
-      Object.entries(data.params as Record<string, string>).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = key;
-        input.value = value;
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
-    } catch (err: any) {
-      setError(err.message || 'Could not connect to myPOS. Please try again.');
-      setMyposLoading(false);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
+      setIsPayPalPaying(false);
     }
   };
 
@@ -210,7 +232,6 @@ function PaymentContent() {
     <main className="min-h-screen bg-slate-50 py-8 sm:py-12 px-4">
       <div className="max-w-5xl mx-auto">
 
-        {/* Back */}
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors"
@@ -219,7 +240,6 @@ function PaymentContent() {
           <span className="text-sm font-medium">Back to Booking</span>
         </button>
 
-        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 rounded-full px-4 py-1.5 text-sm font-semibold mb-4">
             <ShieldCheck className="size-4" />
@@ -227,153 +247,124 @@ function PaymentContent() {
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Complete Your Payment</h1>
           <p className="text-slate-500 text-sm max-w-md mx-auto">
-            Pay securely with your PayPal account.
+            Pay securely by card or PayPal.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-          {/* ── Left: payment panel ── */}
+          {/* ── Payment panel ── */}
           <div className="lg:col-span-3 space-y-4">
 
             {/* Amount banner */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Amount Due</span>
-                <span className="text-xs bg-slate-100 text-slate-500 rounded-full px-2.5 py-0.5">Charged in EUR</span>
+                <span className="text-xs bg-slate-100 text-slate-500 rounded-full px-2.5 py-0.5">ISK</span>
               </div>
               <div className="flex items-end gap-3 mt-1">
                 <span className="text-3xl font-extrabold text-slate-900">{formatCurrency(amount)}</span>
                 <span className="text-slate-400 text-sm mb-1">≈ €{amountEUR}</span>
               </div>
               <p className="text-xs text-slate-400 mt-2">
-                ISK is converted to EUR at checkout (approx. 1 EUR = {ISK_TO_EUR_RATE} ISK).
+                You will be charged in ISK. EUR shown for reference only (approx. 1 EUR = 150 ISK).
               </p>
             </div>
 
-            {/* Payment card */}
+            {/* Card payment via Stripe */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-
-              {/* Header */}
               <div className="px-6 pt-6 pb-4 border-b border-slate-100">
-                <p className="text-sm font-semibold text-slate-700 mb-1">Choose payment method</p>
-                <p className="text-xs text-slate-400">
-                  Choose PayPal or pay by card via myPOS.
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700">Pay by Card</p>
+                  <div className="flex items-center gap-1.5">
+                    {['Visa', 'Mastercard', 'Amex'].map((c) => (
+                      <span key={c} className="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded px-1.5 py-0.5">{c}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Accepted cards row */}
-              <div className="px-6 pt-4 flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-slate-400 font-medium">We accept:</span>
-                {['PayPal', 'Visa', 'Mastercard', 'Amex'].map((c) => (
-                  <span key={c} className="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1">
-                    {c}
-                  </span>
-                ))}
-                <span className="ml-auto text-xs text-slate-400 flex items-center gap-1">
-                  <Lock className="size-3" />
-                  SSL encrypted
-                </span>
-              </div>
-
-              {/* PayPal buttons — vertical layout shows PayPal + card natively */}
               <div className="p-6">
-                {!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
+                {!stripePromise ? (
                   <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                     <AlertCircle className="size-4 shrink-0" />
-                    Payment configuration is missing. Please contact support or try again later.
+                    Card payment is not configured. Please contact support.
+                  </div>
+                ) : secretError ? (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <AlertCircle className="size-4 shrink-0" />
+                    {secretError}
+                  </div>
+                ) : !clientSecret ? (
+                  <div className="flex items-center justify-center py-8 gap-3 text-slate-400">
+                    <Loader2 className="size-5 animate-spin" />
+                    <span className="text-sm">Loading payment form…</span>
                   </div>
                 ) : (
+                  <Elements
+                    stripe={stripePromise}
+                    options={{
+                      clientSecret,
+                      appearance: {
+                        theme: 'stripe',
+                        variables: { colorPrimary: '#EAB308', borderRadius: '8px' },
+                      },
+                    }}
+                  >
+                    <StripeCheckoutForm bookingId={bookingId} />
+                  </Elements>
+                )}
+              </div>
+            </div>
+
+            {/* PayPal */}
+            {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+                  <p className="text-sm font-semibold text-slate-700">Or pay with PayPal</p>
+                </div>
+                <div className="p-6">
                   <PayPalScriptProvider
                     options={{
-                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                      currency: 'EUR',
-                      intent: 'capture',
-                      components: 'buttons',
-                      locale: 'en_US',
-                      'disable-funding': 'card,paylater,venmo,credit',
+                      clientId:            process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                      currency:            'EUR',
+                      intent:              'capture',
+                      components:          'buttons',
+                      locale:              'en_US',
+                      'disable-funding':   'card,paylater,venmo,credit',
                     }}
                   >
                     <PayPalButtonsWrapper
-                      isPaying={isPaying}
-                      createOrder={createOrder}
-                      onApprove={onApprove}
-                      onError={onError}
-                      onCancel={onCancel}
+                      isPaying={isPayPalPaying}
+                      createOrder={createPayPalOrder}
+                      onApprove={onPayPalApprove}
+                      onError={() => setError('PayPal payment could not be processed. Please try again.')}
+                      onCancel={() => setError('PayPal payment was cancelled.')}
                     />
                   </PayPalScriptProvider>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div className="px-6 flex items-center gap-3">
-                <div className="flex-1 h-px bg-slate-100" />
-                <span className="text-xs text-slate-400 font-medium">or pay by card</span>
-                <div className="flex-1 h-px bg-slate-100" />
-              </div>
-
-              {/* myPOS button */}
-              <div className="p-6 pt-4">
-                {!process.env.NEXT_PUBLIC_MYPOS_ENABLED ? (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
-                    <AlertCircle className="size-4 shrink-0" />
-                    myPOS card payment is not configured yet.
-                  </div>
-                ) : (
-                  <button
-                    onClick={payWithMyPos}
-                    disabled={myposLoading || isPaying}
-                    className="w-full flex items-center justify-center gap-3 bg-[#1A2E5A] hover:bg-[#152348] disabled:opacity-60 text-white font-bold rounded-xl px-6 py-3.5 transition-colors"
-                  >
-                    {myposLoading ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        Redirecting to myPOS…
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="size-4" />
-                        Pay with Card via myPOS
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* Feedback messages */}
-              {error && (
-                <div className="mx-6 mb-5 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                  <AlertCircle className="size-4 shrink-0 mt-0.5" />
-                  {error}
                 </div>
-              )}
-              {isPaying && (
-                <div className="mx-6 mb-5 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm flex items-center gap-3">
-                  <Loader2 className="size-4 animate-spin shrink-0" />
-                  Processing your payment — please do not close this page.
-                </div>
-              )}
-
-              <div className="px-6 pb-5">
-                <p className="text-xs text-slate-400 text-center flex items-center justify-center gap-1.5">
-                  <ShieldCheck className="size-3.5 text-green-500 shrink-0" />
-                  Your payment is processed securely — we never store card details.
-                </p>
               </div>
-            </div>
+            )}
+
+            {/* Shared error */}
+            {error && (
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                {error}
+              </div>
+            )}
 
             {/* Trust badges */}
             <div className="flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400 py-1">
-              <span className="flex items-center gap-1.5"><Lock className="size-3.5" />256-bit SSL encryption</span>
+              <span className="flex items-center gap-1.5"><Lock className="size-3.5" />256-bit SSL</span>
               <span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Secure checkout</span>
-              <span className="flex items-center gap-1.5"><Phone className="size-3.5" />24/7 support available</span>
+              <span className="flex items-center gap-1.5"><Phone className="size-3.5" />24/7 support</span>
             </div>
           </div>
 
-          {/* ── Right: order summary ── */}
+          {/* ── Order summary ── */}
           <div className="lg:col-span-2">
             <div className="bg-secondary text-white rounded-2xl shadow-lg p-6 sticky top-24">
-
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
                 <span className="text-3xl">{serviceIcons[serviceType] || '🚗'}</span>
                 <div>
@@ -384,25 +375,17 @@ function PaymentContent() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-300">Base fare</span>
-                  <span>{formatCurrency(amount)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-300">EUR equivalent</span>
-                  <span>€{amountEUR}</span>
-                </div>
-                <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span className="text-primary">{formatCurrency(amount)}</span>
+                  <span className="text-slate-300">Total</span>
+                  <span className="font-bold text-lg text-primary">{formatCurrency(amount)}</span>
                 </div>
               </div>
 
               <div className="space-y-2.5">
                 {[
-                  { icon: Clock,        text: 'Free cancellation up to 24h before' },
-                  { icon: Phone,        text: 'Flight monitoring included'          },
-                  { icon: Star,         text: 'Meet & greet at arrivals'            },
-                  { icon: ShieldCheck,  text: 'Instant booking confirmation'        },
+                  { icon: Clock,       text: 'Free cancellation up to 24h before' },
+                  { icon: Phone,       text: 'Flight monitoring included'          },
+                  { icon: Star,        text: 'Meet & greet at arrivals'            },
+                  { icon: ShieldCheck, text: 'Instant booking confirmation'        },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-center gap-2.5 text-sm text-slate-300">
                     <div className="size-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
@@ -423,6 +406,7 @@ function PaymentContent() {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </main>

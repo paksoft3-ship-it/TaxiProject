@@ -8,6 +8,7 @@ import { generateBookingNumber } from '@/lib/utils';
 // PayPal payment is handled separately via /api/paypal/* routes
 import { sendBookingConfirmation, sendAdminBookingNotification } from '@/lib/email';
 import { rateLimit, getIp } from '@/lib/rateLimit';
+import { createPaymentIntent } from '@/lib/stripe';
 
 // GET /api/bookings - Get all bookings (admin only)
 export async function GET(request: NextRequest) {
@@ -255,9 +256,6 @@ export async function POST(request: NextRequest) {
       specialRequests = `${details.join(', ')}. ${specialRequests}`;
     }
 
-    // PayPal payment is created separately via /api/paypal/create-order
-    // No Stripe payment intent needed here
-
     // Create booking
     const booking = await prisma.booking.create({
       data: {
@@ -280,7 +278,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // For TAXI bookings: send emails immediately (no Stripe webhook fires for metered rides)
+    // For non-TAXI bookings: create Stripe Payment Intent and store on booking
+    if (validated.type !== 'TAXI') {
+      try {
+        const intent = await createPaymentIntent(totalPrice, 'isk', {
+          bookingId:     booking.id,
+          bookingNumber: booking.bookingNumber,
+          customerEmail: booking.customerEmail,
+        });
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data:  { paymentIntentId: intent.id },
+        });
+      } catch (stripeErr) {
+        console.error('Stripe payment intent creation failed:', stripeErr);
+        // Non-fatal — booking is saved, customer can retry payment
+      }
+    }
+
+    // For TAXI bookings: send emails immediately (webhook won't fire for metered rides)
     if (validated.type === 'TAXI') {
       const emailData = {
         bookingNumber: booking.bookingNumber,
