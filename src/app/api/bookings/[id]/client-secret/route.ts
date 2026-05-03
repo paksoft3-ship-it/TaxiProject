@@ -34,6 +34,14 @@ export async function GET(
     // If no intent yet (e.g. Stripe key wasn't configured at booking time), create one now
     let intentId = booking.paymentIntentId;
     if (!intentId) {
+      if (booking.totalPrice <= 0) {
+        console.error(`[Stripe] Cannot create intent — totalPrice is ${booking.totalPrice} for booking ${booking.id}`);
+        return NextResponse.json(
+          { error: `Invalid booking amount (${booking.totalPrice} ISK). Please contact support.` },
+          { status: 400 }
+        );
+      }
+      console.log(`[Stripe] Creating intent lazily for booking ${booking.id}, amount=${booking.totalPrice} ${booking.currency}`);
       const intent = await createPaymentIntent(booking.totalPrice, booking.currency, {
         bookingId:     booking.id,
         bookingNumber: booking.bookingNumber,

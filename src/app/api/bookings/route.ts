@@ -280,19 +280,23 @@ export async function POST(request: NextRequest) {
 
     // For non-TAXI bookings: create Stripe Payment Intent and store on booking
     if (validated.type !== 'TAXI') {
-      try {
-        const intent = await createPaymentIntent(totalPrice, 'isk', {
-          bookingId:     booking.id,
-          bookingNumber: booking.bookingNumber,
-          customerEmail: booking.customerEmail,
-        });
-        await prisma.booking.update({
-          where: { id: booking.id },
-          data:  { paymentIntentId: intent.id },
-        });
-      } catch (stripeErr) {
-        console.error('Stripe payment intent creation failed:', stripeErr);
-        // Non-fatal — booking is saved, customer can retry payment
+      if (totalPrice <= 0) {
+        console.error(`[Stripe] Skipping intent — totalPrice is ${totalPrice} for booking ${booking.id}`);
+      } else {
+        try {
+          const intent = await createPaymentIntent(totalPrice, 'isk', {
+            bookingId:     booking.id,
+            bookingNumber: booking.bookingNumber,
+            customerEmail: booking.customerEmail,
+          });
+          await prisma.booking.update({
+            where: { id: booking.id },
+            data:  { paymentIntentId: intent.id },
+          });
+        } catch (stripeErr: unknown) {
+          const msg = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
+          console.error(`[Stripe] Payment intent creation failed for booking ${booking.id}: ${msg}`);
+        }
       }
     }
 
