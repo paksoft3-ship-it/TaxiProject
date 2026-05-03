@@ -265,24 +265,39 @@ export function BookingForm() {
     return true;
   };
 
+  const validateEmail = (value: string): string | undefined => {
+    if (!value.trim()) return 'Please enter your email address';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
+      return 'Please enter a valid email address (e.g. john@example.com)';
+    return undefined;
+  };
+
+  const validatePhone = (value: string): string | undefined => {
+    if (!value.trim()) return 'Please enter your phone number';
+    if (value.includes('@'))
+      return 'This looks like an email address — please enter a phone number';
+    const digits = value.replace(/\D/g, '');
+    if (digits.length < 7)
+      return 'Please enter a valid phone number with at least 7 digits';
+    if (!/^[+\d][\d\s\-().+]+$/.test(value.trim()))
+      return 'Please enter a valid phone number (e.g. +354 555 1234)';
+    return undefined;
+  };
+
   const validateStep5 = (): boolean => {
     const newErrors: ValidationErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Please enter your name';
+      newErrors.name = 'Please enter your full name';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Please enter your email';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Please enter your phone number';
-    } else if (formData.phone.trim().length < 7) {
-      newErrors.phone = 'Phone number must be at least 7 digits';
-    }
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1022,16 +1037,23 @@ export function BookingForm() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-slate-700 font-semibold text-sm">Full Name</label>
+                <label className="text-slate-700 font-semibold text-sm">Full Name <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <User className="absolute left-3 top-3.5 text-slate-400 size-5" />
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => updateFormData('name', e.target.value)}
-                    placeholder="John Smith"
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (!val) setErrors((p) => ({ ...p, name: 'Please enter your full name' }));
+                      else if (val.length < 2) setErrors((p) => ({ ...p, name: 'Name must be at least 2 characters' }));
+                      else setErrors((p) => ({ ...p, name: undefined }));
+                    }}
+                    placeholder="e.g. John Smith"
+                    autoComplete="name"
                     className={cn(
-                      "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                      "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary border",
                       errors.name ? "border-red-500 border-2" : "border-slate-200"
                     )}
                   />
@@ -1044,14 +1066,19 @@ export function BookingForm() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-slate-700 font-semibold text-sm">Email</label>
+                <label className="text-slate-700 font-semibold text-sm">Email Address <span className="text-red-500">*</span></label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateFormData('email', e.target.value)}
-                  placeholder="john@example.com"
+                  onBlur={(e) => {
+                    const err = validateEmail(e.target.value);
+                    setErrors((p) => ({ ...p, email: err }));
+                  }}
+                  placeholder="e.g. john@example.com"
+                  autoComplete="email"
                   className={cn(
-                    "w-full rounded-lg p-3 text-slate-700 focus:border-primary focus:ring-primary",
+                    "w-full rounded-lg p-3 text-slate-700 focus:border-primary focus:ring-primary border",
                     errors.email ? "border-red-500 border-2" : "border-slate-200"
                   )}
                 />
@@ -1063,16 +1090,21 @@ export function BookingForm() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-slate-700 font-semibold text-sm">Phone Number</label>
+                <label className="text-slate-700 font-semibold text-sm">Phone Number <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3.5 text-slate-400 size-5" />
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => updateFormData('phone', e.target.value)}
-                    placeholder="+354 555 1234"
+                    onBlur={(e) => {
+                      const err = validatePhone(e.target.value);
+                      setErrors((p) => ({ ...p, phone: err }));
+                    }}
+                    placeholder="e.g. +354 555 1234"
+                    autoComplete="tel"
                     className={cn(
-                      "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary",
+                      "w-full rounded-lg p-3 pl-10 text-slate-700 focus:border-primary focus:ring-primary border",
                       errors.phone ? "border-red-500 border-2" : "border-slate-200"
                     )}
                   />

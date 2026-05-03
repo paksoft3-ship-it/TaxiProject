@@ -296,28 +296,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For TAXI bookings: send emails immediately (webhook won't fire for metered rides)
-    if (validated.type === 'TAXI') {
-      const emailData = {
-        bookingNumber: booking.bookingNumber,
-        customerName: booking.customerName,
-        customerEmail: booking.customerEmail,
-        customerPhone: booking.customerPhone,
-        type: booking.type,
-        pickupDate: booking.pickupDate,
-        pickupTime: booking.pickupTime,
-        pickupLocation: booking.pickupLocation,
-        dropoffLocation: booking.dropoffLocation || undefined,
-        passengers: booking.passengers,
-        totalPrice: booking.totalPrice,
-        currency: booking.currency,
-        specialRequests: booking.specialRequests || undefined,
-      };
-      Promise.all([
-        sendBookingConfirmation(emailData),
-        sendAdminBookingNotification(emailData),
-      ]).catch((err) => console.error('Failed to send TAXI booking emails:', err));
-    }
+    // Send booking confirmation to customer and admin for every booking type
+    const emailData = {
+      bookingNumber:   booking.bookingNumber,
+      customerName:    booking.customerName,
+      customerEmail:   booking.customerEmail,
+      customerPhone:   booking.customerPhone,
+      type:            booking.type,
+      pickupDate:      booking.pickupDate,
+      pickupTime:      booking.pickupTime,
+      pickupLocation:  booking.pickupLocation,
+      dropoffLocation: booking.dropoffLocation || undefined,
+      passengers:      booking.passengers,
+      totalPrice:      booking.totalPrice,
+      currency:        booking.currency,
+      specialRequests: booking.specialRequests || undefined,
+    };
+    Promise.all([
+      sendBookingConfirmation(emailData),
+      sendAdminBookingNotification(emailData),
+    ]).catch((err) => console.error('Failed to send booking emails:', err));
 
     return NextResponse.json({ booking });
   } catch (error) {
