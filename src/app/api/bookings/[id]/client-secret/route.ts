@@ -49,8 +49,18 @@ export async function GET(
     const paymentIntent = await stripe.paymentIntents.retrieve(intentId);
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    console.error('Error retrieving client secret:', error);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Error retrieving client secret:', msg);
+
+    // Give a clear message when Stripe is not configured
+    if (msg.includes('Invalid API Key') || msg.includes('sk_test_mock')) {
+      return NextResponse.json(
+        { error: 'Payment is not configured yet. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json({ error: 'Failed to retrieve payment details' }, { status: 500 });
   }
 }
