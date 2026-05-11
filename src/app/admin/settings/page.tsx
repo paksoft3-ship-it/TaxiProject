@@ -34,20 +34,9 @@ interface Settings {
   currency: string;
   bookingEmailNotifications: boolean;
   autoConfirmBookings: boolean;
-  airportTransferPrice: number;
-  airportTransferLargeGroupPrice: number;
-  hourlyHireLargeGroupRate: number;
-  customTourLargeGroupPrice: number;
-  blueLagoonTransferPrice: number;
-  kefBlueLagoonPrice: number;
-  cruisePortPrice: number;
   cityTourBasePrice: number;
-  privateTourBasePrice: number;
   customTourBasePrice: number;
-  blueLagoonRoundtripPrice: number;
-  blueLagoonComboPrice: number;
-  blueLagoonComboLargeGroupPrice: number;
-  hourlyHireRate: number;
+  customTourLargeGroupPrice: number;
   premiumCarFee: number;
   childSeatFee: number;
   extraStopFee: number;
@@ -68,19 +57,9 @@ const defaultSettings: Settings = {
   currency: 'ISK',
   bookingEmailNotifications: true,
   autoConfirmBookings: false,
-  airportTransferPrice: 20000,
-  airportTransferLargeGroupPrice: 25000,
-  hourlyHireLargeGroupRate: 15000,
-  customTourLargeGroupPrice: 75000,
-  blueLagoonTransferPrice: 20000,
-  kefBlueLagoonPrice: 15000,
-  cruisePortPrice: 25000,
   cityTourBasePrice: 10500,
-  privateTourBasePrice: 45000,
   customTourBasePrice: 60000,
-  blueLagoonRoundtripPrice: 39000,
-  blueLagoonComboPrice: 40000,
-  blueLagoonComboLargeGroupPrice: 14000,
+  customTourLargeGroupPrice: 75000,
   premiumCarFee: 5000,
   childSeatFee: 2000,
   extraStopFee: 7000,
@@ -88,7 +67,6 @@ const defaultSettings: Settings = {
   nightSurchargePercent: 25,
   earlyMorningSurchargePercent: 15,
   peakHoursSurchargePercent: 10,
-  hourlyHireRate: 12000,
 };
 
 export default function SettingsPage() {
@@ -312,82 +290,33 @@ export default function SettingsPage() {
           {activeTab === 'pricing' && (
             <div className="p-6 space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Fixed Route Prices</h3>
-                <p className="text-sm text-slate-500">Set transfer and tour base prices (ISK). Changes are reflected on the public pricing page.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Pricing Configuration</h3>
+                <p className="text-sm text-slate-500">Booking add-on fees and time surcharges. Route prices are managed separately.</p>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Car className="size-5" />
-                  Transfer Prices (ISK)
-                </h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { key: 'airportTransferPrice', label: 'Airport Transfer — Small Group (1–4 pax)' },
-                    { key: 'airportTransferLargeGroupPrice', label: 'Airport Transfer — Large Group (5–8 pax)' },
-                    { key: 'blueLagoonTransferPrice', label: 'Blue Lagoon Transfer (Reykjavik ↔ Blue Lagoon)' },
-                    { key: 'kefBlueLagoonPrice', label: 'KEF ↔ Blue Lagoon Direct' },
-                    { key: 'cruisePortPrice', label: 'Cruise Port Transfer' },
-                  ].map(({ key, label }) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        {label}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={settings[key]}
-                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
-                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                      </div>
-                    </div>
-                  ))}
+              {/* Info banner */}
+              <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <Car className="size-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-semibold text-blue-900 dark:text-blue-300 mb-1">Transfer & Tour route prices are managed elsewhere</p>
+                  <p className="text-blue-700 dark:text-blue-400">
+                    Edit transfer and Blue Lagoon prices in <strong>Transfers</strong> (including hourly hire rates).
+                    Edit sightseeing tour prices in <strong>Tours</strong>.
+                    Only booking add-ons and surcharges are configured here.
+                  </p>
                 </div>
               </div>
 
               <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Percent className="size-5" />
-                  Blue Lagoon Package Prices (ISK)
-                </h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { key: 'blueLagoonRoundtripPrice', label: 'Blue Lagoon Roundtrip Package' },
-                    { key: 'blueLagoonComboPrice', label: 'Blue Lagoon Combo Package (≤4 pax)' },
-                    { key: 'blueLagoonComboLargeGroupPrice', label: 'Blue Lagoon Combo (5+ pax)' },
-                  ].map(({ key, label }) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        {label}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={settings[key]}
-                          onChange={(e) => set(key, parseInt(e.target.value) || 0)}
-                          className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-primary dark:bg-slate-600 dark:border-slate-500 dark:text-white"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Percent className="size-5" />
-                  Tour &amp; Hire Base Prices (ISK)
+                  Custom Tour Base Prices (ISK)
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
                     { key: 'customTourBasePrice', label: 'Custom Tour — Small Group (1–4 pax)' },
                     { key: 'customTourLargeGroupPrice', label: 'Custom Tour — Large Group (5–8 pax)' },
-                    { key: 'hourlyHireRate', label: 'Hourly Hire — Small Group rate (per hour, 1–4 pax)' },
-                    { key: 'hourlyHireLargeGroupRate', label: 'Hourly Hire — Large Group rate (per hour, 5–8 pax)' },
-                    { key: 'cityTourBasePrice', label: 'City Tour Base Price' },
+                    { key: 'cityTourBasePrice', label: 'City Tour fallback base price' },
                   ].map(({ key, label }) => (
                     <div key={key}>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -406,7 +335,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
-                  Note: Private tour small &amp; large group prices are set individually in the <strong>Tours</strong> section.
+                  Individual sightseeing tour prices are set in the <strong>Tours</strong> section.
                 </p>
               </div>
 

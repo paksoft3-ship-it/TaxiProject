@@ -21,6 +21,7 @@ import {
   Map,
   ArrowLeftRight,
   ScrollText,
+  LayoutList,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +33,7 @@ const navigation = [
   { name: 'Drivers', href: '/admin/drivers', icon: Users },
   { name: 'Tours', href: '/admin/tours', icon: Map },
   { name: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight },
+  { name: 'Pricing Overview', href: '/admin/pricing-overview', icon: LayoutList },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { name: 'Pages', href: '/admin/pages', icon: ScrollText },

@@ -13,6 +13,8 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Clock,
+  Save,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -71,6 +73,10 @@ export default function TransfersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
+  // Hourly hire rates (stored in Setting model)
+  const [hourlyRates, setHourlyRates] = useState({ hourlyHireRate: 12000, hourlyHireLargeGroupRate: 15000 });
+  const [hourlyRatesSaving, setHourlyRatesSaving] = useState<'idle' | 'saving' | 'saved'>('idle');
+
   const fetchTransfers = async () => {
     try {
       const res = await fetch('/api/admin/transfers');
@@ -85,7 +91,37 @@ export default function TransfersPage() {
     }
   };
 
-  useEffect(() => { fetchTransfers(); }, []);
+  const fetchHourlyRates = async () => {
+    try {
+      const res = await fetch('/api/admin/settings');
+      if (!res.ok) return;
+      const data = await res.json();
+      setHourlyRates({
+        hourlyHireRate: data.settings?.hourlyHireRate ?? 12000,
+        hourlyHireLargeGroupRate: data.settings?.hourlyHireLargeGroupRate ?? 15000,
+      });
+    } catch { /* use defaults */ }
+  };
+
+  const saveHourlyRates = async () => {
+    setHourlyRatesSaving('saving');
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hourlyRates),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setHourlyRatesSaving('saved');
+      setTimeout(() => setHourlyRatesSaving('idle'), 2000);
+      toast.success('Hourly rates saved');
+    } catch {
+      setHourlyRatesSaving('idle');
+      toast.error('Failed to save hourly rates');
+    }
+  };
+
+  useEffect(() => { fetchTransfers(); fetchHourlyRates(); }, []);
 
   const openAdd = (category?: string) => {
     setFormData({ ...emptyForm, category: category || 'PRIVATE_TRANSFER' });
@@ -252,6 +288,61 @@ export default function TransfersPage() {
             <p className="text-xs text-slate-400 mt-1">{cat.items.filter(i => i.active).length} active</p>
           </div>
         ))}
+      </div>
+
+      {/* Hourly Hire Rates */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center gap-3">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Hourly Hire</span>
+            <span className="text-sm text-slate-500">Rate charged per hour — used by the booking calculator</span>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            {([
+              { key: 'hourlyHireRate' as const, label: 'Small Group Rate (1–4 pax)', desc: 'per hour' },
+              { key: 'hourlyHireLargeGroupRate' as const, label: 'Large Group Rate (5–8 pax)', desc: 'per hour' },
+            ]).map(({ key, label, desc }) => (
+              <div key={key}>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="number"
+                      min={0}
+                      value={hourlyRates[key]}
+                      onChange={(e) => setHourlyRates(prev => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))}
+                      className="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 text-sm focus:border-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">ISK</span>
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap">{desc}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={saveHourlyRates}
+              disabled={hourlyRatesSaving === 'saving'}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all',
+                hourlyRatesSaving === 'saved'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-primary text-black hover:bg-yellow-400'
+              )}
+            >
+              {hourlyRatesSaving === 'saving' ? (
+                <><Loader2 className="size-4 animate-spin" /> Saving…</>
+              ) : hourlyRatesSaving === 'saved' ? (
+                <><Check className="size-4" /> Saved</>
+              ) : (
+                <><Save className="size-4" /> Save Hourly Rates</>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Grouped Sections */}
