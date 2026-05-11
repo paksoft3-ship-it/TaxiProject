@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Mail,
+  LayoutList,
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import prisma from '@/lib/db';
@@ -343,7 +344,7 @@ export default async function AdminDashboard() {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             <Link
               href="/admin/bookings"
               className="flex flex-col items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-primary/10 transition-colors"
@@ -371,6 +372,13 @@ export default async function AdminDashboard() {
             >
               <TrendingUp className="size-8 text-green-500" />
               <span className="text-sm font-medium text-slate-900 dark:text-white">Analytics</span>
+            </Link>
+            <Link
+              href="/admin/pricing-overview"
+              className="flex flex-col items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-primary/10 transition-colors"
+            >
+              <LayoutList className="size-8 text-orange-500" />
+              <span className="text-sm font-medium text-slate-900 dark:text-white">Pricing</span>
             </Link>
           </div>
         </div>
