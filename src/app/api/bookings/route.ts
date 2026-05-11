@@ -278,12 +278,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log(`[PAYMENT] Booking created | id=${booking.id} | number=${booking.bookingNumber} | type=${validated.type} | amount=${totalPrice} ISK | customer=${booking.customerEmail}`);
+
     // For non-TAXI bookings: create Stripe Payment Intent and store on booking
     if (validated.type !== 'TAXI') {
       if (totalPrice <= 0) {
-        console.error(`[Stripe] Skipping intent — totalPrice is ${totalPrice} for booking ${booking.id}`);
+        console.error(`[PAYMENT][STRIPE][ERROR] Skipping intent — totalPrice is ${totalPrice} for booking ${booking.id}`);
       } else {
         try {
+          console.log(`[PAYMENT][STRIPE] Creating intent | bookingId=${booking.id} | amountISK=${totalPrice} | stripeAmount=${totalPrice * 100}`);
           const intent = await createPaymentIntent(totalPrice, 'isk', {
             bookingId:     booking.id,
             bookingNumber: booking.bookingNumber,
@@ -293,9 +296,10 @@ export async function POST(request: NextRequest) {
             where: { id: booking.id },
             data:  { paymentIntentId: intent.id },
           });
+          console.log(`[PAYMENT][STRIPE] Intent created | intentId=${intent.id} | status=${intent.status} | bookingId=${booking.id}`);
         } catch (stripeErr: unknown) {
           const msg = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
-          console.error(`[Stripe] Payment intent creation failed for booking ${booking.id}: ${msg}`);
+          console.error(`[PAYMENT][STRIPE][ERROR] Intent creation failed | bookingId=${booking.id} | error=${msg}`);
         }
       }
     }
@@ -317,9 +321,9 @@ export async function POST(request: NextRequest) {
       specialRequests: booking.specialRequests || undefined,
     };
     Promise.all([
-      sendBookingConfirmation(emailData),
-      sendAdminBookingNotification(emailData),
-    ]).catch((err) => console.error('Failed to send booking emails:', err));
+      sendBookingConfirmation(emailData).catch((err) => console.error(`[PAYMENT][EMAIL][ERROR] Booking confirmation to ${booking.customerEmail} failed:`, err)),
+      sendAdminBookingNotification(emailData).catch((err) => console.error('[PAYMENT][EMAIL][ERROR] Admin notification failed:', err)),
+    ]);
 
     return NextResponse.json({ booking });
   } catch (error) {

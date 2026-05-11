@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    console.log(`[PAYMENT][STRIPE] Client-secret requested | bookingId=${id}`);
 
     const booking = await prisma.booking.findUnique({
       where: { id },
@@ -24,10 +25,14 @@ export async function GET(
     });
 
     if (!booking) {
+      console.error(`[PAYMENT][STRIPE][ERROR] Booking not found | bookingId=${id}`);
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
+    console.log(`[PAYMENT][STRIPE] Booking found | bookingId=${id} | amount=${booking.totalPrice} ISK | paymentStatus=${booking.paymentStatus} | hasIntent=${!!booking.paymentIntentId}`);
+
     if (booking.paymentStatus === 'PAID') {
+      console.warn(`[PAYMENT][STRIPE] Booking already paid | bookingId=${id}`);
       return NextResponse.json({ error: 'Booking already paid' }, { status: 400 });
     }
 
@@ -35,13 +40,13 @@ export async function GET(
     let intentId = booking.paymentIntentId;
     if (!intentId) {
       if (booking.totalPrice <= 0) {
-        console.error(`[Stripe] Cannot create intent — totalPrice is ${booking.totalPrice} for booking ${booking.id}`);
+        console.error(`[PAYMENT][STRIPE][ERROR] Cannot create intent — totalPrice is ${booking.totalPrice} | bookingId=${id}`);
         return NextResponse.json(
           { error: `Invalid booking amount (${booking.totalPrice} ISK). Please contact support.` },
           { status: 400 }
         );
       }
-      console.log(`[Stripe] Creating intent lazily for booking ${booking.id}, amount=${booking.totalPrice} ${booking.currency}`);
+      console.log(`[PAYMENT][STRIPE] No intent found — creating lazily | bookingId=${id} | amountISK=${booking.totalPrice} | stripeAmount=${booking.totalPrice * 100}`);
       const intent = await createPaymentIntent(booking.totalPrice, booking.currency, {
         bookingId:     booking.id,
         bookingNumber: booking.bookingNumber,
@@ -52,9 +57,11 @@ export async function GET(
         where: { id: booking.id },
         data:  { paymentIntentId: intentId },
       });
+      console.log(`[PAYMENT][STRIPE] Intent created lazily | intentId=${intentId} | bookingId=${id}`);
     }
 
     let paymentIntent = await stripe.paymentIntents.retrieve(intentId);
+    console.log(`[PAYMENT][STRIPE] Intent retrieved | intentId=${intentId} | status=${paymentIntent.status} | stripeAmount=${paymentIntent.amount} | expectedAmount=${booking.totalPrice * 100}`);
 
     // Correct any intent created with wrong amount (ISK was previously treated as zero-decimal).
     // Stripe expects ISK in aurar (ISK × 100). If the stored amount is off by 100×, update it.
@@ -63,14 +70,16 @@ export async function GET(
       paymentIntent.status === 'requires_payment_method' &&
       paymentIntent.amount !== expectedAmount
     ) {
-      console.log(`[Stripe] Correcting intent amount from ${paymentIntent.amount} to ${expectedAmount} for booking ${booking.id}`);
+      console.warn(`[PAYMENT][STRIPE] Correcting intent amount | intentId=${intentId} | was=${paymentIntent.amount} | correctedTo=${expectedAmount} | bookingId=${id}`);
       paymentIntent = await stripe.paymentIntents.update(intentId, { amount: expectedAmount });
+      console.log(`[PAYMENT][STRIPE] Intent amount corrected | intentId=${intentId} | newAmount=${paymentIntent.amount}`);
     }
 
+    console.log(`[PAYMENT][STRIPE] Returning client_secret | intentId=${intentId} | bookingId=${id}`);
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error('Error retrieving client secret:', msg);
+    console.error(`[PAYMENT][STRIPE][ERROR] client-secret fetch failed | error=${msg}`);
 
     // Give a clear message when Stripe is not configured
     if (msg.includes('Invalid API Key') || msg.includes('sk_test_mock')) {
