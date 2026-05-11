@@ -70,7 +70,7 @@ export default async function BlueLagoonExperiencePage() {
   const packages = await prisma.transferRoute.findMany({
     where: { category: 'BLUE_LAGOON', active: true },
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-  });
+  }).catch(() => []);
   return (
     <>
       {/* Hero Section */}

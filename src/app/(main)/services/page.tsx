@@ -18,6 +18,9 @@ import {
   Phone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import prisma from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Our Services',
@@ -25,139 +28,158 @@ export const metadata: Metadata = {
     'Premium taxi and tour services in Iceland. Airport transfers, city taxis, private tours, and custom adventures with professional drivers.',
 };
 
-const services = [
-  {
-    id: 'blue-lagoon-experience',
-    title: 'Experience the Blue Lagoon',
-    subtitle: 'Geothermal Paradise',
-    icon: Snowflake,
-    image: '/images/airport_transfer.png',
-    description:
-      'Immerse yourself in the world-famous Blue Lagoon, Iceland\'s most iconic geothermal spa. Our premium transfer service ensures a seamless journey to this natural wonder, where mineral-rich waters await to rejuvenate your body and soul.',
-    features: [
-      'Comfortable door-to-door service',
-      'Flexible pickup times',
-      'Luggage storage assistance',
-      'Entry ticket coordination',
-      'Professional drivers',
-      'Return transfer available',
-    ],
-    pricing: {
-      from: '20,000 ISK',
-      note: 'One-way from Reykjavik',
-    },
-    href: `/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Reykjavik, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`,
-    detailsHref: '/services/blue-lagoon-experience',
-    color: 'from-cyan-500 to-blue-500',
-  },
-  {
-    id: 'sightseeing-tours',
-    title: 'Sightseeing Tours',
-    subtitle: 'Discover Iceland\'s Wonders',
-    icon: Mountain,
-    image: '/images/reykjavik_city.png',
-    description:
-      'Explore Iceland\'s breathtaking landscapes with our expert-guided sightseeing tours. From the majestic Golden Circle to hidden waterfalls and volcanic wonders, experience the best of Iceland with knowledgeable local guides.',
-    features: [
-      'Golden Circle tours',
-      'South Coast adventures',
-      'Glacier Lagoon trips',
-      'Expert local guides',
-      'Photography opportunities',
-      'Small group experiences',
-    ],
-    pricing: {
-      from: '10,500 ISK',
-      note: 'Reykjavik City Tour (1-3 hours)',
-    },
-    href: '/tours',
-    detailsHref: '/services/sightseeing-tours',
-    color: 'from-purple-500 to-pink-500',
-  },
-  {
-    id: 'private-transfers',
-    title: 'Private Transfers',
-    subtitle: 'Luxury Door-to-Door Service',
-    icon: CarTaxiFront,
-    image: '/images/golden_circle.png',
-    description:
-      'Experience premium private transfer service anywhere in Iceland. Whether you\'re heading to your hotel, a remote destination, or need transportation for a special occasion, our professional drivers ensure a comfortable and stress-free journey.',
-    features: [
-      'Private vehicle & driver',
-      '24/7 availability',
-      'Modern luxury vehicles',
-      'Professional chauffeurs',
-      'Child seats available',
-      'Flexible scheduling',
-    ],
-    pricing: {
-      from: '20,000 ISK',
-      note: 'Reykjavik ↔ Blue Lagoon',
-    },
-    href: '/booking?type=AIRPORT_TRANSFER&from=service',
-    detailsHref: '/services/private-transfers',
-    color: 'from-yellow-500 to-amber-500',
-  },
-  {
-    id: 'kef-blue-lagoon',
-    title: 'Transfer Between Keflavik Airport and Blue Lagoon',
-    subtitle: 'The Perfect Arrival Experience',
-    icon: Plane,
-    image: '/images/northern_lights.png',
-    description:
-      'Start or end your Iceland adventure in the most relaxing way possible. Our direct transfer service between Keflavik International Airport and the Blue Lagoon lets you unwind after your flight or refresh before departure.',
-    features: [
-      'Real-time flight tracking',
-      'Luggage handling assistance',
-      'Meet & greet service',
-      'Direct route - no stops',
-      'Booking coordination',
-      'Flexible timing options',
-    ],
-    pricing: {
-      from: '10,500 ISK',
-      note: 'KEF ↔ Blue Lagoon (1-4 passengers)',
-    },
-    href: `/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`,
-    detailsHref: '/services/kef-blue-lagoon',
-    color: 'from-blue-500 to-cyan-500',
-  },
-  {
-    id: 'hourly-hire',
-    title: 'Hourly Car Hire with Driver',
-    subtitle: 'Your Schedule, Your Route',
-    icon: Clock,
-    image: '/images/south_coast.png',
-    description:
-      'Hire a private driver by the hour and explore Iceland completely on your own terms. Stop wherever you like, for as long as you want. Perfect for custom itineraries, business travel, or making the most of limited time.',
-    features: [
-      'From 3 to 12 hours',
-      'No fixed route — go anywhere',
-      'Professional English-speaking driver',
-      'Free WiFi on board',
-      'Child seats available',
-      'All fuel & parking included',
-    ],
-    pricing: {
-      from: 'From 3 hrs',
-      note: 'Price calculated at checkout',
-    },
-    href: '/booking?type=HOURLY_HIRE&from=service',
-    detailsHref: '/services/hourly-hire',
-    color: 'from-green-500 to-teal-500',
-  },
-];
-
 const vehicleFeatures = [
   { icon: Wifi, label: 'Free WiFi' },
   { icon: Snowflake, label: 'Climate Control' },
   { icon: Baby, label: 'Child Seats' },
   { icon: CreditCard, label: 'Card Payment' },
   { icon: Shield, label: 'Fully Insured' },
-  { icon: Users, label: 'Up to 7 Seats' },
+  { icon: Users, label: 'Up to 8 Seats' },
 ];
 
-export default function ServicesPage() {
+const PRICE_DEFAULTS = {
+  blueLagoonTransferPrice: 20000,
+  cityTourBasePrice: 10500,
+  kefBlueLagoonPrice: 15000,
+};
+
+function formatISK(n: number) {
+  return `${n.toLocaleString('is-IS')} ISK`;
+}
+
+export default async function ServicesPage() {
+  const rows = await prisma.setting.findMany({
+    where: { key: { in: Object.keys(PRICE_DEFAULTS) } },
+  }).catch(() => []);
+
+  const prices = { ...PRICE_DEFAULTS };
+  for (const r of rows) {
+    if (r.key in prices) (prices as any)[r.key] = parseFloat(r.value) || (PRICE_DEFAULTS as any)[r.key];
+  }
+
+  const services = [
+    {
+      id: 'blue-lagoon-experience',
+      title: 'Experience the Blue Lagoon',
+      subtitle: 'Geothermal Paradise',
+      icon: Snowflake,
+      image: '/images/airport_transfer.png',
+      description:
+        'Immerse yourself in the world-famous Blue Lagoon, Iceland\'s most iconic geothermal spa. Our premium transfer service ensures a seamless journey to this natural wonder, where mineral-rich waters await to rejuvenate your body and soul.',
+      features: [
+        'Comfortable door-to-door service',
+        'Flexible pickup times',
+        'Luggage storage assistance',
+        'Entry ticket coordination',
+        'Professional drivers',
+        'Return transfer available',
+      ],
+      pricing: {
+        from: formatISK(prices.blueLagoonTransferPrice),
+        note: 'One-way from Reykjavik',
+      },
+      href: `/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Reykjavik, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`,
+      detailsHref: '/services/blue-lagoon-experience',
+      color: 'from-cyan-500 to-blue-500',
+    },
+    {
+      id: 'sightseeing-tours',
+      title: 'Sightseeing Tours',
+      subtitle: 'Discover Iceland\'s Wonders',
+      icon: Mountain,
+      image: '/images/reykjavik_city.png',
+      description:
+        'Explore Iceland\'s breathtaking landscapes with our expert-guided sightseeing tours. From the majestic Golden Circle to hidden waterfalls and volcanic wonders, experience the best of Iceland with knowledgeable local guides.',
+      features: [
+        'Golden Circle tours',
+        'South Coast adventures',
+        'Glacier Lagoon trips',
+        'Expert local guides',
+        'Photography opportunities',
+        'Small group experiences',
+      ],
+      pricing: {
+        from: formatISK(prices.cityTourBasePrice),
+        note: 'Reykjavik City Tour (1-3 hours)',
+      },
+      href: '/tours',
+      detailsHref: '/services/sightseeing-tours',
+      color: 'from-purple-500 to-pink-500',
+    },
+    {
+      id: 'private-transfers',
+      title: 'Private Transfers',
+      subtitle: 'Luxury Door-to-Door Service',
+      icon: CarTaxiFront,
+      image: '/images/golden_circle.png',
+      description:
+        'Experience premium private transfer service anywhere in Iceland. Whether you\'re heading to your hotel, a remote destination, or need transportation for a special occasion, our professional drivers ensure a comfortable and stress-free journey.',
+      features: [
+        'Private vehicle & driver',
+        '24/7 availability',
+        'Modern luxury vehicles',
+        'Professional chauffeurs',
+        'Child seats available',
+        'Flexible scheduling',
+      ],
+      pricing: {
+        from: formatISK(prices.blueLagoonTransferPrice),
+        note: 'Reykjavik ↔ Blue Lagoon',
+      },
+      href: '/booking?type=AIRPORT_TRANSFER&from=service',
+      detailsHref: '/services/private-transfers',
+      color: 'from-yellow-500 to-amber-500',
+    },
+    {
+      id: 'kef-blue-lagoon',
+      title: 'Transfer Between Keflavik Airport and Blue Lagoon',
+      subtitle: 'The Perfect Arrival Experience',
+      icon: Plane,
+      image: '/images/northern_lights.png',
+      description:
+        'Start or end your Iceland adventure in the most relaxing way possible. Our direct transfer service between Keflavik International Airport and the Blue Lagoon lets you unwind after your flight or refresh before departure.',
+      features: [
+        'Real-time flight tracking',
+        'Luggage handling assistance',
+        'Meet & greet service',
+        'Direct route - no stops',
+        'Booking coordination',
+        'Flexible timing options',
+      ],
+      pricing: {
+        from: formatISK(prices.kefBlueLagoonPrice),
+        note: 'KEF ↔ Blue Lagoon (1-4 passengers)',
+      },
+      href: `/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`,
+      detailsHref: '/services/kef-blue-lagoon',
+      color: 'from-blue-500 to-cyan-500',
+    },
+    {
+      id: 'hourly-hire',
+      title: 'Hourly Car Hire with Driver',
+      subtitle: 'Your Schedule, Your Route',
+      icon: Clock,
+      image: '/images/south_coast.png',
+      description:
+        'Hire a private driver by the hour and explore Iceland completely on your own terms. Stop wherever you like, for as long as you want. Perfect for custom itineraries, business travel, or making the most of limited time.',
+      features: [
+        'From 3 to 12 hours',
+        'No fixed route — go anywhere',
+        'Professional English-speaking driver',
+        'Free WiFi on board',
+        'Child seats available',
+        'All fuel & parking included',
+      ],
+      pricing: {
+        from: 'From 3 hrs',
+        note: 'Price calculated at checkout',
+      },
+      href: '/booking?type=HOURLY_HIRE&from=service',
+      detailsHref: '/services/hourly-hire',
+      color: 'from-green-500 to-teal-500',
+    },
+  ];
+
   return (
     <>
       {/* Hero Section */}

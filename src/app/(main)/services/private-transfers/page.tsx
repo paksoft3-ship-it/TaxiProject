@@ -111,8 +111,8 @@ export default async function PrivateTransfersPage() {
     prisma.transferRoute.findMany({
       where: { category: 'PRIVATE_TRANSFER', active: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-    }),
-    prisma.setting.findMany({ where: { key: { in: pricingKeys } } }),
+    }).catch(() => []),
+    prisma.setting.findMany({ where: { key: { in: pricingKeys } } }).catch(() => []),
   ]);
 
   const pricing: Record<string, number> = {

@@ -82,7 +82,7 @@ export default async function KefBlueLagoonPage() {
   const routes = await prisma.transferRoute.findMany({
     where: { category: 'AIRPORT_BLUE_LAGOON', active: true },
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-  });
+  }).catch(() => []);
   return (
     <>
       {/* Hero Section */}

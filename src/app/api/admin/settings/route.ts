@@ -23,7 +23,7 @@ const settingsSchema = z.object({
   instagramUrl: z.string().optional(),
   tripAdvisorUrl: z.string().optional(),
   stripePublishableKey: z.string().optional(),
-  currency: z.enum(['ISK', 'EUR', 'USD']).optional(),
+  currency: z.enum(['ISK', 'EUR', 'USD', 'GBP']).optional(),
   timezone: z.string().optional(),
   bookingEmailNotifications: z.boolean().optional(),
   autoConfirmBookings: z.boolean().optional(),

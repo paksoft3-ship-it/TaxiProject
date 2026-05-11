@@ -38,11 +38,11 @@ async function getData() {
   const keys = Object.keys(PRICING_DEFAULTS);
   const [settings, tours, privateRoutes] = await Promise.all([
     prisma.setting.findMany({ where: { key: { in: keys } } }),
-    prisma.tour.findMany({ where: { active: true }, orderBy: { price: 'asc' } }),
+    prisma.tour.findMany({ where: { active: true }, orderBy: { price: 'asc' } }).catch(() => []),
     prisma.transferRoute.findMany({
       where: { category: 'PRIVATE_TRANSFER', active: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-    }),
+    }).catch(() => []),
   ]);
 
   const pricing = { ...PRICING_DEFAULTS };

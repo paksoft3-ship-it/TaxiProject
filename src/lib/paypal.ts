@@ -1,15 +1,12 @@
 // PayPal REST API v2 server helpers
 // Works with both sandbox and live by checking PAYPAL_MODE env var
 
+import { getISKtoEURRate } from '@/lib/exchangeRate';
+
 const PAYPAL_API_BASE =
   process.env.PAYPAL_MODE === 'live'
     ? 'https://api-m.paypal.com'
     : 'https://api-m.sandbox.paypal.com';
-
-// PayPal does NOT support ISK. Convert to EUR for payment.
-// This rate can be overridden via PAYPAL_ISK_TO_EUR_RATE env var.
-// Default: 150 ISK = 1 EUR (approximate). Adjust as needed.
-const ISK_TO_EUR_RATE = parseFloat(process.env.PAYPAL_ISK_TO_EUR_RATE || '150');
 
 /**
  * Generate a PayPal OAuth2 access token using client credentials.
@@ -51,10 +48,12 @@ export async function createOrder(
   amountISK: number,
   description?: string
 ): Promise<{ id: string; status: string; amountEUR: string }> {
-  const accessToken = await generateAccessToken();
+  const [accessToken, iskToEurRate] = await Promise.all([
+    generateAccessToken(),
+    getISKtoEURRate(),
+  ]);
 
-  // Convert ISK to EUR (2 decimal places)
-  const amountEUR = (amountISK / ISK_TO_EUR_RATE).toFixed(2);
+  const amountEUR = (amountISK / iskToEurRate).toFixed(2);
 
   const requestBody = {
     intent: 'CAPTURE',

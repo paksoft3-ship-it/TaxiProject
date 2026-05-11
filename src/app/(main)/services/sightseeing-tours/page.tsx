@@ -15,6 +15,9 @@ import {
   Sun,
   Sparkles,
 } from 'lucide-react';
+import prisma from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Sightseeing Tours | Discover Iceland\'s Wonders',
@@ -45,18 +48,7 @@ const features = [
   },
 ];
 
-interface Tour {
-  name: string;
-  duration: string;
-  price: string;
-  image: string;
-  description: string;
-  highlights: string[];
-  distance?: string;
-  seasonal?: string;
-}
-
-const tours: Tour[] = [
+const FALLBACK_TOURS = [
   {
     name: 'Reykjavik City Tour',
     duration: '1-3 hours',
@@ -69,7 +61,6 @@ const tours: Tour[] = [
     name: 'Golden Circle',
     duration: '6 hours',
     price: '92,500 ISK',
-    distance: '320 km',
     image: '/images/south_coast.png',
     description: 'Visit Þingvellir National Park, Geysir geothermal area, and Gullfoss Waterfall.',
     highlights: ['Þingvellir National Park', 'Strokkur Geyser', 'Gullfoss Waterfall', 'Kerið Crater (optional)'],
@@ -78,7 +69,6 @@ const tours: Tour[] = [
     name: 'South Coast Spectacular',
     duration: '10 hours',
     price: '138,500 ISK',
-    distance: '420 km',
     image: '/images/snaefellsnes.png',
     description: 'Explore waterfalls, black sand beaches, and glacier views along the scenic south coast.',
     highlights: ['Seljalandsfoss Waterfall', 'Skógafoss Waterfall', 'Reynisfjara Black Beach', 'Vík Village'],
@@ -87,7 +77,6 @@ const tours: Tour[] = [
     name: 'Snæfellsnes Peninsula',
     duration: '12 hours',
     price: '154,500 ISK',
-    distance: '350 km',
     image: '/images/glacier_lagoon.png',
     description: 'Discover "Iceland in Miniature" with diverse landscapes, volcanoes, and charming villages.',
     highlights: ['Kirkjufell Mountain', 'Snæfellsjökull Glacier', 'Arnarstapi Cliffs', 'Djúpalónssandur Beach'],
@@ -96,7 +85,6 @@ const tours: Tour[] = [
     name: 'Glacier Lagoon & Diamond Beach',
     duration: '15 hours',
     price: '204,500 ISK',
-    distance: '800 km',
     image: '/images/northern_lights.png',
     description: 'Journey to the stunning Jökulsárlón glacier lagoon and the famous Diamond Beach where icebergs wash ashore.',
     highlights: ['Jökulsárlón Glacier Lagoon', 'Diamond Beach', 'Vatnajökull Glacier', 'Scenic South Coast'],
@@ -114,7 +102,24 @@ const highlights = [
   'Free WiFi in all vehicles',
 ];
 
-export default function SightseeingToursPage() {
+export default async function SightseeingToursPage() {
+  const dbTours = await prisma.tour.findMany({
+    where: { active: true },
+    orderBy: { price: 'asc' },
+  }).catch(() => []);
+
+  const tours = dbTours.length > 0
+    ? dbTours.map((t) => ({
+        name: t.name,
+        duration: t.duration,
+        price: `${t.price.toLocaleString('is-IS')} ISK`,
+        image: t.images[0] || '/images/golden_circle.png',
+        description: t.description,
+        highlights: t.highlights ?? [],
+        seasonal: undefined as string | undefined,
+      }))
+    : FALLBACK_TOURS.map((t) => ({ ...t, seasonal: undefined as string | undefined }));
+
   return (
     <>
       {/* Hero Section */}
