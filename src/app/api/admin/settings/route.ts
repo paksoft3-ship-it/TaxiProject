@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -177,6 +178,12 @@ export async function PUT(request: NextRequest) {
       const raw = dbMap[key] ?? defaultSettings[key];
       settings[key] = parseValue(key, raw);
     }
+
+    revalidatePath('/pricing');
+    revalidatePath('/services');
+    revalidatePath('/services/private-transfers');
+    revalidatePath('/services/sightseeing-tours');
+    revalidatePath('/booking');
 
     return NextResponse.json({ message: 'Settings updated successfully', settings });
   } catch (error) {
