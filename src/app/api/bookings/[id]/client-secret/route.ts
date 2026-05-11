@@ -54,7 +54,18 @@ export async function GET(
       });
     }
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(intentId);
+    let paymentIntent = await stripe.paymentIntents.retrieve(intentId);
+
+    // Correct any intent created with wrong amount (ISK was previously treated as zero-decimal).
+    // Stripe expects ISK in aurar (ISK × 100). If the stored amount is off by 100×, update it.
+    const expectedAmount = Math.round(booking.totalPrice * 100);
+    if (
+      paymentIntent.status === 'requires_payment_method' &&
+      paymentIntent.amount !== expectedAmount
+    ) {
+      console.log(`[Stripe] Correcting intent amount from ${paymentIntent.amount} to ${expectedAmount} for booking ${booking.id}`);
+      paymentIntent = await stripe.paymentIntents.update(intentId, { amount: expectedAmount });
+    }
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error: unknown) {

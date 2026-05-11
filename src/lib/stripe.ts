@@ -6,7 +6,8 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_
 });
 
 // Currencies that have no subunit — amounts are passed as-is to Stripe
-const ZERO_DECIMAL_CURRENCIES = new Set(['isk', 'jpy', 'krw', 'vnd', 'bif', 'clp', 'gnf', 'mga', 'pyg', 'rwf', 'ugx', 'xaf', 'xof']);
+// NOTE: ISK is NOT zero-decimal in Stripe; Stripe expects amounts in aurar (ISK × 100)
+const ZERO_DECIMAL_CURRENCIES = new Set(['jpy', 'krw', 'vnd', 'bif', 'clp', 'gnf', 'mga', 'pyg', 'rwf', 'ugx', 'xaf', 'xof']);
 
 function toStripeAmount(amount: number, currency: string): number {
   return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase())
