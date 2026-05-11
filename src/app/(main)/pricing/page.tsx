@@ -36,15 +36,16 @@ const PRICING_DEFAULTS = {
 
 async function getData() {
   const keys = Object.keys(PRICING_DEFAULTS);
-  const [settings, tours, privateRoutes] = await Promise.all([
+  const [settings, tours, allRoutes] = await Promise.all([
     prisma.setting.findMany({ where: { key: { in: keys } } }),
     prisma.tour.findMany({ where: { active: true }, orderBy: { price: 'asc' } }).catch(() => []),
     prisma.transferRoute.findMany({
-      where: { category: 'PRIVATE_TRANSFER', active: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      where: { active: true },
+      orderBy: [{ sortOrder: 'asc' }, { price: 'asc' }],
     }).catch(() => []),
   ]);
 
+  // Setting values are fallbacks when no TransferRoute rows exist
   const pricing = { ...PRICING_DEFAULTS };
   for (const s of settings) {
     if (s.key in pricing) {
@@ -52,7 +53,27 @@ async function getData() {
     }
   }
 
-  return { pricing, tours, privateRoutes };
+  const privateRoutes = allRoutes.filter((r) => r.category === 'PRIVATE_TRANSFER');
+  const airportBlueLagoonRoutes = allRoutes.filter((r) =>
+    ['AIRPORT', 'AIRPORT_BLUE_LAGOON', 'BLUE_LAGOON'].includes(r.category)
+  );
+  const airportRoutes = allRoutes.filter((r) => r.category === 'AIRPORT');
+
+  // Hero card prices: prefer min from TransferRoute, fall back to Setting
+  const heroTransferPrice =
+    privateRoutes.length > 0
+      ? Math.min(...privateRoutes.map((r) => r.price))
+      : pricing.blueLagoonTransferPrice;
+
+  const heroAirportPrice =
+    airportRoutes.length > 0
+      ? Math.min(...airportRoutes.map((r) => r.price))
+      : pricing.airportTransferPrice;
+
+  const heroTourPrice =
+    tours.length > 0 ? tours[0].price : pricing.cityTourBasePrice;
+
+  return { pricing, tours, privateRoutes, airportBlueLagoonRoutes, heroTransferPrice, heroAirportPrice, heroTourPrice };
 }
 
 function formatISK(n: number) {
@@ -91,7 +112,7 @@ const faqs = [
 ];
 
 export default async function PricingPage() {
-  const { pricing, tours, privateRoutes } = await getData();
+  const { pricing, tours, privateRoutes, airportBlueLagoonRoutes, heroTransferPrice, heroAirportPrice, heroTourPrice } = await getData();
 
   const topTours = tours.slice(0, 3);
 
@@ -101,7 +122,7 @@ export default async function PricingPage() {
       title: 'Private Transfers',
       icon: CarTaxiFront,
       priceLabel: 'Starting from',
-      price: formatISK(pricing.blueLagoonTransferPrice),
+      price: formatISK(heroTransferPrice),
       priceNote: 'Reykjavik ↔ Blue Lagoon',
       features: [
         '24/7 Availability',
@@ -117,7 +138,7 @@ export default async function PricingPage() {
       title: 'Airport Transfer',
       icon: Plane,
       priceLabel: 'Fixed Rate',
-      price: formatISK(pricing.airportTransferPrice),
+      price: formatISK(heroAirportPrice),
       priceNote: 'Keflavik (KEF) ↔ Reykjavik',
       features: [
         'Meet & Greet in Arrivals',
@@ -134,8 +155,8 @@ export default async function PricingPage() {
       title: 'Sightseeing Tours',
       icon: Mountain,
       priceLabel: 'Starting from',
-      price: formatISK(pricing.cityTourBasePrice),
-      priceNote: 'Reykjavik City Tour (1-3 hrs)',
+      price: formatISK(heroTourPrice),
+      priceNote: tours.length > 0 ? `${tours[0].name} (${tours[0].duration})` : 'Reykjavik City Tour (1-3 hrs)',
       features: topTours.length > 0
         ? topTours.map(t => `${t.name} from ${formatISK(t.price)}`)
         : ['Expert Local Guides', 'Golden Circle', 'South Coast', 'Glacier Lagoon'],
@@ -338,31 +359,43 @@ export default async function PricingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (1–4 pax)</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
-                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.kefBlueLagoonPrice)}</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (5–8 pax)</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
-                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboLargeGroupPrice)}</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Reykjavik</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">45 min</td>
-                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.airportTransferPrice)}</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">KEF → Blue Lagoon → Reykjavik</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
-                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik → Blue Lagoon → KEF</td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
-                    <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
-                  </tr>
+                  {airportBlueLagoonRoutes.length > 0 ? (
+                    airportBlueLagoonRoutes.map((route) => (
+                      <tr key={route.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">{route.name}</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">{route.duration ?? '—'}</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(route.price)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (1–4 pax)</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.kefBlueLagoonPrice)}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Blue Lagoon (5–8 pax)</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">25 min</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboLargeGroupPrice)}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">KEF ↔ Reykjavik</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">45 min</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.airportTransferPrice)}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">KEF → Blue Lagoon → Reykjavik</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="p-4 text-slate-700 dark:text-slate-300">Reykjavik → Blue Lagoon → KEF</td>
+                        <td className="p-4 text-slate-500 dark:text-slate-400">~3 hours</td>
+                        <td className="p-4 text-right font-bold text-primary">{formatISK(pricing.blueLagoonComboPrice)}</td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>

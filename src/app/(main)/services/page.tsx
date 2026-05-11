@@ -48,14 +48,30 @@ function formatISK(n: number) {
 }
 
 export default async function ServicesPage() {
-  const rows = await prisma.setting.findMany({
-    where: { key: { in: Object.keys(PRICE_DEFAULTS) } },
-  }).catch(() => []);
+  const [settingRows, transferRoutes, cheapestTour] = await Promise.all([
+    prisma.setting.findMany({ where: { key: { in: Object.keys(PRICE_DEFAULTS) } } }).catch(() => []),
+    prisma.transferRoute.findMany({
+      where: { active: true },
+      orderBy: { price: 'asc' },
+    }).catch(() => []),
+    prisma.tour.findFirst({ where: { active: true }, orderBy: { price: 'asc' } }).catch(() => null),
+  ]);
 
+  // Settings are fallback values
   const prices = { ...PRICE_DEFAULTS };
-  for (const r of rows) {
+  for (const r of settingRows) {
     if (r.key in prices) (prices as any)[r.key] = parseFloat(r.value) || (PRICE_DEFAULTS as any)[r.key];
   }
+
+  // Override with TransferRoute min prices when routes exist
+  const privateRoutes = transferRoutes.filter((r) => r.category === 'PRIVATE_TRANSFER');
+  const kefBlueLagoonRoutes = transferRoutes.filter((r) => r.category === 'AIRPORT_BLUE_LAGOON');
+  const blueLagoonRoutes = transferRoutes.filter((r) => r.category === 'BLUE_LAGOON');
+
+  if (privateRoutes.length > 0) prices.blueLagoonTransferPrice = Math.min(...privateRoutes.map((r) => r.price));
+  if (kefBlueLagoonRoutes.length > 0) prices.kefBlueLagoonPrice = Math.min(...kefBlueLagoonRoutes.map((r) => r.price));
+  else if (blueLagoonRoutes.length > 0) prices.kefBlueLagoonPrice = Math.min(...blueLagoonRoutes.map((r) => r.price));
+  if (cheapestTour) prices.cityTourBasePrice = cheapestTour.price;
 
   const services = [
     {
