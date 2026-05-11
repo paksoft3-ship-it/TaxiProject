@@ -197,7 +197,7 @@ export default async function KefBlueLagoonPage() {
                     {route.passengers && <p className="text-xs text-slate-500">{route.passengers}</p>}
                   </div>
                   <Link
-                    href={`/booking?type=BLUE_LAGOON&from=service&routePrice=${route.price}&routeName=${encodeURIComponent(route.name)}&pickup=${encodeURIComponent(route.from || 'Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent(route.to || 'Blue Lagoon, Grindavík, Iceland')}`}
+                    href={`/booking?type=BLUE_LAGOON&from=service&routePrice=${route.price}${route.largeGroupPrice > 0 ? `&routeLargeGroupPrice=${route.largeGroupPrice}` : ''}&routeName=${encodeURIComponent(route.name)}&pickup=${encodeURIComponent(route.from || 'Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent(route.to || 'Blue Lagoon, Grindavík, Iceland')}`}
                     className={`inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${route.popular
                         ? 'bg-primary text-black hover:bg-yellow-400'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'

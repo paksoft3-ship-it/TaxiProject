@@ -15,6 +15,7 @@ const transfersData = [
     distance: '47 km',
     passengers: '1–4 passengers',
     price: 20000,
+    largeGroupPrice: 25000,
     features: ['Flight tracking', 'Meet & greet at arrivals', 'Door-to-door service', 'Free WiFi', 'Luggage assistance'],
     popular: true,
     active: true,
@@ -30,6 +31,7 @@ const transfersData = [
     distance: '47 km',
     passengers: '5–8 passengers',
     price: 25000,
+    largeGroupPrice: 0,
     features: ['Flight tracking', 'Meet & greet at arrivals', 'Spacious van', 'Free WiFi', 'Luggage assistance'],
     popular: false,
     active: true,
@@ -47,6 +49,7 @@ const transfersData = [
     distance: '20 km',
     passengers: '1–4 passengers',
     price: 15000,
+    largeGroupPrice: 18000,
     features: ['Direct route', 'Flight tracking', 'Luggage storage assistance', 'Meet & greet'],
     popular: true,
     active: true,
@@ -62,6 +65,7 @@ const transfersData = [
     distance: '20 km',
     passengers: '5–8 passengers',
     price: 18000,
+    largeGroupPrice: 0,
     features: ['Direct route', 'Flight tracking', 'Luggage storage assistance', 'Spacious van'],
     popular: false,
     active: true,
@@ -79,6 +83,7 @@ const transfersData = [
     distance: '48 km',
     passengers: '1–4 passengers',
     price: 20000,
+    largeGroupPrice: 25000,
     features: ['Door-to-door pickup', 'Professional driver', 'Free WiFi', 'Luggage assistance'],
     popular: false,
     active: true,
@@ -94,6 +99,7 @@ const transfersData = [
     distance: '48 km each way',
     passengers: '1–4 passengers',
     price: 39000,
+    largeGroupPrice: 48000,
     features: ['Door-to-door service', 'Wait & return', 'Free WiFi', 'Luggage assistance'],
     popular: true,
     active: true,
@@ -109,6 +115,7 @@ const transfersData = [
     distance: '68 km total',
     passengers: '1–4 passengers',
     price: 40000,
+    largeGroupPrice: 50000,
     features: ['Flight tracking', 'Luggage storage at lagoon', 'Door-to-door final drop', 'Free WiFi'],
     popular: false,
     active: true,
@@ -124,6 +131,7 @@ const transfersData = [
     distance: '68 km total',
     passengers: '1–4 passengers',
     price: 40000,
+    largeGroupPrice: 50000,
     features: ['Hotel pickup', 'Luggage storage at lagoon', 'Airport drop-off', 'Free WiFi'],
     popular: false,
     active: true,
@@ -141,6 +149,7 @@ const transfersData = [
     distance: '48 km',
     passengers: '1–4 passengers',
     price: 20000,
+    largeGroupPrice: 25000,
     features: ['Door-to-door service', 'Professional driver', 'Free WiFi', 'Child seats available'],
     popular: true,
     active: true,
@@ -156,6 +165,7 @@ const transfersData = [
     distance: 'Varies',
     passengers: '1–4 passengers',
     price: 10500,
+    largeGroupPrice: 14000,
     features: ['Any pickup/drop-off', 'Professional driver', 'Free WiFi', 'Card payment'],
     popular: false,
     active: true,
@@ -171,6 +181,7 @@ const transfersData = [
     distance: '48 km',
     passengers: '5–8 passengers',
     price: 25000,
+    largeGroupPrice: 0,
     features: ['Spacious van', 'Door-to-door service', 'Free WiFi', 'Luggage assistance'],
     popular: false,
     active: true,
@@ -192,11 +203,15 @@ export async function POST() {
         where: { name: t.name, category: t.category },
       });
       if (existing) {
-        results.push({ name: t.name, status: 'skipped (already exists)' });
-        continue;
+        await prisma.transferRoute.update({
+          where: { id: existing.id },
+          data: { largeGroupPrice: t.largeGroupPrice },
+        });
+        results.push({ name: t.name, status: 'updated largeGroupPrice' });
+      } else {
+        await prisma.transferRoute.create({ data: t });
+        results.push({ name: t.name, status: 'created' });
       }
-      await prisma.transferRoute.create({ data: t });
-      results.push({ name: t.name, status: 'created' });
     }
 
     return NextResponse.json({ message: 'Transfer seed complete', results });

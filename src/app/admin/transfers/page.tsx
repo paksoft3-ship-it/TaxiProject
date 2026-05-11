@@ -30,6 +30,7 @@ interface TransferRoute {
   distance: string | null;
   passengers: string | null;
   price: number;
+  largeGroupPrice: number;
   features: string[];
   popular: boolean;
   active: boolean;
@@ -53,6 +54,7 @@ const emptyForm = {
   distance: '',
   passengers: '',
   price: 0,
+  largeGroupPrice: 0,
   featuresText: '',
   popular: false,
   active: true,
@@ -140,6 +142,7 @@ export default function TransfersPage() {
       distance: t.distance || '',
       passengers: t.passengers || '',
       price: t.price,
+      largeGroupPrice: t.largeGroupPrice,
       featuresText: t.features.join('\n'),
       popular: t.popular,
       active: t.active,
@@ -158,6 +161,7 @@ export default function TransfersPage() {
     distance: f.distance || null,
     passengers: f.passengers || null,
     price: Number(f.price),
+    largeGroupPrice: Number(f.largeGroupPrice),
     features: f.featuresText.split('\n').map(s => s.trim()).filter(Boolean),
     popular: f.popular,
     active: f.active,
@@ -384,6 +388,7 @@ export default function TransfersPage() {
                       <th className="px-6 py-3">Duration</th>
                       <th className="px-6 py-3">Passengers</th>
                       <th className="px-6 py-3">Price (ISK)</th>
+                      <th className="px-6 py-3">Large Group (ISK)</th>
                       <th className="px-6 py-3">Status</th>
                       <th className="px-6 py-3"></th>
                     </tr>
@@ -410,6 +415,9 @@ export default function TransfersPage() {
                         <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{t.passengers || '—'}</td>
                         <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">
                           {t.price.toLocaleString()} ISK
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                          {t.largeGroupPrice > 0 ? `${t.largeGroupPrice.toLocaleString()} ISK` : '—'}
                         </td>
                         <td className="px-6 py-4">
                           <button
@@ -577,6 +585,22 @@ export default function TransfersPage() {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Large Group Price (ISK)
+                      <span className="text-slate-400 font-normal ml-1">(5+ pax)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.largeGroupPrice}
+                      onChange={e => setFormData({ ...formData, largeGroupPrice: Number(e.target.value) })}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                      placeholder="0 = not applicable"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sort Order</label>
                     <input
                       type="number"
@@ -585,6 +609,7 @@ export default function TransfersPage() {
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                     />
                   </div>
+                  <div />
                 </div>
 
                 <div>

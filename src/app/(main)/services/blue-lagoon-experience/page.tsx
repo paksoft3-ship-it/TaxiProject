@@ -246,7 +246,7 @@ export default async function BlueLagoonExperiencePage() {
                   ))}
                 </ul>
                 <Link
-                  href={`/booking?type=BLUE_LAGOON&from=service&routePrice=${pkg.price}&routeName=${encodeURIComponent(pkg.name)}&pickup=${encodeURIComponent(pkg.from || 'Reykjavik, Iceland')}&dropoff=${encodeURIComponent(pkg.to || 'Blue Lagoon, Grindavík, Iceland')}`}
+                  href={`/booking?type=BLUE_LAGOON&from=service&routePrice=${pkg.price}${pkg.largeGroupPrice > 0 ? `&routeLargeGroupPrice=${pkg.largeGroupPrice}` : ''}&routeName=${encodeURIComponent(pkg.name)}&pickup=${encodeURIComponent(pkg.from || 'Reykjavik, Iceland')}&dropoff=${encodeURIComponent(pkg.to || 'Blue Lagoon, Grindavík, Iceland')}`}
                   className={`block text-center py-3 rounded-xl font-bold transition-colors ${pkg.popular
                     ? 'bg-primary text-black hover:bg-yellow-400'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'

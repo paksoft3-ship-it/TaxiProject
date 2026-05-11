@@ -66,6 +66,7 @@ export function BookingForm() {
   const initialPickup = searchParams.get('pickup') || '';
   const initialDropoff = searchParams.get('dropoff') || '';
   const initialRoutePrice = Number(searchParams.get('routePrice')) || 0;
+  const initialRouteLargeGroupPrice = Number(searchParams.get('routeLargeGroupPrice')) || 0;
   const initialRouteName = searchParams.get('routeName') || '';
   const initialDate = searchParams.get('date') || '';
   const initialPassengers = Number(searchParams.get('passengers')) || 2;
@@ -351,6 +352,7 @@ export function BookingForm() {
           flightTime: serviceType === 'AIRPORT_TRANSFER' ? flightDetails.flightTime : undefined,
           luggageCount: (serviceType === 'AIRPORT_TRANSFER' || serviceType === 'BLUE_LAGOON') ? flightDetails.luggageCount : undefined,
           routePrice: initialRoutePrice || undefined,
+          routeLargeGroupPrice: initialRouteLargeGroupPrice || undefined,
           routeName: initialRouteName || undefined,
           options: {
             ...options,
@@ -1181,6 +1183,7 @@ export function BookingForm() {
           tourPrice={initialTourPrice || undefined}
           tourLargeGroupPrice={initialTourLargeGroupPrice || undefined}
           fixedRoutePrice={initialRoutePrice || undefined}
+          fixedRouteLargeGroupPrice={initialRouteLargeGroupPrice || undefined}
           fixedRouteLabel={initialRouteName || undefined}
           pricingSettings={pricingSettings}
         />

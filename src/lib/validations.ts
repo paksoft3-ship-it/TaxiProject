@@ -12,6 +12,7 @@ export const bookingSchema = z.object({
   pickupTime: z.string(),
   tourId: z.string().optional(),
   routePrice: z.number().optional(),
+  routeLargeGroupPrice: z.number().optional(),
   routeName: z.string().optional(),
   flightNumber: z.string().optional(),
   flightTime: z.string().optional(),

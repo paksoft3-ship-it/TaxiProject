@@ -136,8 +136,9 @@ export async function POST(request: NextRequest) {
     // Use routePrice (from service page route cards) when explicitly provided
     if (validated.routePrice && validated.routePrice > 0) {
       basePrice = validated.routePrice;
-      if (validated.routeName) {
-        // Will be added to details below
+      // Switch to large group price if passengers > 4 and route has one
+      if (validated.passengers > 4 && validated.routeLargeGroupPrice && validated.routeLargeGroupPrice > 0) {
+        basePrice = validated.routeLargeGroupPrice;
       }
     }
 
@@ -157,17 +158,16 @@ export async function POST(request: NextRequest) {
     // Calculate extras
     let extras = 0;
 
-    // Extra passengers fee
-    if (validated.passengers > 4) {
+    // Large group price overrides (only when no routePrice was provided)
+    if (validated.passengers > 4 && !validated.routePrice) {
       if (validated.type === 'AIRPORT_TRANSFER') {
         basePrice = pricing.airportTransferLargeGroupPrice;
-      } else if (validated.type === 'BLUE_LAGOON') {
-        // package price already set above; no extra fee
       } else if (validated.type === 'CUSTOM_TOUR') {
         basePrice = pricing.customTourLargeGroupPrice;
       }
       // PRIVATE_TOUR: handled above via tour.largeGroupPrice
       // HOURLY_HIRE: handled above via hourlyHireLargeGroupRate
+      // BLUE_LAGOON with routePrice: handled above via routeLargeGroupPrice
     }
 
     // Options add-ons (applied once for all types)
