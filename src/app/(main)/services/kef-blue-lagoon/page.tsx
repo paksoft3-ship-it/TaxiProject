@@ -119,7 +119,7 @@ export default async function KefBlueLagoonPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href={`/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`}
+                href={`/booking?type=BLUE_LAGOON&from=service&routePrice=15000&routeName=${encodeURIComponent('KEF ↔ Blue Lagoon (1–4 pax)')}&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-yellow-400 transition-colors"
               >
                 Book Transfer
@@ -294,7 +294,7 @@ export default async function KefBlueLagoonPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/booking?type=BLUE_LAGOON&from=service&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`}
+              href={`/booking?type=BLUE_LAGOON&from=service&routePrice=15000&routeName=${encodeURIComponent('KEF ↔ Blue Lagoon (1–4 pax)')}&pickup=${encodeURIComponent('Keflavik International Airport, Iceland')}&dropoff=${encodeURIComponent('Blue Lagoon, Grindavík, Iceland')}`}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-white font-bold rounded-xl hover:bg-slate-700 transition-colors"
             >
               Book Transfer

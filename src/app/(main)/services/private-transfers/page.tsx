@@ -125,7 +125,8 @@ export default async function PrivateTransfersPage() {
   }
 
   const vehicleOptions = vehicleFeatures.map((v, i) => {
-    const prices = [pricing.cityTourBasePrice, pricing.airportTransferPrice, pricing.airportTransferLargeGroupPrice];
+    // Sedan & SUV share the 1-4 pax rate; Van uses the large group rate
+    const prices = [pricing.airportTransferPrice, pricing.airportTransferPrice, pricing.airportTransferLargeGroupPrice];
     return { ...v, price: `From ${prices[i].toLocaleString('is-IS')} ISK` };
   });
   return (

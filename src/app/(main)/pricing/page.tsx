@@ -30,7 +30,7 @@ const PRICING_DEFAULTS = {
   blueLagoonTransferPrice: 20000,
   kefBlueLagoonPrice: 15000,
   blueLagoonComboPrice: 40000,
-  blueLagoonComboLargeGroupPrice: 14000,
+  blueLagoonComboLargeGroupPrice: 50000,
   cityTourBasePrice: 10500,
 };
 

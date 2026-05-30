@@ -79,7 +79,7 @@ const defaultSettings: Record<string, string> = {
   blueLagoonTransferPrice: '20000',
   blueLagoonRoundtripPrice: '39000',
   blueLagoonComboPrice: '40000',
-  blueLagoonComboLargeGroupPrice: '14000',
+  blueLagoonComboLargeGroupPrice: '50000',
   kefBlueLagoonPrice: '15000',
   cruisePortPrice: '25000',
   cityTourBasePrice: '10500',
