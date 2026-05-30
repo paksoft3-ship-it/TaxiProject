@@ -935,7 +935,7 @@ export function BookingForm() {
                       <p className="text-sm text-slate-500">Upgrade to a luxury oversized vehicle</p>
                     </div>
                   </div>
-                  <span className="font-bold text-slate-900">ISK 5,000</span>
+                  <span className="font-bold text-slate-900">ISK {(pricingSettings.premiumCarFee ?? 5000).toLocaleString()}</span>
                 </label>
 
                 {/* Child Seats */}
@@ -953,7 +953,7 @@ export function BookingForm() {
                         <p className="text-sm text-slate-500">Safety seats for children</p>
                       </div>
                     </div>
-                    <span className="font-bold text-slate-900">ISK 2,000 <span className="text-xs font-normal text-slate-500">/ each</span></span>
+                    <span className="font-bold text-slate-900">ISK {(pricingSettings.childSeatFee ?? 2000).toLocaleString()} <span className="text-xs font-normal text-slate-500">/ each</span></span>
                   </div>
 
                   {options.childSeats > 0 && (
@@ -987,7 +987,7 @@ export function BookingForm() {
                         <p className="text-sm text-slate-500">Stop at an additional location</p>
                       </div>
                     </div>
-                    <span className="font-bold text-slate-900">ISK 7,000</span>
+                    <span className="font-bold text-slate-900">ISK {(pricingSettings.extraStopFee ?? 7000).toLocaleString()}</span>
                   </label>
                 )}
 
@@ -1006,7 +1006,7 @@ export function BookingForm() {
                         <p className="text-sm text-slate-500">Extended waiting at pickup location</p>
                       </div>
                     </div>
-                    <span className="font-bold text-slate-900">ISK 14,000</span>
+                    <span className="font-bold text-slate-900">ISK {(pricingSettings.extraTimeFee ?? 14000).toLocaleString()}</span>
                   </label>
                 )}
               </div>
