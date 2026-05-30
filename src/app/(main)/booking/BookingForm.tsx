@@ -201,21 +201,27 @@ export function BookingForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, step, formData.pickupLocation, formData.dropoffLocation]);
 
-  // Geocode pickup location for single-pin map (tours & hourly hire)
+  // Geocode pickup location for single-pin map (tours & hourly hire).
+  // Also depends on `step` so the geocoder re-fires when the user reaches
+  // step 3 — handles the case where isLoaded was already true on mount.
   useEffect(() => {
     if (!isLoaded || !formData.pickupLocation.trim()) {
       setPickupCoords(null);
       return;
     }
     if (serviceType !== 'PRIVATE_TOUR' && serviceType !== 'HOURLY_HIRE') return;
+    // Don't append ', Iceland' if the address already mentions it (avoids
+    // sending 'Reykjavik, Iceland, Iceland' which makes the geocoder fail)
+    const loc = formData.pickupLocation;
+    const address = loc.toLowerCase().includes('iceland') ? loc : `${loc}, Iceland`;
     const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: formData.pickupLocation + ', Iceland' }, (results, status) => {
+    geocoder.geocode({ address }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
-        const loc = results[0].geometry.location;
-        setPickupCoords({ lat: loc.lat(), lng: loc.lng() });
+        const position = results[0].geometry.location;
+        setPickupCoords({ lat: position.lat(), lng: position.lng() });
       }
     });
-  }, [isLoaded, formData.pickupLocation, serviceType]);
+  }, [isLoaded, step, formData.pickupLocation, serviceType]);
 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
