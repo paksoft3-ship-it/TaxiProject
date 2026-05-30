@@ -3,7 +3,7 @@ import prisma from '@/lib/db';
 import { PolicyPageLayout } from '@/components/PolicyPageLayout';
 import { getDefaultPage } from '@/lib/defaultPages';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Refund Policy | PrimeTaxi & Tours',

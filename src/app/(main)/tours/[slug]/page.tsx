@@ -6,7 +6,7 @@ import { Clock, MapPin, Check, ArrowRight, Star, Shield, Calendar } from 'lucide
 import { formatCurrency } from '@/lib/utils';
 import prisma from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ slug: string }>;

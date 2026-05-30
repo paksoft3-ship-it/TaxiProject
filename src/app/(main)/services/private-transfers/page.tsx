@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import prisma from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 import {
   Car,
   Check,

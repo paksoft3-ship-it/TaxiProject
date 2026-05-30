@@ -17,7 +17,7 @@ import { TourCard } from '@/components/TourCard';
 import prisma from '@/lib/db';
 import type { TourCategory } from '@/types';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function HomePage() {
   const dbTours = await prisma.tour.findMany({

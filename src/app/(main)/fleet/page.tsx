@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: 'Explore our luxury fleet of vehicles. From comfortable sedans to spacious vans, we have the perfect vehicle for your journey in Iceland.',
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function FleetPage() {
     const vehicles = await prisma.vehicle.findMany({

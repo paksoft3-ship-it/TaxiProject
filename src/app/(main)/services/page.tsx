@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import prisma from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Our Services',
