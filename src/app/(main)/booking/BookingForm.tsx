@@ -166,14 +166,18 @@ export function BookingForm() {
 
 
 
-  const calculateRoute = async () => {
-    if (!formData.pickupLocation || !formData.dropoffLocation) return;
+  // Accept explicit pickup/dropoff to avoid stale closure bugs when called
+  // from onChange handlers (the state update hasn't re-rendered yet at that point)
+  const calculateRoute = async (pickup?: string, dropoff?: string) => {
+    const origin = pickup ?? formData.pickupLocation;
+    const dest   = dropoff ?? formData.dropoffLocation;
+    if (!origin || !dest) return;
     try {
       // eslint-disable-next-line no-undef
       const directionsService = new google.maps.DirectionsService();
       const results = await directionsService.route({
-        origin: formData.pickupLocation,
-        destination: formData.dropoffLocation,
+        origin,
+        destination: dest,
         // eslint-disable-next-line no-undef
         travelMode: google.maps.TravelMode.DRIVING,
       });
@@ -188,14 +192,14 @@ export function BookingForm() {
     }
   };
 
-  // Recalculate route whenever the user reaches step 3 with both locations filled
-  // (covers preset Blue Lagoon locations AND homepage widget predefined locations)
+  // Recalculate whenever step reaches 3 OR either location changes while on step 3.
+  // Pass values explicitly so the effect always uses fresh data, not a stale closure.
   useEffect(() => {
     if (isLoaded && step === 3 && formData.pickupLocation && formData.dropoffLocation) {
-      calculateRoute();
+      calculateRoute(formData.pickupLocation, formData.dropoffLocation);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, step]);
+  }, [isLoaded, step, formData.pickupLocation, formData.dropoffLocation]);
 
   // Geocode pickup location for single-pin map (tours & hourly hire)
   useEffect(() => {
@@ -725,7 +729,7 @@ export function BookingForm() {
                     <label className="text-slate-700 font-semibold text-sm">Pick-up Location</label>
                     <PlaceAutocomplete
                       value={formData.pickupLocation}
-                      onChange={(val) => { updateFormData('pickupLocation', val); setTimeout(calculateRoute, 100); }}
+                      onChange={(val) => { updateFormData('pickupLocation', val); setTimeout(() => calculateRoute(val, formData.dropoffLocation), 300); }}
                       placeholder="Enter airport, hotel, or address"
                       icon={<Plane className="text-primary size-5" />}
                       className={cn("bg-slate-50 text-slate-700 border", errors.pickupLocation ? "border-red-500 border-2" : "border-slate-200")}
@@ -743,7 +747,7 @@ export function BookingForm() {
                     <label className="text-slate-700 font-semibold text-sm">Drop-off Location</label>
                     <PlaceAutocomplete
                       value={formData.dropoffLocation}
-                      onChange={(val) => { updateFormData('dropoffLocation', val); setTimeout(calculateRoute, 100); }}
+                      onChange={(val) => { updateFormData('dropoffLocation', val); setTimeout(() => calculateRoute(formData.pickupLocation, val), 300); }}
                       placeholder="Enter destination"
                       icon={<Flag className="text-red-500 size-5" />}
                       className={cn("bg-slate-50 text-slate-700 border", errors.dropoffLocation ? "border-red-500 border-2" : "border-slate-200")}
@@ -761,7 +765,7 @@ export function BookingForm() {
                           key={place}
                           onClick={() => {
                             if (!formData.pickupLocation) { updateFormData('pickupLocation', place); }
-                            else { updateFormData('dropoffLocation', place); setTimeout(calculateRoute, 100); }
+                            else { updateFormData('dropoffLocation', place); setTimeout(() => calculateRoute(formData.pickupLocation, place), 300); }
                           }}
                           className={cn(
                             'px-3 py-1 text-xs rounded-full transition-colors border',
