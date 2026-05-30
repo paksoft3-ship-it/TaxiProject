@@ -13,7 +13,7 @@ const pricingDefaults: Record<string, string> = {
   customTourBasePrice: '60000',
   blueLagoonRoundtripPrice: '39000',
   blueLagoonComboPrice: '40000',
-  blueLagoonComboLargeGroupPrice: '14000',
+  blueLagoonComboLargeGroupPrice: '50000',
   hourlyHireRate: '12000',
 };
 
@@ -28,12 +28,12 @@ export async function POST() {
 
     for (const [key, value] of Object.entries(pricingDefaults)) {
       const existing = await prisma.setting.findUnique({ where: { key } });
-      if (existing) {
-        results.push({ key, status: 'skipped (already exists)' });
-        continue;
-      }
-      await prisma.setting.create({ data: { key, value } });
-      results.push({ key, status: 'created' });
+      await prisma.setting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value },
+      });
+      results.push({ key, status: existing ? 'updated' : 'created' });
     }
 
     return NextResponse.json({ message: 'Pricing seed complete', results });

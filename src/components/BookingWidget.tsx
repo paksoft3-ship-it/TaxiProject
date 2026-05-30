@@ -2,14 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  MapPin, Flag, Calendar, CarTaxiFront, 
-  Mountain, ArrowRight, Plane, Droplets, 
+import {
+  MapPin, Flag, Calendar, CarTaxiFront,
+  Mountain, ArrowRight, Plane, Droplets,
   Clock, Users, Hash
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackBookingStarted } from '@/lib/analytics';
 import { PlaceAutocomplete } from '@/components/PlaceAutocomplete';
+
+interface Tour {
+  id: string;
+  name: string;
+  price: number;
+  largeGroupPrice: number;
+}
 
 type BookingType = 'AIRPORT_TRANSFER' | 'TAXI' | 'PRIVATE_TOUR' | 'BLUE_LAGOON' | 'HOURLY_HIRE';
 
@@ -33,7 +40,8 @@ export function BookingWidget() {
   const [flightNumber, setFlightNumber] = useState('');
   const [passengers, setPassengers] = useState('2');
   const [hours, setHours] = useState('4');
-  const [tourName, setTourName] = useState('');
+  const [selectedTourId, setSelectedTourId] = useState('');
+  const [tours, setTours] = useState<Tour[]>([]);
   const [blDirection, setBlDirection] = useState('KEF_BL_RV');
 
   useEffect(() => {
@@ -48,11 +56,22 @@ export function BookingWidget() {
     // Reset per-tab fields on tab switch to avoid stale values carrying over
     setFlightNumber('');
     setDropoff('');
-    setTourName('');
+    setSelectedTourId('');
     setBlDirection('KEF_BL_RV');
     setHours('4');
     setPickup(activeTab === 'AIRPORT_TRANSFER' ? 'Keflavík International Airport (KEF)' : '');
   }, [activeTab]);
+
+  // Fetch real tours from DB when Day Tours tab is active
+  useEffect(() => {
+    if (activeTab !== 'PRIVATE_TOUR' || tours.length > 0) return;
+    fetch('/api/tours')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.tours) setTours(data.tours);
+      })
+      .catch(() => {});
+  }, [activeTab, tours.length]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,9 +91,24 @@ export function BookingWidget() {
       params.append('pickup', pickup);
       params.append('dropoff', dropoff);
     } else if (activeTab === 'PRIVATE_TOUR') {
-      params.append('tourName', tourName);
+      const tour = tours.find((t) => t.id === selectedTourId);
+      if (tour) {
+        params.append('from', 'service');
+        params.append('tourId', tour.id);
+        params.append('tourName', tour.name);
+        params.append('tourPrice', tour.price.toString());
+        params.append('tourLargeGroupPrice', tour.largeGroupPrice.toString());
+      }
     } else if (activeTab === 'BLUE_LAGOON') {
       params.append('direction', blDirection);
+      // Map direction to package type so pricing is applied correctly
+      const directionPackage: Record<string, string> = {
+        KEF_BL_RV: 'combo',
+        RV_BL_RV:  'roundtrip',
+        RV_BL_KEF: 'combo',
+      };
+      const pkg = directionPackage[blDirection];
+      if (pkg) params.append('package', pkg);
     } else if (activeTab === 'HOURLY_HIRE') {
       params.append('pickup', pickup);
       params.append('hours', hours);
@@ -165,16 +199,17 @@ export function BookingWidget() {
                 <div className="relative">
                   <Mountain className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
                   <select
-                    value={tourName}
-                    onChange={(e) => setTourName(e.target.value)}
+                    value={selectedTourId}
+                    onChange={(e) => setSelectedTourId(e.target.value)}
                     className="w-full pl-10 pr-4 h-12 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-primary focus:outline-none appearance-none transition-all"
                     required
                   >
-                    <option value="" disabled>Choose a destination...</option>
-                    <option value="Golden Circle">Golden Circle Classic</option>
-                    <option value="South Coast">South Coast & Waterfalls</option>
-                    <option value="Snaefellsnes">Snæfellsnes Peninsula</option>
-                    <option value="Northern Lights">Northern Lights Chase</option>
+                    <option value="" disabled>Choose a tour...</option>
+                    {tours.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} — {t.price.toLocaleString()} ISK
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

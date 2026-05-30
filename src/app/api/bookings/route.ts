@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       blueLagoonTransferPrice: 20000,
       blueLagoonRoundtripPrice: 39000,
       blueLagoonComboPrice: 40000,
-      blueLagoonComboLargeGroupPrice: 14000,
+      blueLagoonComboLargeGroupPrice: 50000,
       premiumCarFee: 5000,
       childSeatFee: 2000,
       extraStopFee: 7000,
